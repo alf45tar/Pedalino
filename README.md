@@ -18,4 +18,4 @@ High customizable MIDI controller.
 
 ## Hardware
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino.svg)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.svg)
