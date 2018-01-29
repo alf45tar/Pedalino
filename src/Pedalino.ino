@@ -2,7 +2,7 @@
 #include <MIDI_Controller.h>
 #include <EEPROM.h>
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #define SIGNATURE "Pedalino(TM)"
 
@@ -27,6 +27,10 @@
 #define PED_LOGARITHMIC     1
 #define PED_EXPONENTIAL     2
 
+#define PED_USBMIDI         0
+#define PED_MIDIOUT         1
+
+
 #define CALIBRATION_DURATION   8000
 
 struct bank {
@@ -49,7 +53,16 @@ bank   banks[BANKS][PEDALS];     // Banks Setup
 pedal  pedals[PEDALS];           // Pedals Setup
 byte   currentBank = 0;
 byte   currentPedal = 0;
+byte   currentInterface = PED_USBMIDI;
 
+#ifdef DEBUG_PEDALINO
+USBDebugMIDI_Interface            midiInterface1(115200);
+HardwareSerialDebugMIDI_Interface midiInterface2(Serial3, MIDI_BAUD);
+#endif
+#ifndef DEBUG_PEDALINO
+USBMIDI_Interface            midiInterface1;
+HardwareSerialMIDI_Interface midiInterface2(Serial3, MIDI_BAUD);
+#endif
 
 // LCD display definitions
 
@@ -116,7 +129,25 @@ void midi_setup()
 {
   for (int i = 0; i < PEDALS; i++) delete pedals[i].footPedal;
 
+  switch (currentInterface) {
+    case PED_USBMIDI:
+      midiInterface1.setDefault();
+      break;
+    case PED_MIDIOUT:
+      midiInterface2.setDefault();
+      break;
+  }
+
 #ifdef DEBUG_PEDALINO
+  Serial.print("Interface ");  
+  switch (currentInterface) {
+    case PED_USBMIDI:
+      Serial.println("USB");  
+      break;
+    case PED_MIDIOUT:
+      Serial.println("MIDI OUT");
+      break;
+  }
   Serial.print("Bank ");
   Serial.println(currentBank + 1);
 #endif
@@ -126,15 +157,15 @@ void midi_setup()
 #ifdef DEBUG_PEDALINO
     Serial.print("Pedal ");
     Serial.print(i + 1);
-    Serial.print(" mode ");
+    Serial.print("     Mode ");
     Serial.print(pedals[i].mode);
-    Serial.print(" polarity ");
+    Serial.print("   Polarity ");
     Serial.print(pedals[i].invertPolarity);
-    Serial.print(" MIDI Function ");
+    Serial.print("   MIDI Function ");
     Serial.print(banks[currentBank][i].midiFunction);
-    Serial.print(" Channel ");
+    Serial.print("   Channel ");
     Serial.print(banks[currentBank][i].midiChannel);
-    Serial.print(" Code ");
+    Serial.print("   Code ");
     Serial.print(banks[currentBank][i].midiCode);
     Serial.println("");
 #endif
@@ -297,6 +328,8 @@ void update_eeprom() {
   offset += sizeof(byte);
   EEPROM.put(offset, currentPedal);
   offset += sizeof(byte);
+  EEPROM.put(offset, currentInterface);
+  offset += sizeof(byte);
 
 #ifdef DEBUG_PEDALINO
   Serial.println("end.");
@@ -352,6 +385,8 @@ void read_eeprom() {
     offset += sizeof(byte);
     EEPROM.get(offset, currentPedal);
     offset += sizeof(byte);
+    EEPROM.get(offset, currentInterface);
+    offset += sizeof(byte);
 
 #ifdef DEBUG_PEDALINO
     Serial.println("end.");
@@ -386,7 +421,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_ZERO           28
 #define II_MAX            29
 #define II_MAP            30
-#define II_DEFAULT        31
+#define II_INTERFACE      31
+#define II_DEFAULT        32
 
 // Global menu data and definitions
 
@@ -398,7 +434,7 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
   { M_ROOT,       SIGNATURE,      10, 12, 0 },
   { M_BANKSETUP,  "Banks Setup",  20, 33, 0 },
   { M_PEDALSETUP, "Pedals Setup", 40, 46, 0 },
-  { M_PROFILE,    "Profile",      50, 50, 0 },
+  { M_PROFILE,    "Options",      50, 51, 0 },
 };
 
 // Menu Items ----------
@@ -407,7 +443,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   // Starting (Root) menu
   { 10, "Banks Setup",     MD_Menu::MNU_MENU,  M_BANKSETUP },
   { 11, "Pedals Setup",    MD_Menu::MNU_MENU,  M_PEDALSETUP },
-  { 12, "Profile",         MD_Menu::MNU_MENU,  M_PROFILE },
+  { 12, "Options",         MD_Menu::MNU_MENU,  M_PROFILE },
   // Banks Setup
   { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
   { 30, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
@@ -422,8 +458,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 44, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
   { 45, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 46, "Map Function",    MD_Menu::MNU_INPUT, II_MAP },
-  // Profile
-  { 50, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  // Options
+  { 50, "Interface",       MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 51, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -431,6 +468,7 @@ const PROGMEM char listPedalMode[] = "   Momentary  |     Latch    |    Analog  
 const PROGMEM char listMidiFunction[] = "Program Change| Control Code |  Note On/Off  ";
 const PROGMEM char listPolarity[] = " No|Yes";
 const PROGMEM char listMapFunction[] = "    Linear    |  Logarithmic  |  Exponential  ";
+const PROGMEM char listOutputInterface[] = "     USB     |   MIDI OUT   ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
@@ -445,6 +483,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_ZERO,          ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0,   1023, 0, 10, nullptr },
   { II_MAX,           ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0,   1023, 0, 10, nullptr },
   { II_MAP,           ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listMapFunction },
+  { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listOutputInterface },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,      0, 0,  0, nullptr }
 };
 
@@ -524,6 +563,11 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
           vBuf.value = pedals[currentPedal].mapFunction;
         else r = nullptr;
       else pedals[currentPedal].mapFunction = vBuf.value;
+      break;
+
+    case II_INTERFACE:
+      if (bGet) vBuf.value = currentInterface;
+      else currentInterface = vBuf.value;
       break;
 
     case II_DEFAULT:
@@ -717,7 +761,7 @@ void setup(void)
 {
 
 #ifdef DEBUG_PEDALINO
-  Serial.begin(9600);
+  Serial.begin(115200);
 #endif
 
   read_eeprom();
@@ -758,8 +802,6 @@ void loop(void)
 
   M.runMenu();   // just run the menu code
 
-#ifndef DEBUG_PEDALINO
   // Refresh the MIDI controller (check whether the input has changed since last time, if so, send the new value over MIDI)
   MIDI_Controller.refresh();
-#endif
 }
