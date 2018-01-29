@@ -1,3 +1,5 @@
+**Status:** Working but under active development
+
 # Pedalino
 High customizable MIDI controller.
 
