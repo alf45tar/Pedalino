@@ -18,6 +18,7 @@ High customizable MIDI controller for guitarists and more.
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
 - IR Receiver module (like KY-022 or equivalent)
+- ZS-040 breakout board based on HC-05, HC-06 and HC-08 Bluetooth UART Communication Module 
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - Customized [MIDI_Controller](https://github.com/tttapa/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
