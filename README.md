@@ -12,6 +12,7 @@ High customizable MIDI controller for guitarists and more.
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
 - Invert polarity via software
 - Individual calibration of expression pedals
+- Tranform a linear expression pedal into log expression pedal and vice versa
 - Configuration via IR/Bluetooth remote control
 
 ## Requirements
