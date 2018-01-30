@@ -28,10 +28,10 @@ High customizable MIDI controller for guitarists and more.
 A MIDI firware for Arduino Uno/Mega is required. HIDUINO or mocoLUFA can be used.
 I suggest a dual mode firmware like mocoLUFA because is supporting both USB-MIDI and Arduino-Serial.
 
-More information can be obtained in the following link:
+More information can be obtained in the following links:
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
-- [MocoLUFA] https://github.com/kuwatay/mocolufa
-- [HIDUINO](http://www.dimitridiakopoulos.com/hiduino.html)
+- [HIDUINO](https://github.com/ddiakopoulos/hiduino)
+- [MocoLUFA](https://github.com/kuwatay/mocolufa)
 
 ## Prototype
 
