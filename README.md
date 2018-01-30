@@ -13,9 +13,11 @@ High customizable MIDI controller for guitarists and more.
 ## Requirements
 - Arduino Mega 2560 or equivalent
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
+- IR Receiver module (like KY-022 or equivalent)
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
+- [IRRemore](https://github.com/z3t0/Arduino-IRremote) library) library
 
 
 ## Hardware
