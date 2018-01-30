@@ -10,10 +10,8 @@ High customizable MIDI controller for guitarists and more.
 - 10 banks
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
 - Invert polarity via software
-- Individual calibration of expression pedal
-- IR Remote control
-- Remote control via Bluetooth
-- Each parameters can be configured by menu. Configuration is saved into EEPROM. Non need to re-compile the program. 
+- Individual calibration of expression pedals
+- Configuration via IR/Bluetooth remote control
 
 ## Requirements
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
@@ -33,3 +31,7 @@ High customizable MIDI controller for guitarists and more.
 Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.svg)
+
+## ToDo
+
+- Bluetooth MIDI
