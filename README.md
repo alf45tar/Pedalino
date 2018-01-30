@@ -20,7 +20,7 @@ High customizable MIDI controller for guitarists and more.
 - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
 - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
-- Customized [MIDI_Controller](https://github.com/tttapa/MIDI_controller) library
+- [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 
