@@ -5,8 +5,8 @@ High customizable MIDI controller for guitarists and more.
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
-- Up to 16 controllers in any quantity or order (up to 8 for Arduino UNO R3 lite version)
-- MIDI output via USB MIDI or classic MIDI OUT connector
+- Up to 16 controllers in any quantity or order (up to 8 for lite version)
+- MIDI output via USB MIDI and classic MIDI OUT connector (only one in lite version)
 - Send Program Change, Control Code and Note On/Off MIDI events
 - 10 banks
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
@@ -23,9 +23,15 @@ High customizable MIDI controller for guitarists and more.
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [IRRemore](https://github.com/z3t0/Arduino-IRremote) library) library
 
-## Setup
+## 
 
+A MIDI firware for Arduino Uno/Mega is required. HIDUINO or mocoLUFA can be used.
+I suggest a dual mode firmware like mocoLUFA because is supporting both USB-MIDI and Arduino-Serial.
 
+More information can be obtained in the following link:
+- [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
+- [MocoLUFA] https://github.com/kuwatay/mocolufa
+- [HIDUINO](http://www.dimitridiakopoulos.com/hiduino.html)
 
 ## Prototype
 
