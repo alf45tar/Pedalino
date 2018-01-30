@@ -5,7 +5,7 @@ High customizable MIDI controller for guitarists and more.
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
-- 10 banks of 16 controllers each in any quantity or order (up to 8 for lite version)
+- 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - MIDI output via USB MIDI or classic MIDI OUT connector (only one in lite version)
 - Send the following MIDI events: Program Change, Control Code or Note On/Off
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
