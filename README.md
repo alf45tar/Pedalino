@@ -38,7 +38,7 @@ More information can be obtained in the following links:
 
 Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.svg)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.png)
 
 ## ToDo
 
