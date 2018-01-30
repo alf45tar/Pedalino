@@ -4,7 +4,8 @@
 High customizable MIDI controller for guitarists and more.
 
 ## Features
-- Up to 16 controllers. Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders).
+- Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
+- Up to 16 controllers in any quantity or order (up to 8 for Arduino UNO R3 lite version)
 - MIDI output via USB MIDI or classic MIDI OUT connector
 - Send Program Change, Control Code and Note On/Off MIDI events
 - 10 banks
