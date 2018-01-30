@@ -24,8 +24,8 @@
 #define PED_JOG_WHEEL       3
 
 #define PED_LINEAR          0
-#define PED_LOGARITHMIC     1
-#define PED_EXPONENTIAL     2
+#define PED_LOG             1
+#define PED_ANTILOG         2
 
 #define PED_USBMIDI         0
 #define PED_MIDIOUT         1
@@ -51,9 +51,10 @@ struct pedal {
 
 bank   banks[BANKS][PEDALS];     // Banks Setup
 pedal  pedals[PEDALS];           // Pedals Setup
-byte   currentBank = 0;
-byte   currentPedal = 0;
+byte   currentBank      = 0;
+byte   currentPedal     = 0;
 byte   currentInterface = PED_USBMIDI;
+byte   lastUsedPedal    = 0;
 
 #ifdef DEBUG_PEDALINO
 USBDebugMIDI_Interface            midiInterface1(115200);
@@ -80,8 +81,8 @@ HardwareSerialMIDI_Interface      midiInterface2(Serial3, MIDI_BAUD);
 #define  LCD_D7         43
 #define  LCD_BACKLIGHT  41
 
-static LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
-boolean powersaver = false;
+LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
+boolean       powersaver = false;
 
 // IR Remote receiver
 
@@ -89,6 +90,25 @@ boolean powersaver = false;
 
 #define RECV_PIN      33     // connect Y to this PIN, G to GND, R to 5V
 #define RECV_LED_PIN  35
+
+#define IR_ON_OFF   0xFFEA15
+#define IR_OK       0xFF48B7
+#define IR_ESC      0xFFE817
+#define IR_LEFT     0xFF7887
+#define IR_RIGHT    0xFF6897
+#define IR_UP       0xFF708F
+#define IR_DOWN     0xFF28D7
+#define IR_SWITCH   0xFFBA45
+#define IR_KEY_1    0xFFDA25
+#define IR_KEY_2    0xFFF20D
+#define IR_KEY_3    0xFFCA35
+#define IR_KEY_4    0xFF5AA5
+#define IR_KEY_5    0xFFF00F
+#define IR_KEY_6    0xFF7A85
+#define IR_KEY_7    0xFF6A95
+#define IR_KEY_8    0xFF728D
+#define IR_KEY_9    0xFF4AB5
+#define IR_KEY_0    0xFFAA55
 
 IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
 decode_results  results;
@@ -250,13 +270,14 @@ int mapAnalog(int p, int value)
   switch (pedals[p].mapFunction) {
     case PED_LINEAR:
       break;
-    case PED_LOGARITHMIC:
+    case PED_LOG:
       value = round(log(value + 1) * 147.61);             // y=log(x+1)/log(1023)*1023
       break;
-    case PED_EXPONENTIAL:
+    case PED_ANTILOG:
       value = round((exp(value / 511.5) - 1) * 160.12);   // y=[e^(2*x/1023)-1]/[e^2-1]*1023
       break;
   }
+  if (abs(pedals[p].pedalValue - value) > 10) lastUsedPedal = p;
   pedals[p].pedalValue = value;
   return value;
 }
@@ -266,28 +287,31 @@ void screen_update() {
   if (!powersaver) {
     char buf[LCD_COLS * LCD_ROWS + 2 * LCD_ROWS];
     const char bar[] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-    //const char bar[] = {49,50,51,52,53,54,55,56,57,48};
     memset(buf, 0, sizeof(buf));
-    for (int i = 0; i <= 5; i++) {
-      buf[i] = foot_char(i + 3);
+    for (int i = 0; i < PEDALS; i++) {
+      buf[i] = foot_char(i);
     }
-    strncpy(&buf[6], &bar[0], map(pedals[0].pedalValue, 0, 1023, 0, 10));
-    strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[0].pedalValue, 0, 1023, 0, 10));
+    //strncpy(&buf[6], &bar[0], map(pedals[0].pedalValue, 0, 1023, 0, 10));
+    //strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[0].pedalValue, 0, 1023, 0, 10));
     lcd.setCursor(0, 0);
     lcd.print(buf);
     memset(buf, 0, sizeof(buf));
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
-    strncpy(&buf[strlen(buf)], &bar[0], map(pedals[1].pedalValue, 0, 1023, 0, 10));
-    strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[1].pedalValue, 0, 1023, 0, 10));
+    strncpy(&buf[strlen(buf)], &bar[0], map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
+    strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
     lcd.setCursor(0, 1);
     lcd.print(buf);
+    //lcd.setCursor(lastUsedPedal, 0);
+    //lcd.cursor();
+    //lcd.blink();
   }
 }
 
 char foot_char (int footswitch)
 {
+  const char bar[] = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
   footswitch = constrain(footswitch, 0, PEDALS - 1);
-  if (pedals[footswitch].pedalValue == LOW) return '1' + footswitch;
+  if (footswitch == lastUsedPedal || pedals[footswitch].pedalValue == LOW) return bar[footswitch % 10];
   return ' ';
 }
 
@@ -469,7 +493,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 const PROGMEM char listPedalMode[] = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  ";
 const PROGMEM char listMidiFunction[] = "Program Change| Control Code |  Note On/Off  ";
 const PROGMEM char listPolarity[] = " No|Yes";
-const PROGMEM char listMapFunction[] = "    Linear    |  Logarithmic  |  Exponential  ";
+const PROGMEM char listMapFunction[] = "    Linear    |     Log     |   Anti-Log   ";
 const PROGMEM char listOutputInterface[] = "     USB     |   MIDI OUT   ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
@@ -477,7 +501,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_BANK,          ">1-10:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,  BANKS, 0, 10, nullptr },
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
   { II_PEDAL,         ">1-8:       ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
-#else
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   { II_PEDAL,         ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
 #endif
   { II_MIDICHANNEL,   ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,     16, 0, 10, nullptr },
@@ -641,41 +665,50 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   incDelta = 1;
   static unsigned long  previous_value;
   static byte           count = 0;
-  static bool           selectBank = true;
+  static bool           selectBank = false;
   unsigned long         ircode;
   bool                  repeat;
+  byte                  numberPressed = 127;
 
   if (irrecv.decode(&results)) {
     ircode = results.value;
     irrecv.resume();
     repeat = (ircode == REPEAT && count > 4);
     if (repeat) ircode = previous_value;
-    //Serial.println(ircode, HEX);
+#ifdef DEBUG_PEDALINO
+    if (ircode > 0xFFFFFF && ircode != REPEAT) return MD_Menu::NAV_NULL;
+    Serial.print("Key pressed: ");
+    Serial.println(ircode, HEX);
+#endif
     switch (ircode) {
       case 0xFF22DD:
-      case 0xFF6897:
-      case 0xFF28D7:
+      case IR_RIGHT:
+      case IR_DOWN:
         if (!repeat) count = 0;
         previous_value = ircode;
         return MD_Menu::NAV_DEC;
+
       case 0xFFC23D:
-      case 0xFF7887:
-      case 0xFF708F:
+      case IR_LEFT:
+      case IR_UP:
         if (!repeat) count = 0;
         previous_value = ircode;
         return MD_Menu::NAV_INC;
+
       case 0xFF02FD:
-      case 0xFF48B7:
+      case IR_OK:
         if (!repeat) count = 0;
         previous_value = ircode;
         return MD_Menu::NAV_SEL;
+
       case 0xFFE21D:
-      case 0xFFE817:
+      case IR_ESC:
         if (!repeat) count = 0;
         previous_value = ircode;
         return MD_Menu::NAV_ESC;
+
       case 0xFFA25D:
-      case 0xFFEA15:
+      case IR_ON_OFF:
         if (powersaver) {
           lcd.on();
           powersaver = false;
@@ -685,63 +718,64 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
           powersaver = true;
         }
         return MD_Menu::NAV_NULL;
+
       case REPEAT:
         count++;
         break;
 
-      case 0xFFDA25: // 1
-        currentBank = 0;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_1: // 1
+        numberPressed = 1;
         break;
-      case 0xFFF20D: // 2
-        currentBank = 1;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_2: // 2
+        numberPressed = 2;
         break;
-      case 0xFFCA35: // 3
-        currentBank = 2;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_3: // 3
+        numberPressed = 3;
         break;
-      case 0xFF5AA5: //4
-        currentBank = 3;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_4: // 4
+        numberPressed = 4;
         break;
-      case 0xFFF00F: // 5
-        currentBank = 4;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_5: // 5
+        numberPressed = 5;
         break;
-      case 0xFF7A85: // 6
-        currentBank = 5;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_6: // 6
+        numberPressed = 6;
         break;
-      case 0xFF6A95: // 7
-        currentBank = 6;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_7: // 7
+        numberPressed = 7;
         break;
-      case 0xFF728D: // 8
-        currentBank = 7;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_8: // 8
+        numberPressed = 8;
         break;
-      case 0xFF4AB5: // 9
-        currentBank = 8;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_9: // 9
+        numberPressed = 9;
         break;
-      case 0xFFAA55: // 0
-        currentBank = 9;
-        update_eeprom();
-        midi_setup();
+      case IR_KEY_0: // 0
+        numberPressed = 10;
         break;
-      case 0xFFBA45:
+
+      case IR_SWITCH:
         selectBank = !selectBank;
         break;
+
+      default:
+        previous_value = 0;
+        break;
+    }
+  }
+  if (numberPressed != 127) {
+    if (selectBank) {
+      currentBank = numberPressed;
+      update_eeprom();
+      midi_setup();
+    }
+    else {
+      pedals[numberPressed - 1].pedalValue = LOW;
+      pedals[numberPressed - 1].footPedal->push();
+      screen_update();
+      delay(200);
+      pedals[numberPressed - 1].pedalValue = HIGH;
+      pedals[numberPressed - 1].footPedal->release();
     }
   }
 
@@ -757,7 +791,7 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         return MD_Menu::NAV_ESC;
     }
   }
-  return MD_Menu::NAV_NULL;;
+  return MD_Menu::NAV_NULL;
 }
 
 
