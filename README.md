@@ -3,7 +3,7 @@
 # Pedalino
 High customizable MIDI controller for guitarists and more.
 
-## Main features
+## Features
 - Up to 16 controllers. Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders).
 - MIDI output via USB MIDI or classic MIDI OUT connector
 - Send Program Change, Control Code and Note On/Off MIDI events
