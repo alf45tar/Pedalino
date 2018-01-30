@@ -9,6 +9,8 @@ High customizable MIDI controller for guitarists and more.
 - Send Program Change, Control Code and Note On/Off MIDI events
 - 10 banks
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
+- Invert polarity via software
+- Individual calibration of expression pedal
 - IR Remote control
 - Remote control via Bluetooth
 - Each parameters can be configured by menu. Configuration is saved into EEPROM. Non need to re-compile the program. 
