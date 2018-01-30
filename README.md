@@ -17,12 +17,12 @@ High customizable MIDI controller for guitarists and more.
 ## Requirements
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
-- IR Receiver module (like KY-022 or equivalent)
-- ZS-040 breakout board based on HC-05, HC-06 or HC-08 Bluetooth UART Communication Module 
+- Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
+- ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - Customized [MIDI_Controller](https://github.com/tttapa/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
-- [IRRemore](https://github.com/z3t0/Arduino-IRremote) library) library
+- [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 
 ## 
 
