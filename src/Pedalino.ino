@@ -11,7 +11,7 @@
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
 #define PEDALS             8
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
-#define PEDALS            8
+#define PEDALS            16
 #endif
 
 #define PED_PROGRAM_CHANGE  0
@@ -36,7 +36,7 @@
 struct bank {
   byte                   midiFunction;   // 0 = Program Change, 1 = Control Code, 2 = Note On/Note Off
   byte                   midiChannel;    // MIDI channel 1-16
-  byte                   midiCode;       // Program Change, Control Code or Note
+  byte                   midiCode;       // Program Change, Control Code or Note to send
 };
 
 struct pedal {
@@ -58,10 +58,9 @@ byte   currentInterface = PED_USBMIDI;
 #ifdef DEBUG_PEDALINO
 USBDebugMIDI_Interface            midiInterface1(115200);
 HardwareSerialDebugMIDI_Interface midiInterface2(Serial3, MIDI_BAUD);
-#endif
-#ifndef DEBUG_PEDALINO
-USBMIDI_Interface            midiInterface1;
-HardwareSerialMIDI_Interface midiInterface2(Serial3, MIDI_BAUD);
+#else
+USBMIDI_Interface                 midiInterface1;
+HardwareSerialMIDI_Interface      midiInterface2(Serial3, MIDI_BAUD);
 #endif
 
 // LCD display definitions
@@ -73,13 +72,13 @@ HardwareSerialMIDI_Interface midiInterface2(Serial3, MIDI_BAUD);
 
 // LCD pin definitions
 
-#define  LCD_RS         43
-#define  LCD_ENA        41
-#define  LCD_D4         31
-#define  LCD_D5         33
-#define  LCD_D6         35
-#define  LCD_D7         37
-#define  LCD_BACKLIGHT  12
+#define  LCD_RS         53
+#define  LCD_ENA        51
+#define  LCD_D4         49
+#define  LCD_D5         47
+#define  LCD_D6         45
+#define  LCD_D7         43
+#define  LCD_BACKLIGHT  41
 
 static LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean powersaver = false;
@@ -88,20 +87,22 @@ boolean powersaver = false;
 
 #include <IRremote.h>
 
-#define RECV_PIN      30     // connect Y to this PIN, G to GND, R to 5V
-#define RECV_LED_PIN  32
+#define RECV_PIN      33     // connect Y to this PIN, G to GND, R to 5V
+#define RECV_LED_PIN  35
 
 IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
 decode_results  results;
 
 // BLE receiver
 
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
 #include <SoftwareSerial.h>
-
-#define BLE_RX_PIN  51
-#define BLE_TX_PIN  50
-
+#define BLE_RX_PIN  10
+#define BLE_TX_PIN  11
 SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
+#define bluetooth Serial2
+#endif
 
 // Software reset via watchdog
 
@@ -109,6 +110,7 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 #include <avr/wdt.h>
 
 #define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
+
 
 void load_factory_default()
 {
@@ -139,10 +141,10 @@ void midi_setup()
   }
 
 #ifdef DEBUG_PEDALINO
-  Serial.print("Interface ");  
+  Serial.print("Interface ");
   switch (currentInterface) {
     case PED_USBMIDI:
-      Serial.println("USB");  
+      Serial.println("USB");
       break;
     case PED_MIDIOUT:
       Serial.println("MIDI OUT");
@@ -473,7 +475,11 @@ const PROGMEM char listOutputInterface[] = "     USB     |   MIDI OUT   ";
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
   { II_BANK,          ">1-10:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,  BANKS, 0, 10, nullptr },
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
   { II_PEDAL,         ">1-8:       ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
+#else
+  { II_PEDAL,         ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
+#endif
   { II_MIDICHANNEL,   ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,     16, 0, 10, nullptr },
   { II_MIDIFUNCTION,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listMidiFunction },
   { II_MIDICODE,      "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,    127, 0, 10, nullptr },
