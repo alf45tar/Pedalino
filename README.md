@@ -37,6 +37,7 @@ More information can be obtained in the following links:
 ## Prototype
 
 Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
+Connect up to 16 pots and switches from pin A0 (pedal 1) to A15 (pedal 16).
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.png)
 
