@@ -42,4 +42,6 @@ Potenziometers and switches can be replaced with any commercial footswitch or ex
 
 ## ToDo
 
+- Test lite version for Arduino Uno R3
+- Test rotary encoders
 - Bluetooth MIDI
