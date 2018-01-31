@@ -54,7 +54,9 @@ pedal  pedals[PEDALS];           // Pedals Setup
 byte   currentBank      = 0;
 byte   currentPedal     = 0;
 byte   currentInterface = PED_USBMIDI;
+byte   lastUsedSwitch   = 0;
 byte   lastUsedPedal    = 0;
+bool   selectBank       = true;
 
 #ifdef DEBUG_PEDALINO
 USBDebugMIDI_Interface            midiInterface1(115200);
@@ -131,6 +133,8 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 
 #define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
 
+const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
+const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 void load_factory_default()
 {
@@ -211,7 +215,19 @@ void midi_setup()
         break;
 
       case PED_LATCH:
-        pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+        switch (banks[currentBank][i].midiFunction)
+        {
+          case PED_PROGRAM_CHANGE:
+            pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_CONTROL_CHANGE:
+            pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_NOTE_ON_OFF:
+            pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, NOTE_ON, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+        }
+        pedals[i].footPedal->map(mapDigital);
         break;
 
       case PED_ANALOG:
@@ -249,14 +265,13 @@ void calibrate()
       lcd.print(" ");
     lcd.print(pedals[currentPedal].expMax);
   }
-  //pedals[currentPedal].expZero += 5;
-  //pedals[currentPedal].expMax  -= 5;
 }
 
 int mapDigital(int p, int value)
 {
   p -= PIN_A0;
   p = constrain(p, 0, PEDALS);
+  if (pedals[p].pedalValue != value) lastUsedSwitch = p;
   pedals[p].pedalValue = value;
   return value;
 }
@@ -277,41 +292,54 @@ int mapAnalog(int p, int value)
       value = round((exp(value / 511.5) - 1) * 160.12);   // y=[e^(2*x/1023)-1]/[e^2-1]*1023
       break;
   }
-  if (abs(pedals[p].pedalValue - value) > 10) lastUsedPedal = p;
+  if (abs(pedals[p].pedalValue - value) > 30) lastUsedPedal = p;
   pedals[p].pedalValue = value;
   return value;
 }
 
 void screen_update() {
 
+  static char screen1[LCD_COLS + 1];
+  static char screen2[LCD_COLS + 1];
+
   if (!powersaver) {
-    char buf[LCD_COLS * LCD_ROWS + 2 * LCD_ROWS];
-    const char bar[] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    char buf[LCD_COLS + 1];
+    // Line 1
     memset(buf, 0, sizeof(buf));
-    for (int i = 0; i < PEDALS; i++) {
+    for (byte i = 0; i < PEDALS; i++) {
       buf[i] = foot_char(i);
     }
-    //strncpy(&buf[6], &bar[0], map(pedals[0].pedalValue, 0, 1023, 0, 10));
-    //strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[0].pedalValue, 0, 1023, 0, 10));
-    lcd.setCursor(0, 0);
-    lcd.print(buf);
+    if (strcmp(screen1, buf) != 0) {
+      memset(screen1, 0, LCD_COLS + 1);
+      strncpy(screen1, buf, LCD_COLS);
+      lcd.setCursor(0, 0);
+      lcd.print(buf);
+    }
+    // Line 2
     memset(buf, 0, sizeof(buf));
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
-    strncpy(&buf[strlen(buf)], &bar[0], map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
+    //sprintf(&buf[strlen(buf)], "%2x%2x%2x", currentBank + 1, banks[currentBank][lastUsedSwitch].midiChannel, banks[currentBank][lastUsedSwitch].midiCode);
+    strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
     strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
-    lcd.setCursor(0, 1);
-    lcd.print(buf);
-    //lcd.setCursor(lastUsedPedal, 0);
-    //lcd.cursor();
-    //lcd.blink();
+    if (strcmp(screen2, buf) != 0) {
+      memset(screen2, 0, LCD_COLS + 1);
+      strncpy(screen2, buf, LCD_COLS);
+      lcd.setCursor(0, 1);
+      lcd.print(buf);
+    }
+    if (selectBank) {
+      lcd.setCursor(5, 1);
+      lcd.cursor();
+    }
+    else
+      lcd.noCursor();
   }
 }
 
-char foot_char (int footswitch)
+char foot_char (byte footswitch)
 {
-  const char bar[] = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
   footswitch = constrain(footswitch, 0, PEDALS - 1);
-  if (footswitch == lastUsedPedal || pedals[footswitch].pedalValue == LOW) return bar[footswitch % 10];
+  if (footswitch == lastUsedPedal || pedals[footswitch].pedalValue == LOW) return bar1[footswitch % 10];
   return ' ';
 }
 
@@ -665,7 +693,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   incDelta = 1;
   static unsigned long  previous_value;
   static byte           count = 0;
-  static bool           selectBank = false;
   unsigned long         ircode;
   bool                  repeat;
   byte                  numberPressed = 127;
@@ -765,7 +792,7 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   }
   if (numberPressed != 127) {
     if (selectBank) {
-      currentBank = numberPressed;
+      currentBank = numberPressed - 1;
       update_eeprom();
       midi_setup();
     }
