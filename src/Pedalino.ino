@@ -165,7 +165,7 @@ void midi_setup()
   }
 
 #ifdef DEBUG_PEDALINO
-  Serial.print("Interface ");
+  Serial.print("MIDI Interface ");
   switch (currentInterface) {
     case PED_USBMIDI:
       Serial.println("USB");
@@ -297,7 +297,7 @@ int mapAnalog(int p, int value)
   return value;
 }
 
-void screen_update() {
+void screen_update(bool force = false) {
 
   static char screen1[LCD_COLS + 1];
   static char screen2[LCD_COLS + 1];
@@ -309,7 +309,7 @@ void screen_update() {
     for (byte i = 0; i < PEDALS; i++) {
       buf[i] = foot_char(i);
     }
-    if (strcmp(screen1, buf) != 0) {
+    if (force || strcmp(screen1, buf) != 0) {
       memset(screen1, 0, LCD_COLS + 1);
       strncpy(screen1, buf, LCD_COLS);
       lcd.setCursor(0, 0);
@@ -321,7 +321,7 @@ void screen_update() {
     //sprintf(&buf[strlen(buf)], "%2x%2x%2x", currentBank + 1, banks[currentBank][lastUsedSwitch].midiChannel, banks[currentBank][lastUsedSwitch].midiCode);
     strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
     strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue, 0, 1023, 0, 10));
-    if (strcmp(screen2, buf) != 0) {
+    if (force || strcmp(screen2, buf) != 0) {
       memset(screen2, 0, LCD_COLS + 1);
       strncpy(screen2, buf, LCD_COLS);
       lcd.setCursor(0, 1);
@@ -852,8 +852,8 @@ void loop(void)
   static bool prevMenuRun = true;
 
   // Detect if we need to initiate running normal user code
-  //if (prevMenuRun && !M.isInMenu())
-  //
+  if (prevMenuRun && !M.isInMenu())
+    screen_update(true);
   prevMenuRun = M.isInMenu();
 
   // If we are not running and not autostart
@@ -866,6 +866,7 @@ void loop(void)
       M.runMenu(true);
   }
   if (!M.isInMenu()) screen_update();
+  else lcd.noCursor();
 
   M.runMenu();   // just run the menu code
 
