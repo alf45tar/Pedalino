@@ -17,6 +17,7 @@
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
 #define PED_NOTE_ON_OFF     2
+#define PED_PITCH_BEND      3
 
 #define PED_MOMENTARY       0
 #define PED_LATCH           1
@@ -34,7 +35,7 @@
 #define CALIBRATION_DURATION   8000
 
 struct bank {
-  byte                   midiFunction;   // 0 = Program Change, 1 = Control Code, 2 = Note On/Note Off
+  byte                   midiMessage;    // 0 = Program Change, 1 = Control Code, 2 = Note On/Note Off, 3 = Pitch Bend
   byte                   midiChannel;    // MIDI channel 1-16
   byte                   midiCode;       // Program Change, Control Code or Note to send
 };
@@ -188,7 +189,7 @@ void midi_setup()
     Serial.print("   Polarity ");
     Serial.print(pedals[i].invertPolarity);
     Serial.print("   MIDI Function ");
-    Serial.print(banks[currentBank][i].midiFunction);
+    Serial.print(banks[currentBank][i].midiMessage);
     Serial.print("   Channel ");
     Serial.print(banks[currentBank][i].midiChannel);
     Serial.print("   Code ");
@@ -199,7 +200,7 @@ void midi_setup()
     switch (pedals[i].mode) {
 
       case PED_MOMENTARY:
-        switch (banks[currentBank][i].midiFunction)
+        switch (banks[currentBank][i].midiMessage)
         {
           case PED_PROGRAM_CHANGE:
             pedals[i].footPedal = new Digital(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
@@ -210,12 +211,15 @@ void midi_setup()
           case PED_NOTE_ON_OFF:
             pedals[i].footPedal = new Digital(PIN_A0 + i, NOTE_ON, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
             break;
+          case PED_PITCH_BEND:
+            pedals[i].footPedal = new Digital(PIN_A0 + i, PITCH_BEND, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
         }
         pedals[i].footPedal->map(mapDigital);
         break;
 
       case PED_LATCH:
-        switch (banks[currentBank][i].midiFunction)
+        switch (banks[currentBank][i].midiMessage)
         {
           case PED_PROGRAM_CHANGE:
             pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
@@ -226,12 +230,29 @@ void midi_setup()
           case PED_NOTE_ON_OFF:
             pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, NOTE_ON, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
             break;
+          case PED_PITCH_BEND:
+            pedals[i].footPedal = new DigitalLatch(PIN_A0 + i, PITCH_BEND, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
         }
         pedals[i].footPedal->map(mapDigital);
         break;
 
       case PED_ANALOG:
-        pedals[i].footPedal = new AnalogResponsive(PIN_A0 + i, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+        switch (banks[currentBank][i].midiMessage)
+        {
+          case PED_PROGRAM_CHANGE:
+            pedals[i].footPedal = new AnalogResponsive(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_CONTROL_CHANGE:
+            pedals[i].footPedal = new AnalogResponsive(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_NOTE_ON_OFF:
+            pedals[i].footPedal = new AnalogResponsive(PIN_A0 + i, NOTE_ON, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_PITCH_BEND:
+            pedals[i].footPedal = new AnalogResponsive(PIN_A0 + i, PITCH_BEND, 0, banks[currentBank][i].midiChannel);
+            break;
+        }
         pedals[i].footPedal->map(mapAnalog);
         break;
 
@@ -357,7 +378,7 @@ void update_eeprom() {
 
   for (int b = 0; b < BANKS; b++)
     for (int p = 0; p < PEDALS; p++) {
-      EEPROM.put(offset, banks[b][p].midiFunction);
+      EEPROM.put(offset, banks[b][p].midiMessage);
       offset += sizeof(byte);
       EEPROM.put(offset, banks[b][p].midiChannel);
       offset += sizeof(byte);
@@ -414,7 +435,7 @@ void read_eeprom() {
 
     for (int b = 0; b < BANKS; b++)
       for (int p = 0; p < PEDALS; p++) {
-        EEPROM.get(offset, banks[b][p].midiFunction);
+        EEPROM.get(offset, banks[b][p].midiMessage);
         offset += sizeof(byte);
         EEPROM.get(offset, banks[b][p].midiChannel);
         offset += sizeof(byte);
@@ -467,7 +488,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_BANK           20
 #define II_PEDAL          21
 #define II_MIDICHANNEL    22
-#define II_MIDIFUNCTION   23
+#define II_MIDIMESSAGE    23
 #define II_MIDICODE       24
 #define II_MODE           25
 #define II_POLARITY       26
@@ -502,7 +523,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
   { 30, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
   { 31, "SetMIDIChannel",  MD_Menu::MNU_INPUT, II_MIDICHANNEL },
-  { 32, "SetMIDIFunction", MD_Menu::MNU_INPUT, II_MIDIFUNCTION },
+  { 32, "SetMIDIMessage",  MD_Menu::MNU_INPUT, II_MIDIMESSAGE },
   { 33, "Set MIDI Code",   MD_Menu::MNU_INPUT, II_MIDICODE },
   // Pedals Setup
   { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
@@ -519,7 +540,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 
 // Input Items ---------
 const PROGMEM char listPedalMode[] = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  ";
-const PROGMEM char listMidiFunction[] = "Program Change| Control Code |  Note On/Off  ";
+const PROGMEM char listMidiMessage[] = "Program Change| Control Code |  Note On/Off |  Pitch Bend  |";
 const PROGMEM char listPolarity[] = " No|Yes";
 const PROGMEM char listMapFunction[] = "    Linear    |     Log     |   Anti-Log   ";
 const PROGMEM char listOutputInterface[] = "     USB     |   MIDI OUT   ";
@@ -533,7 +554,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_PEDAL,         ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
 #endif
   { II_MIDICHANNEL,   ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,     16, 0, 10, nullptr },
-  { II_MIDIFUNCTION,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listMidiFunction },
+  { II_MIDIMESSAGE,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listMidiMessage },
   { II_MIDICODE,      "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,    127, 0, 10, nullptr },
   { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,      0, 0,  0, listPedalMode },
   { II_POLARITY,      "Invert:    " , MD_Menu::INP_LIST,  mnuValueRqst,  3, 0, 0,      0, 0,  0, listPolarity },
@@ -574,9 +595,9 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       else banks[currentBank][currentPedal].midiChannel = vBuf.value;
       break;
 
-    case II_MIDIFUNCTION:
-      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiFunction;
-      else banks[currentBank][currentPedal].midiFunction = vBuf.value;
+    case II_MIDIMESSAGE:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiMessage;
+      else banks[currentBank][currentPedal].midiMessage = vBuf.value;
       break;
 
     case II_MIDICODE:
