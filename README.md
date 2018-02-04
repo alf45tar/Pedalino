@@ -7,8 +7,9 @@ High customizable MIDI controller for guitarists and more.
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - MIDI output via USB MIDI or classic MIDI OUT connector (only one in lite version)
-- Send the following MIDI events: Program Change, Control Code or Note On/Off
-- MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank.
+- Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
+- MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
+- Switch debouncing and analog noise suppression without decreasing responsiveness
 - Invert polarity via software
 - Individual calibration of expression pedals: manual or automatic
 - Tranform a linear expression pedal into log expression pedal and vice versa
@@ -22,6 +23,7 @@ High customizable MIDI controller for guitarists and more.
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
+- [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 
 ## 
