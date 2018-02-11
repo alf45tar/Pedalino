@@ -46,7 +46,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 
 ## Pedalino(TM) Shield
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_pcb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 
 
 ## ToDo
