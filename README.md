@@ -11,7 +11,7 @@ High customizable MIDI controller for guitarists and more.
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
 - Invert polarity via software
-- Individual calibration of expression pedals: manual or automatic
+- Individual automatic calibration of expression pedals. Manual fine tuning is not usually requested.
 - Tranform a linear expression pedal into log expression pedal and vice versa
 - Configuration via IR/Bluetooth remote control
 
@@ -23,6 +23,7 @@ High customizable MIDI controller for guitarists and more.
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
+- [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch)
 - [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 
@@ -48,6 +49,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 - Test lite version for Arduino Uno R3
 - Test rotary encoders
 - Bluetooth MIDI
+- AppleMIDI (also know as RTP-MIDI)
 
 # Copyright
 Copyright 2017-2018 alfa45star
