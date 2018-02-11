@@ -23,7 +23,7 @@ High customizable MIDI controller for guitarists and more.
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
-- [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch)
+- [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
 - [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 
