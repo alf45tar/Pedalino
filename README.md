@@ -53,7 +53,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 
 - [ ] Test lite version for Arduino Uno R3
 - [ ] Test rotary encoders
-- [ ] Pedalino(TM) Shield
+- [ ] Pedalino™ Shield
 - [ ] Bluetooth MIDI
 - [ ] AppleMIDI (also know as RTP-MIDI)
 
