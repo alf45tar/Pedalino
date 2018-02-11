@@ -1,6 +1,6 @@
 **Status:** Working but under active development
 
-# Pedalino(TM)
+# Pedalino™
 High customizable MIDI controller for guitarists and more.
 
 ## Features
@@ -44,7 +44,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.png)
 
-## Pedalino(TM) Shield
+## Pedalino™ Shield
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 
