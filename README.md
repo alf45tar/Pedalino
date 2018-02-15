@@ -6,7 +6,7 @@ High customizable MIDI controller for guitarists and more.
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
-- MIDI output via USB MIDI or classic MIDI OUT connector (only one in lite version)
+- MIDI output via USB MIDI, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via WiFi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
@@ -18,10 +18,12 @@ High customizable MIDI controller for guitarists and more.
 ## Requirements
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
+- ESP8266 ESP-01 WiFi module
 - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
 - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
+- [Arduino MIDI Library](https://github.com/FortySevenEffects/arduino_midi_library)
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
 - [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
@@ -53,9 +55,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 
 - [ ] Test lite version for Arduino Uno R3
 - [ ] Test rotary encoders
-- [ ] Pedalino™ Shield
 - [ ] Bluetooth MIDI
-- [ ] AppleMIDI (also know as RTP-MIDI)
 
 # Copyright
 Copyright 2017-2018 alfa45star
