@@ -52,9 +52,21 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 
-## How to connect Pedalino to a WiFi network for enable AppleMIDI
+## How to connect Pedalino to a WiFi network
 
-On power on Pedalino will try to connect to the last know access point for 30 seconds. If it cannot connect to the last used access point it enter into SmartConfig mode for 60 seconds. If it doesn't receive any SSID and password it switch to AP mode. In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection fro clients.
+AppleMIDI requires a network connection. Pedalino support WiFi connection to any IEEE 802.11 b/g/n Wi-Fi access point with WPA/WPA2 authentication or open networks.
+
+- On power on Pedalino will try to connect to the last know access point for 30 seconds.
+- If it cannot connect to the last used access point it enter into SmartConfig mode for 60 seconds.
+- If it doesn't receive any SSID and password it switch to AP mode. In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection fro clients.
+
+## How to configure connection to 
+
+Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
+
+- [ESP8266 SmartConfig](https://play.google.com/store/apps/details?id=com.cmmakerclub.iot.esptouch) for Android
+- [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
+
 
 ## ToDo
 
