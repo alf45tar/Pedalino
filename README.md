@@ -28,6 +28,8 @@ High customizable MIDI controller for guitarists and more.
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
 - [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
+- [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
+- [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
 
 ## 
 
@@ -50,6 +52,9 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 
+## How to connect Pedalino to a WiFi network for enable AppleMIDI
+
+On power on Pedalino will try to connect to the last know access point for 30 seconds. If it cannot connect to the last used access point it enter into SmartConfig mode for 60 seconds. If it doesn't receive any SSID and password it switch to AP mode. In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection fro clients.
 
 ## ToDo
 
