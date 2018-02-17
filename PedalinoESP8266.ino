@@ -235,11 +235,6 @@ void ap_mode_start()
 {
   WiFi.mode(WIFI_AP);
   boolean result = WiFi.softAP("Pedalino");
-
-  MDNS.begin(host);
-  httpUpdater.setup(&httpServer);
-  httpServer.begin();
-  MDNS.addService("http", "tcp", 80);
 }
 
 
