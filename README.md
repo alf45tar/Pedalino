@@ -15,6 +15,7 @@ High customizable MIDI controller for guitarists and more.
 - Tranform a linear expression pedal into log expression pedal and vice versa
 - Configuration via IR/Bluetooth remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
+- Firmware update via HTTP (http://pedalino/update)
 
 ## Requirements
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
