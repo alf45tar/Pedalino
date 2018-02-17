@@ -59,12 +59,18 @@ AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-F
 
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
 
+Tested apps for configure SSID and password are:
 - [ESP8266 SmartConfig](https://play.google.com/store/apps/details?id=com.cmmakerclub.iot.esptouch) for Android
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
+Boot procedure
 - On power on Pedalino will try to connect to the last know access point
-- If it cannot connect to the last used access point after 30 seconds it enter into SmartConfig mode
-- If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode. In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required.
+- If it cannot connect to the last used access point it enters into Smart Config mode after 30 seconds
+- If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode.
+- In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required.
+
+Reboot Pedalino to restart the procedure.
+
 
 ## ToDo
 
