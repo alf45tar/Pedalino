@@ -66,10 +66,10 @@ Tested apps for configure SSID and password are:
 Boot procedure
 - On power on Pedalino will try to connect to the last know access point
 - If it cannot connect to the last used access point it enters into Smart Config mode after 30 seconds
-- If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode.
+- Start one of the tested apps to configure SSID and password 
+- If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode
 - In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required.
-
-Reboot Pedalino to restart the procedure.
+- Reboot Pedalino to restart the procedure.
 
 
 ## ToDo
