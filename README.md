@@ -65,7 +65,7 @@ Tested apps for configure SSID and password are:
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
 Boot procedure
-- On power on Pedalino will try to connect to the last know access points (it could save up to 5 access points)
+- On power on Pedalino will try to connect to the last know access point
 - If it cannot connect to the last used access point it enters into Smart Config mode after 30 seconds
 - Start one of the tested apps to configure SSID and password 
 - If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode
