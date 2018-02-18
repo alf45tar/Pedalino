@@ -56,7 +56,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
 
 ## How to connect Pedalino to a WiFi network
 
-AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi access point with WPA/WPA2 authentication.
+AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi access point with WPA/WPA2 authentication (only 2.4 GHz).
 
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
 
