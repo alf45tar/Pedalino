@@ -12,8 +12,12 @@
 
 #define PEDALINO_DEBUG
 
-#define WIFI_CONNECT_TIMEOUT    30
-#define SMART_CONFIG_TIMEOUT    60
+#define WIFI_CONNECT_TIMEOUT    10
+#define SMART_CONFIG_TIMEOUT    30
+
+#define BUILTIN_LED       2  // onboard LED, used as status indicator
+#define BUILTIN_LED_OFF() digitalWrite(BUILTIN_LED, HIGH)
+#define BUILTIN_LED_ON()  digitalWrite(BUILTIN_LED, LOW)
 
 const char host[]     = "pedalino";
 
@@ -235,6 +239,7 @@ void ap_mode_start()
 {
   WiFi.mode(WIFI_AP);
   boolean result = WiFi.softAP("Pedalino");
+  BUILTIN_LED_OFF();
 }
 
 
@@ -258,8 +263,9 @@ bool smart_config()
   Serial.print("SmartConfig started");
 #endif
 
-  for (int i = 0; i < SMART_CONFIG_TIMEOUT * 2 && !WiFi.smartConfigDone(); i++) {
-    delay(500);
+  for (int i = 0; i < SMART_CONFIG_TIMEOUT && !WiFi.smartConfigDone(); i++) {
+    status_blink();
+    delay(950);
 #ifdef PEDALINO_DEBUG
     Serial.print(".");
 #endif
@@ -276,9 +282,16 @@ bool smart_config()
     Serial.println("[NO SUCCESS]");
 #endif
 
-  WiFi.stopSmartConfig();
-
-  return WiFi.stopSmartConfig();
+  if (WiFi.smartConfigDone())
+  {
+    WiFi.stopSmartConfig();
+    return true;
+  }
+  else
+  {
+    WiFi.stopSmartConfig();
+    return false;
+  }
 }
 
 bool auto_reconnect()
@@ -291,7 +304,10 @@ bool auto_reconnect()
 #endif
 
   for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
-    delay(500);
+    status_blink();
+    delay(100);
+    status_blink();
+    delay(300);
 #ifdef PEDALINO_DEBUG
     Serial.print(".");
 #endif
@@ -336,29 +352,30 @@ void wifi_connect()
     Serial.printf("DNS 2       : %s\n", WiFi.dnsIP(1).toString().c_str());
     Serial.println("");
 #endif
-    // Start LLMNR (Link-Local Multicast Name Resolution) responder
-    LLMNR.begin(host);
-#ifdef PEDALINO_DEBUG
-    Serial.println("LLMNR responder started");
-#endif
-
-    // Start mDNS (Multicast DNS) responder
-    if (MDNS.begin(host, WiFi.localIP())) {
-#ifdef PEDALINO_DEBUG
-      Serial.println("mDNS responder started");
-#endif
-      MDNS.addService("apple-midi", "udp", 5004);
-    }
-    // Start firmawre update via HTTP (connect to http://pedalino/update)
-    httpUpdater.setup(&httpServer);
-    httpServer.begin();
-    MDNS.addService("http", "tcp", 80);
-#ifdef PEDALINO_DEBUG
-    Serial.println("HTTP server started");
-    Serial.println("Connect to http://pedalino/update for firmware update");
-#endif
   }
 
+  // Start LLMNR (Link-Local Multicast Name Resolution) responder
+  LLMNR.begin(host);
+#ifdef PEDALINO_DEBUG
+  Serial.println("LLMNR responder started");
+#endif
+
+  // Start mDNS (Multicast DNS) responder
+  if (MDNS.begin(host, WiFi.localIP())) {
+#ifdef PEDALINO_DEBUG
+    Serial.println("mDNS responder started");
+#endif
+    MDNS.addService("apple-midi", "udp", 5004);
+  }
+
+  // Start firmawre update via HTTP (connect to http://pedalino/update)
+  httpUpdater.setup(&httpServer);
+  httpServer.begin();
+  MDNS.addService("http", "tcp", 80);
+#ifdef PEDALINO_DEBUG
+  Serial.println("HTTP server started");
+  Serial.println("Connect to http://pedalino/update for firmware update");
+#endif
 }
 
 void midi_connect()
@@ -413,8 +430,17 @@ void midi_connect()
   AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
 }
 
+void status_blink()
+{
+  BUILTIN_LED_ON();
+  delay(50);
+  BUILTIN_LED_OFF();
+}
+
 void setup()
 {
+  pinMode(BUILTIN_LED, OUTPUT);
+
 #ifdef PEDALINO_DEBUG
   Serial.begin(115200);
   Serial.println("");
@@ -433,6 +459,24 @@ void setup()
 
 void loop()
 {
+  switch (WiFi.getMode()) {
+    case WIFI_STA:
+      if (WiFi.isConnected())
+        BUILTIN_LED_ON();
+      else
+        BUILTIN_LED_OFF();
+      break;
+    case WIFI_AP:
+      if (WiFi.softAPgetStationNum() > 0)
+        BUILTIN_LED_ON();
+      else
+        BUILTIN_LED_OFF();
+      break;
+    default:
+      BUILTIN_LED_OFF();
+      break;
+  }
+
   // Listen to incoming messages from Arduino
   MIDI.read();
 
