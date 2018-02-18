@@ -33,26 +33,28 @@ High customizable MIDI controller for guitarists and more.
 - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
 - [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
 
-## 
+## Pedalino™ Shield
 
-A MIDI firware for Arduino Uno/Mega is required. HIDUINO or mocoLUFA can be used.
+Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
+
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
+
+## Prototype
+
+This is just an example for pots and switch connection.
+
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.png)
+
+## USB MIDI
+
+A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. HIDUINO or mocoLUFA can be used.
 I suggest a dual mode firmware like mocoLUFA because is supporting both USB-MIDI and Arduino-Serial.
 
 More information can be obtained in the following links:
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
 - [HIDUINO](https://github.com/ddiakopoulos/hiduino)
 - [MocoLUFA](https://github.com/kuwatay/mocolufa)
-
-## Prototype
-
-Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
-Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16).
-
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/Pedalino_bb.png)
-
-## Pedalino™ Shield
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 
 ## How to connect Pedalino to a WiFi network
 
