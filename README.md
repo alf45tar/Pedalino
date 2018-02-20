@@ -67,10 +67,10 @@ Tested apps for configure SSID and password are:
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
 Boot procedure
-- On power on Pedalino will try to connect to the last know access point (double flasing led)
-- If it cannot connect to the last used access point it enters into Smart Config mode after 30 seconds (slow flashing led)
+- On power on Pedalino will try to connect to the last know access point (fast double flashing led)
+- If it cannot connect to the last used access point it enters into Smart Config mode after 15 seconds (slow flashing led)
 - Start one of the tested apps to configure SSID and password 
-- If it doesn't receive any SSID and password during the next 60 seconds it switch to AP mode (led off)
+- If it doesn't receive any SSID and password during the next 30 seconds it switch to AP mode (led off)
 - In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required. Led is off until a client connect to AP.
 - Led is on when connected (Pedalino is connected to an AP or a client is connected to Pedalino AP)
 - Reboot Pedalino to restart the procedure.
