@@ -3,6 +3,12 @@
 # Pedalino™
 High customizable MIDI controller for guitarists and more.
 
+- USB MIDI class-compliant device
+- No extra drivers to connect your Windows, macOS or iOS (iPad/iPhone). 
+- AppleMIDI (aka RTP_MIDI) via WiFi
+- IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication
+- MIDI OUT DIN connector
+
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
