@@ -113,13 +113,13 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 // LCD pin definitions
 
-#define  LCD_RS         53
-#define  LCD_ENA        51
-#define  LCD_D4         49
-#define  LCD_D5         47
-#define  LCD_D6         45
-#define  LCD_D7         43
-#define  LCD_BACKLIGHT  41
+#define  LCD_RS         46
+#define  LCD_ENA        44
+#define  LCD_D4         42
+#define  LCD_D5         40
+#define  LCD_D6         38
+#define  LCD_D7         36
+#define  LCD_BACKLIGHT  34
 
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean       powersaver = false;
@@ -128,7 +128,7 @@ boolean       powersaver = false;
 
 #include <IRremote.h>
 
-#define RECV_PIN      33     // connect Y to this PIN, G to GND, R to 5V
+#define RECV_PIN       2     // connect Y to this PIN, G to GND, R to 5V
 #define RECV_LED_PIN  35
 
 #define IR_ON_OFF   0xFFEA15
