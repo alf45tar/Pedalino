@@ -17,7 +17,7 @@ High customizable MIDI controller for guitarists and more.
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
 - Firmware update via HTTP (http://pedalino/update)
 
-## Requirements
+## Bill of materials
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
 - ESP8266 ESP-01 WiFi module
