@@ -4,9 +4,9 @@
 High customizable MIDI controller for guitarists and more.
 
 - USB MIDI class-compliant device
-- No extra drivers to connect your Windows, macOS or iOS (iPad/iPhone). 
-- AppleMIDI (aka RTP_MIDI) via WiFi
-- IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication
+- No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
+- AppleMIDI (aka RTP-MIDI) via WiFi
+- IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI OUT DIN connector
 
 ## Features
