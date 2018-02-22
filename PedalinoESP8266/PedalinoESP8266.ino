@@ -10,7 +10,7 @@
 #include <MIDI.h>
 #include <AppleMidi.h>
 
-#define PEDALINO_DEBUG
+#undef PEDALINO_DEBUG
 
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
@@ -303,6 +303,7 @@ bool auto_reconnect()
   Serial.printf("Connecting to %s ", WiFi.SSID().c_str());
 #endif
 
+  WiFi.mode(WIFI_STA);
   for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
     status_blink();
     delay(100);
