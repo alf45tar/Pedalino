@@ -16,6 +16,10 @@ env:
 install:
     - pip install -U platformio
     - platformio update
+        # download library to the temporary directory
+    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/arduino_midi_library_source.zip
+    - unzip /tmp/arduino_midi_library_source.zip -d /tmp/
+
 
 script:
     - platformio ci --board=<ID_1> --board=<ID_2> --board=<ID_N>
