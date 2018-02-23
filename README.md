@@ -1,6 +1,6 @@
 **Status:** Working but under active development
 
-![travisci](https://travis-ci.org/alf45tar/Pedalino)
+[![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
 
 # Pedalino™
