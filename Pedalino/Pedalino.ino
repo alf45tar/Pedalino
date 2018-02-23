@@ -46,7 +46,7 @@
 #define PED_AP              1   // wifi access point
 
 
-#define CALIBRATION_DURATION   6000
+#define CALIBRATION_DURATION   8000
 
 struct bank {
   byte                   midiMessage;     /* 0 = Program Change,
@@ -121,7 +121,7 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 #define  LCD_D7         36
 #define  LCD_BACKLIGHT  34
 
-LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT);
+LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean       powersaver = false;
 
 // IR Remote receiver
@@ -313,16 +313,16 @@ void midi_setup()
           switch (banks[currentBank][i].midiMessage)
           {
             case PED_PROGRAM_CHANGE:
-              //pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_CONTROL_CHANGE:
-              //pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_NOTE_ON_OFF:
-              //pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, NOTE_ON,        banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, NOTE_ON,        banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_PITCH_BEND:
-              //pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PITCH_BEND,     0,                              banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PITCH_BEND,     0,                              banks[currentBank][i].midiChannel);
               break;
           }
           pedals[i].midiController->map(map_analog);
@@ -973,11 +973,11 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
       case 0xFFA25D:
       case IR_ON_OFF:
         if (powersaver) {
-          //lcd.on();
+          lcd.on();
           powersaver = false;
         }
         else {
-          //lcd.off();
+          lcd.off();
           powersaver = true;
         }
         return MD_Menu::NAV_NULL;
