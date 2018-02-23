@@ -1,5 +1,8 @@
 **Status:** Working but under active development
 
+![travisci](https://travis-ci.org/alf45tar/Pedalino)
+
+
 # Pedalino™
 High customizable MIDI controller for guitarists and more.
 
