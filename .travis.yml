@@ -10,7 +10,7 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=Pedalino        PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560"
-    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--board=esp8266"
+    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
 
 install:
     - pip install -U platformio
