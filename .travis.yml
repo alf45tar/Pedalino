@@ -22,6 +22,9 @@ install:
     
     - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/lib/MIDI_controller_source.zip
     - unzip /tmp/lib/MIDI_controller_source.zip -d /tmp/lib/
+    
+    - wget https://github.com/PaulStoffregen/Encoder/archive/master.zip -O /tmp/lib/Encoder_source.zip
+    - unzip /tmp/lib/Encoder_source.zip -d /tmp/lib/
    
     - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/lib/arduino_midi_library_source.zip
     - unzip /tmp/lib/arduino_midi_library_source.zip -d /tmp/lib/
