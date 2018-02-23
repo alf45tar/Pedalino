@@ -7,7 +7,7 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266LLMNR.h>
 #include <ESP8266HTTPUpdateServer.h>
-#include <MIDI.h>
+#include "MIDI.h"
 #include <AppleMidi.h>
 
 #undef PEDALINO_DEBUG
