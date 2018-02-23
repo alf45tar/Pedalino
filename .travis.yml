@@ -47,4 +47,4 @@ install:
 
 
 script:
-    - platformio ci --lib="/tmp/lib/MIDI_Controller-master" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --verbose --project-conf=/tmp/platformio.ini
