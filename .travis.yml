@@ -50,4 +50,4 @@ install:
 
 
 script:
-    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --lib="/tmp/lib/Encoder-master" --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --lib="/tmp/lib/Newliquidcrystal_1.3.5" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --lib="/tmp/lib/Encoder-master" --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
