@@ -17,7 +17,7 @@ install:
     - platformio update
     
         # download library to the temporary directory
-    - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/MIDI_controller_source.zip
+    - wget https://github.com/tttapa/MIDI_controller/archive/master.zip -O /tmp/MIDI_controller_source.zip
     - unzip /tmp/MIDI_controller_source.zip -d /tmp/
    
    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/arduino_midi_library_source.zip
