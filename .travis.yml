@@ -9,8 +9,7 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=Pedalino        PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560"
-    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
+    - PLATFORMIO_CI_SRC=Pedalino
 
 install:
     - pip install -U platformio
@@ -48,4 +47,4 @@ install:
 
 
 script:
-    - platformio ci --lib="/tmp/lib" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/MIDI_Controller-master" --verbose --project-conf=/tmp/platformio.ini
