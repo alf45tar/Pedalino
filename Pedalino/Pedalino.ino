@@ -121,7 +121,7 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 #define  LCD_D7         36
 #define  LCD_BACKLIGHT  34
 
-LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
+LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT);
 boolean       powersaver = false;
 
 // IR Remote receiver
