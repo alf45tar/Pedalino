@@ -973,11 +973,11 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
       case 0xFFA25D:
       case IR_ON_OFF:
         if (powersaver) {
-          lcd.on();
+          //lcd.on();
           powersaver = false;
         }
         else {
-          lcd.off();
+          //lcd.off();
           powersaver = true;
         }
         return MD_Menu::NAV_NULL;
