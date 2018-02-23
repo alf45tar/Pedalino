@@ -17,31 +17,31 @@ install:
     - platformio update
     
         # download library to the temporary directory
-    - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/MIDI_controller_source.zip
-    - unzip /tmp/MIDI_controller_source.zip -d /tmp/
+    - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/lib/MIDI_controller_source.zip
+    - unzip /tmp/lib/MIDI_controller_source.zip -d /tmp/
    
-    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/arduino_midi_library_source.zip
-    - unzip /tmp/arduino_midi_library_source.zip -d /tmp/
+    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/lib/arduino_midi_library_source.zip
+    - unzip /tmp/lib/arduino_midi_library_source.zip -d /tmp/
 
-    - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/MD_Menu_source.zip
-    - unzip /tmp/MD_Menu_source.zip -d /tmp/
+    - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/lib/MD_Menu_source.zip
+    - unzip /tmp/lib/MD_Menu_source.zip -d /tmp/
 
-    - wget https://github.com/MajicDesigns/MD_UISwitch/archive/master.zip -O /tmp/MD_UISwitch_source.zip
-    - unzip /tmp/MD_UISwitch_source.zip -d /tmp/
+    - wget https://github.com/MajicDesigns/MD_UISwitch/archive/master.zip -O /tmp/lib/MD_UISwitch_source.zip
+    - unzip /tmp/lib/MD_UISwitch_source.zip -d /tmp/
 
-    - wget https://github.com/dxinteractive/ResponsiveAnalogRead/archive/master.zip -O /tmp/ResponsiveAnalogRead_source.zip
-    - unzip /tmp/ResponsiveAnalogRead_source.zip -d /tmp/
+    - wget https://github.com/dxinteractive/ResponsiveAnalogRead/archive/master.zip -O /tmp/lib/ResponsiveAnalogRead_source.zip
+    - unzip /tmp/lib/ResponsiveAnalogRead_source.zip -d /tmp/
 
-    - wget https://github.com/z3t0/Arduino-IRremote/archive/master.zip -O /tmp/Arduino-IRremote_source.zip
-    - unzip /tmp/Arduino-IRremote_source.zip -d /tmp/
+    - wget https://github.com/z3t0/Arduino-IRremote/archive/master.zip -O /tmp/lib/Arduino-IRremote_source.zip
+    - unzip /tmp/lib/Arduino-IRremote_source.zip -d /tmp/
 
-    - wget https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads/Newliquidcrystal_1.3.5.zip -O /tmp/Newliquidcrystal_1.3.5_source.zip
-    - unzip /tmp/Newliquidcrystal_1.3.5_source.zip -d /tmp/
+    - wget https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads/Newliquidcrystal_1.3.5.zip -O /tmp/lib/Newliquidcrystal_1.3.5_source.zip
+    - unzip /tmp/lib/Newliquidcrystal_1.3.5_source.zip -d /tmp/
     
-    - wget https://github.com/lathoub/Arduino-AppleMIDI-Library/archive/master.zip -O /tmp/Arduino-AppleMIDI-Library_source.zip
-    - unzip /tmp/Arduino-AppleMIDI-Library_source.zip -d /tmp/
+    - wget https://github.com/lathoub/Arduino-AppleMIDI-Library/archive/master.zip -O /tmp/lib/Arduino-AppleMIDI-Library_source.zip
+    - unzip /tmp/lib/Arduino-AppleMIDI-Library_source.zip -d /tmp/
     
 
 
 script:
-    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --verbose
+    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --lib="/tmp/lib"
