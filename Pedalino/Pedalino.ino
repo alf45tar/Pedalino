@@ -46,7 +46,7 @@
 #define PED_AP              1   // wifi access point
 
 
-#define CALIBRATION_DURATION   8000
+#define CALIBRATION_DURATION   6000
 
 struct bank {
   byte                   midiMessage;     /* 0 = Program Change,
