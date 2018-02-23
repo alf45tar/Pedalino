@@ -50,4 +50,4 @@ install:
 
 
 script:
-    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --lib="/tmp/lib/Encoder-master" --lib="/tmp/lib/arduino_midi_library-master" --verbose --project-conf=/tmp/platformio.ini
