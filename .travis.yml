@@ -48,4 +48,4 @@ install:
 
 
 script:
-    - platformio ci --lib="/tmp/lib/" --verbose --project-conf=/tmp/platoformio.ini
+    - platformio ci --lib="/tmp/lib/" --verbose --project-conf=/tmp/platformio.ini
