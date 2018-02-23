@@ -16,7 +16,7 @@ install:
     - pip install -U platformio
     - platformio update
     
-    - wget https://github.com/alf45tar/platformio.ini -O /tmp/platformio.ini
+    - wget https://github.com/alf45tar/Pedalino/blob/master/platformio.ini -O /tmp/platformio.ini
     
         # download library to the temporary directory
     - mkdir /tmp/lib
