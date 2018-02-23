@@ -16,6 +16,8 @@ install:
     - pip install -U platformio
     - platformio update
     
+    - wget https://github.com/alf45tar/platformio.ini -O /tmp/platformio.ini
+    
         # download library to the temporary directory
     - mkdir /tmp/lib
     
@@ -46,4 +48,4 @@ install:
 
 
 script:
-    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --lib="/tmp/lib/" --verbose
+    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --lib="/tmp/lib/" --verbose --project-conf=/tmp/platoformio.ini
