@@ -17,6 +17,8 @@ install:
     - platformio update
     
         # download library to the temporary directory
+    - mkdir /tmp/lib
+    
     - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/lib/MIDI_controller_source.zip
     - unzip /tmp/lib/MIDI_controller_source.zip -d /tmp/
    
