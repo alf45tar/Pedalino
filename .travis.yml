@@ -16,9 +16,17 @@ env:
 install:
     - pip install -U platformio
     - platformio update
+    
         # download library to the temporary directory
     - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/arduino_midi_library_source.zip
     - unzip /tmp/arduino_midi_library_source.zip -d /tmp/
+
+    - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/MD_Menu_source.zip
+    - unzip /tmp/MD_Menu_source.zip -d /tmp/
+
+    - wget https://github.com/MajicDesigns/MD_UISwitch/archive/master.zip -O /tmp/MD_UISwitch_source.zip
+    - unzip /tmp/MD_UISwitch_source.zip -d /tmp/
+
 
 
 script:
