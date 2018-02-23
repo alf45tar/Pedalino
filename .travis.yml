@@ -37,6 +37,10 @@ install:
 
     - wget https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads/Newliquidcrystal_1.3.5.zip -O /tmp/Newliquidcrystal_1.3.5_source.zip
     - unzip /tmp/Newliquidcrystal_1.3.5_source.zip -d /tmp/
+    
+    - wget https://github.com/lathoub/Arduino-AppleMIDI-Library/archive/master.zip -O /tmp/Arduino-AppleMIDI-Library_source.zip
+    - unzip /tmp/Arduino-AppleMIDI-Library_source.zip -d /tmp/
+    
 
 
 script:
