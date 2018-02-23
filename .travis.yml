@@ -46,4 +46,4 @@ install:
 
 
 script:
-    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --lib="/tmp/lib"
+    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --lib="/tmp/lib/" --verbose
