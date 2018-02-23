@@ -34,6 +34,7 @@ High customizable MIDI controller for guitarists and more.
 - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 - [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
 - [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
+- [Encoder](https://github.com/PaulStoffregen/Encoder) library
 - [Arduino MIDI Library](https://github.com/FortySevenEffects/arduino_midi_library)
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
