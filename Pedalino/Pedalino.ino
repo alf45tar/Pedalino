@@ -313,16 +313,16 @@ void midi_setup()
           switch (banks[currentBank][i].midiMessage)
           {
             case PED_PROGRAM_CHANGE:
-              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive::AnalogResponsive(PIN_A0 + i, PROGRAM_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_CONTROL_CHANGE:
-              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive::AnalogResponsive(PIN_A0 + i, CONTROL_CHANGE, banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_NOTE_ON_OFF:
-              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, NOTE_ON,        banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive::AnalogResponsive(PIN_A0 + i, NOTE_ON,        banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
               break;
             case PED_PITCH_BEND:
-              pedals[i].midiController = new AnalogResponsive(PIN_A0 + i, PITCH_BEND,     0,                              banks[currentBank][i].midiChannel);
+              pedals[i].midiController = new AnalogResponsive::AnalogResponsive(PIN_A0 + i, PITCH_BEND,     0,                              banks[currentBank][i].midiChannel);
               break;
           }
           pedals[i].midiController->map(map_analog);
