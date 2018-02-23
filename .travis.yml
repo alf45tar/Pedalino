@@ -9,9 +9,8 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=Pedalino/pedalino.ino
-    - PLATFORMIO_CI_SRC=PedalinoESP8266/PedalinoESP8266.ino
-    - PLATFORMIO_CI_SRC=path/to/test/directory
+    - PLATFORMIO_CI_SRC=Pedalino/Pedalino.ino
+
 
 install:
     - pip install -U platformio
@@ -38,4 +37,4 @@ install:
 
 
 script:
-    - platformio ci --board=<ID_1> --board=<ID_2> --board=<ID_N>
+    - platformio ci --board=mega
