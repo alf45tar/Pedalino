@@ -44,4 +44,4 @@ install:
 
 
 script:
-    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS
+    - platformio ci $PLATFORMIO_CI_EXTRA_ARGS --verbose
