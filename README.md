@@ -97,6 +97,7 @@ Uploading .hex file to Arduino it is very easy and straithforward with [Xloader]
 - [ ] Test lite version for Arduino Uno R3
 - [ ] Test rotary encoders
 - [ ] Bluetooth MIDI
+- [ ] MIDI routing
 
 # Copyright
 Copyright 2017-2018 alfa45star
