@@ -86,6 +86,11 @@ Boot procedure
 - Led is on when connected (Pedalino is connected to an AP or a client is connected to Pedalino AP)
 - Reboot Pedalino to restart the procedure.
 
+## Pre-compiled source into hex files
+
+I know compile the source code requires a lot of dependancies. I decided to provide also the .hex file for your convenience.
+Uploading .hex file to Arduino it is very easy and straithforward with [Xloader](http://xloader.russemotto.com/).
+
 
 ## ToDo
 
