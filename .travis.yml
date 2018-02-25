@@ -43,4 +43,4 @@ install:
     - unzip /tmp/Arduino-IRremote_source.zip -d /tmp/
 
 script:
-    - platformio ci --exclude="PedalinoESP8266" --lib="/tmp/arduino_midi_library-master" --lib="/tmp/Bounce2-master" --lib="/tmp/MD_Menu-master" --lib="/tmp/MD_UISwitch-master" --lib="/tmp/ResponsiveAnalogRead-master" --lib="/tmp/Arduino-IRremote-master" --board=megaatmega2560 --project-options="lib_deps=Wire" --project-options="lib_ignore=RobotIRremote"
+    - platformio ci --exclude="PedalinoESP8266" --lib="/tmp/arduino_midi_library-master" --lib="/tmp/Bounce2-master" --lib="/tmp/MD_Menu-master" --lib="/tmp/MD_UISwitch-master" --lib="/tmp/ResponsiveAnalogRead-master" --lib="/tmp/Arduino-IRremote-master" --board=megaatmega2560 --project-option="lib_deps=Wire" --project-option="lib_ignore=RobotIRremote"
