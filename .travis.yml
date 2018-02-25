@@ -26,3 +26,10 @@ install:
 
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --verbose
+
+deploy:
+  provider: releases
+  file: ".pioenvs/esp01_1m/firmware.elf"
+  skip_cleanup: true
+  on:
+    tags: true
