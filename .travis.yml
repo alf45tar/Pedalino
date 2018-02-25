@@ -10,6 +10,7 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=Pedalino
+    - PLATFORMIO_CI_SRC=PedalinoESP8266
 
 install:
     - pip install -U platformio
@@ -42,4 +43,4 @@ install:
     - unzip /tmp/Arduino-IRremote_source.zip -d /tmp/
 
 script:
-    - platformio ci --lib="/tmp/arduino_midi_library-master" --lib="/tmp/Bounce2-master" --lib="/tmp/MD_Menu-master" --lib="/tmp/MD_UISwitch-master" --lib="/tmp/ResponsiveAnalogRead-master" --lib="/tmp/Arduino-IRremote-master" --project-conf=/tmp/platformio.ini
+    - platformio ci --exclude="PedalinoESP8266" --lib="/tmp/arduino_midi_library-master" --lib="/tmp/Bounce2-master" --lib="/tmp/MD_Menu-master" --lib="/tmp/MD_UISwitch-master" --lib="/tmp/ResponsiveAnalogRead-master" --lib="/tmp/Arduino-IRremote-master" --project-conf=/tmp/platformio.ini
