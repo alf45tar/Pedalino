@@ -10,7 +10,7 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=Pedalino PLATFORMIO_CI_EXTRA_ARGS="--lib=/tmp/arduino_midi_library-master --lib=/tmp/Bounce2-master --lib=/tmp/MD_Menu-master --lib=/tmp/MD_UISwitch-master --lib=/tmp/ResponsiveAnalogRead-master --lib=/tmp/Arduino-IRremote-master --board=megaatmega2560 --project-option='lib_deps=Wire' --project-option='lib_ignore=RobotIRremote'"
-    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--lib='/tmp/arduino_midi_library-master' --board=esp01-1m"
+    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--lib=/tmp/arduino_midi_library-master --board=esp01_1m"
 
 install:
     - pip install -U platformio
@@ -18,9 +18,9 @@ install:
     #
     # Libraries from PlatformIO Library Registry:
     #
-    - platformio lib -g install 136
+    - platformio lib -g install 136 https://github.com/lathoub/Arduino-AppleMIDI-Library.git
     
-    - wget https://raw.githubusercontent.com/alf45tar/Pedalino/master/platformio.ini -O /tmp/platformio.ini
+    #- wget https://raw.githubusercontent.com/alf45tar/Pedalino/master/platformio.ini -O /tmp/platformio.ini
     
     # download library to the temporary directory
    
