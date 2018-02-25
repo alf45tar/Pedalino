@@ -19,12 +19,6 @@ install:
     
         # download library to the temporary directory
     - mkdir /tmp/lib
-    
-    - wget https://github.com/alf45tar/MIDI_controller/archive/master.zip -O /tmp/lib/MIDI_controller_source.zip
-    - unzip /tmp/lib/MIDI_controller_source.zip -d /tmp/lib/
-    
-    - wget https://github.com/PaulStoffregen/Encoder/archive/master.zip -O /tmp/lib/Encoder_source.zip
-    - unzip /tmp/lib/Encoder_source.zip -d /tmp/lib/
    
     - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/lib/arduino_midi_library_source.zip
     - unzip /tmp/lib/arduino_midi_library_source.zip -d /tmp/lib/
@@ -43,11 +37,6 @@ install:
 
     - wget https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads/Newliquidcrystal_1.3.5.zip -O /tmp/lib/Newliquidcrystal_1.3.5_source.zip
     - unzip /tmp/lib/Newliquidcrystal_1.3.5_source.zip -d /tmp/lib/
-    
-    - wget https://github.com/lathoub/Arduino-AppleMIDI-Library/archive/master.zip -O /tmp/lib/Arduino-AppleMIDI-Library_source.zip
-    - unzip /tmp/lib/Arduino-AppleMIDI-Library_source.zip -d /tmp/lib/
-    
-
 
 script:
-    - platformio ci --lib="/tmp/lib/MIDI_controller-master" --lib="/tmp/lib/Encoder-master" --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
