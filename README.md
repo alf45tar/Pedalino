@@ -10,7 +10,7 @@ High customizable MIDI controller for guitarists and more.
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - AppleMIDI (aka RTP-MIDI) via WiFi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
-- MIDI OUT DIN connector
+- MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
