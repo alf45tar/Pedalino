@@ -22,6 +22,9 @@ install:
    
     - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/lib/arduino_midi_library_source.zip
     - unzip /tmp/lib/arduino_midi_library_source.zip -d /tmp/lib/
+    
+    - wget https://github.com/thomasfredericks/Bounce2/archive/master.zip -O /tmp/lib/Bounce2_source.zip
+    - unzip /tmp/lib/Bounce2_source.zip -d /tmp/lib/
 
     - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/lib/MD_Menu_source.zip
     - unzip /tmp/lib/MD_Menu_source.zip -d /tmp/lib/
@@ -39,4 +42,4 @@ install:
     - unzip /tmp/lib/Newliquidcrystal_1.3.5_source.zip -d /tmp/lib/
 
 script:
-    - platformio ci --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/Bounce2_library-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
