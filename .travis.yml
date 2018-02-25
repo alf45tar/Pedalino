@@ -26,14 +26,3 @@ install:
 
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --verbose
-
-before_deploy:
-      # Set up git user name and tag this commit
-      - git config --local user.name "alf45tar"
-      - git config --local user.email "alf45tar"
-      - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
- deploy:
-      provider: releases
-      file: ".pioenvs/esp01_1m/firmware.elf"
-      skip_cleanup: true
-
