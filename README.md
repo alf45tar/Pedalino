@@ -21,7 +21,7 @@ High customizable MIDI controller for guitarists and more.
 - Switch debouncing and analog noise suppression without decreasing responsiveness
 - Invert polarity via software
 - Individual automatic calibration of expression pedals. Manual fine tuning is not usually requested.
-- Tranform a linear expression pedal into log expression pedal and vice versa
+- Transform a linear expression pedal into log expression pedal and vice versa
 - Configuration via IR/Bluetooth remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
 - Firmware update via HTTP (http://pedalino/update)
@@ -29,16 +29,15 @@ High customizable MIDI controller for guitarists and more.
 ## Bill of materials
 - Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
-- ESP8266 ESP-01 WiFi module
+- ESP8266 ESP-01 1M WiFi module
 - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
 - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
-- [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
-- [MIDI_Controller](https://github.com/alf45tar/MIDI_controller) library
-- [Encoder](https://github.com/PaulStoffregen/Encoder) library
 - [Arduino MIDI](https://github.com/FortySevenEffects/arduino_midi_library) library
+- [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library)
+- [Bounce2](https://github.com/thomasfredericks/Bounce2) library
+- [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
-- [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
 - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
 - [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
@@ -95,7 +94,7 @@ Uploading .hex file to Arduino it is very easy and straithforward with [Xloader]
 ## ToDo
 
 - [ ] Test lite version for Arduino Uno R3
-- [ ] Test rotary encoders
+- [ ] Add rotary encoders
 - [ ] Bluetooth MIDI
 - [ ] MIDI routing
 
