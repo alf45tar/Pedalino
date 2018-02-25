@@ -17,31 +17,29 @@ install:
     #
     # Libraries from PlatformIO Library Registry:
     #
-    # https://platformio.org/lib/show/1/OneWire
     - platformio lib -g install 136
     
     - wget https://raw.githubusercontent.com/alf45tar/Pedalino/master/platformio.ini -O /tmp/platformio.ini
     
-        # download library to the temporary directory
-    - mkdir /tmp/lib
+    # download library to the temporary directory
    
-    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/lib/arduino_midi_library_source.zip
-    - unzip /tmp/lib/arduino_midi_library_source.zip -d /tmp/lib/
+    - wget https://github.com/FortySevenEffects/arduino_midi_library/archive/master.zip -O /tmp/arduino_midi_library_source.zip
+    - unzip /tmp/arduino_midi_library_source.zip -d /tmp/
     
-    - wget https://github.com/thomasfredericks/Bounce2/archive/master.zip -O /tmp/lib/Bounce2_source.zip
-    - unzip /tmp/lib/Bounce2_source.zip -d /tmp/lib/
+    - wget https://github.com/thomasfredericks/Bounce2/archive/master.zip -O /tmp/Bounce2_source.zip
+    - unzip /tmp/Bounce2_source.zip -d /tmp/
 
-    - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/lib/MD_Menu_source.zip
-    - unzip /tmp/lib/MD_Menu_source.zip -d /tmp/lib/
+    - wget https://github.com/MajicDesigns/MD_Menu/archive/master.zip -O /tmp/MD_Menu_source.zip
+    - unzip /tmp/MD_Menu_source.zip -d /tmp/
 
-    - wget https://github.com/MajicDesigns/MD_UISwitch/archive/master.zip -O /tmp/lib/MD_UISwitch_source.zip
-    - unzip /tmp/lib/MD_UISwitch_source.zip -d /tmp/lib/
+    - wget https://github.com/MajicDesigns/MD_UISwitch/archive/master.zip -O /tmp/MD_UISwitch_source.zip
+    - unzip /tmp/MD_UISwitch_source.zip -d /tmp/
 
-    - wget https://github.com/dxinteractive/ResponsiveAnalogRead/archive/master.zip -O /tmp/lib/ResponsiveAnalogRead_source.zip
-    - unzip /tmp/lib/ResponsiveAnalogRead_source.zip -d /tmp/lib/
+    - wget https://github.com/dxinteractive/ResponsiveAnalogRead/archive/master.zip -O /tmp/ResponsiveAnalogRead_source.zip
+    - unzip /tmp/ResponsiveAnalogRead_source.zip -d /tmp/
 
-    - wget https://github.com/z3t0/Arduino-IRremote/archive/master.zip -O /tmp/lib/Arduino-IRremote_source.zip
-    - unzip /tmp/lib/Arduino-IRremote_source.zip -d /tmp/lib/
+    - wget https://github.com/z3t0/Arduino-IRremote/archive/master.zip -O /tmp/Arduino-IRremote_source.zip
+    - unzip /tmp/Arduino-IRremote_source.zip -d /tmp/
 
 script:
-    - platformio ci --lib="/tmp/lib/arduino_midi_library-master" --lib="/tmp/lib/Bounce2-master" --lib="/tmp/lib/MD_Menu-master" --lib="/tmp/lib/MD_UISwitch-master" --lib="/tmp/lib/ResponsiveAnalogRead-master" --lib="/tmp/lib/Arduino-IRremote-master" --verbose --project-conf=/tmp/platformio.ini
+    - platformio ci --lib="/tmp/arduino_midi_library-master" --lib="/tmp/Bounce2-master" --lib="/tmp/MD_Menu-master" --lib="/tmp/MD_UISwitch-master" --lib="/tmp/ResponsiveAnalogRead-master" --lib="/tmp/Arduino-IRremote-master" --project-conf=/tmp/platformio.ini
