@@ -25,4 +25,4 @@ install:
                                 https://github.com/z3t0/Arduino-IRremote.git
 
 script:
-    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS
+    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --verbose
