@@ -1,1 +1,28 @@
+language: python
+python:
+    - "2.7"
 
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+    directories:
+        - "~/.platformio"
+
+env:
+    - PLATFORMIO_CI_SRC=Pedalino PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560 --project-option='lib_ignore=RobotIRremote'"
+    - PLATFORMIO_CI_SRC=PedalinoESP8266 PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
+
+install:
+    - pip install -U platformio
+    - platformio update
+    - platformio lib -g install 136
+                                https://github.com/lathoub/Arduino-AppleMIDI-Library.git
+                                https://github.com/FortySevenEffects/arduino_midi_library.git
+                                https://github.com/thomasfredericks/Bounce2.git
+                                https://github.com/dxinteractive/ResponsiveAnalogRead.git
+                                https://github.com/MajicDesigns/MD_Menu.git
+                                https://github.com/MajicDesigns/MD_UISwitch.git
+                                https://github.com/z3t0/Arduino-IRremote.git
+
+script:
+    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire"
