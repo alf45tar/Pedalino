@@ -29,13 +29,13 @@ script:
 
 before_deploy:
       # Set up git user name and tag this commit
-      - git config --local user.name "alf45tar"
+      #- git config --local user.name "alf45tar"
       #- git config --local user.email "YOUR GIT USER EMAIL"
-      - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
+      #- git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
    
 deploy:
     provider: releases
-    api_key: "GITHUB OAUTH TOKEN"
+    #api_key: "GITHUB OAUTH TOKEN"
     file: "firmware.elf"
     skip_cleanup: true
     on:
