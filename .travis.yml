@@ -34,9 +34,9 @@ before_deploy:
       - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
    
 deploy:
-    provider: releases
-    #api_key: "GITHUB OAUTH TOKEN"
-    file: "firmware.elf"
-    skip_cleanup: true
-    on:
-        tags: true
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  keep-history: true
+  on:
+    branch: master
