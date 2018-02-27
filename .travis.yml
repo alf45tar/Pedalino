@@ -27,12 +27,6 @@ install:
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire"
 
-before_deploy:
-      # Set up git user name and tag this commit
-      - git config --local user.name "alf45tar"
-      - git config --local user.email "35426671+alf45tar@users.noreply.github.com"
-      - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
-   
 deploy:
   provider: pages
   skip-cleanup: true
