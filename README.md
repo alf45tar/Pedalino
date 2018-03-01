@@ -14,9 +14,9 @@ High customizable MIDI controller for guitarists and more.
 - MIDI routing
 
 ## Applications
--
--
--
+- Change preset to your favourite guitar rig
+- Transform legacy MIDI equipment to USB MIDI class-compliant device
+- Connect Windows PC to macOS and iOS devices via AppleMIDI
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
