@@ -13,6 +13,11 @@ High customizable MIDI controller for guitarists and more.
 - MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 - MIDI routing
 
+## Applications
+-
+-
+-
+
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
