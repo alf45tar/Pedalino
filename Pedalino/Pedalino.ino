@@ -60,6 +60,12 @@
 #define PED_USBMIDI         0
 #define PED_MIDIOUT         1
 #define PED_APPLEMIDI       2   // also known as rtpMIDI protocol
+#define PED_MIDI_ALL_INT    3
+
+#define PED_LEGACY_MIDI_OUT   0
+#define PED_LEGACY_MIDI_IN    1
+#define PED_LEGACY_MIDI_THRU  2
+
 
 #define PED_STA             0   // wifi client station with smart config
 #define PED_AP              1   // wifi access point
@@ -99,13 +105,14 @@ struct pedal {
 
 bank   banks[BANKS][PEDALS];     // Banks Setup
 pedal  pedals[PEDALS];           // Pedals Setup
-byte   currentBank      = 0;
-byte   currentPedal     = 0;
-byte   currentInterface = PED_USBMIDI;
-byte   currentWiFiMode  = PED_AP;
-byte   lastUsedSwitch   = 0;
-byte   lastUsedPedal    = 0;
-bool   selectBank       = true;
+byte   currentBank            = 0;
+byte   currentPedal           = 0;
+byte   currentInterface       = PED_USBMIDI;
+byte   currentLegacyMIDIPort  = PED_LEGACY_MIDI_OUT;
+byte   currentWiFiMode        = PED_AP;
+byte   lastUsedSwitch         = 0;
+byte   lastUsedPedal          = 0;
+bool   selectBank             = true;
 
 
 // MIDI interfaces definition
@@ -119,6 +126,8 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial,  USB_MIDI);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, SerialMIDISettings);
 
+#include "MIDIRouting.h"
+
 
 //
 MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
@@ -130,7 +139,8 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 
 // LCD display definitions
-
+//
+// New LiquidCrystal library https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home is 5 times faster than Arduino standard LCD library
 #include <LiquidCrystal.h>
 
 #define  LCD_ROWS  2
@@ -839,8 +849,9 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MAX            32
 #define II_RESPONSECURVE  33
 #define II_INTERFACE      34
-#define II_WIFI           35
-#define II_DEFAULT        36
+#define II_LEGACY_MIDI    35
+#define II_WIFI           36
+#define II_DEFAULT        37
 
 // Global menu data and definitions
 
@@ -852,7 +863,7 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
   { M_ROOT,       SIGNATURE,      10, 12, 0 },
   { M_BANKSETUP,  "Banks Setup",  20, 34, 0 },
   { M_PEDALSETUP, "Pedals Setup", 40, 48, 0 },
-  { M_PROFILE,    "Options",      50, 52, 0 },
+  { M_PROFILE,    "Options",      50, 53, 0 },
 };
 
 // Menu Items ----------
@@ -880,9 +891,10 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 47, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 48, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
   // Options
-  { 50, "Interface",       MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 51, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
-  { 52, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 50, "OutputInterface", MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 51, "LegacyMIDIPort",  MD_Menu::MNU_INPUT, II_LEGACY_MIDI },
+  { 52, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
+  { 53, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -892,7 +904,8 @@ const PROGMEM char listPedalMode[] =       "   Momentary  |     Latch    |    An
 const PROGMEM char listPedalPressMode[] =  "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[] =        " No|Yes";
 const PROGMEM char listResponseCurve[] =   "    Linear    |      Log     |   Anti-Log   ";
-const PROGMEM char listOutputInterface[] = "     USB      |   MIDI OUT   |   AppleMIDI   ";
+const PROGMEM char listOutputInterface[] = "     USB      |   MIDI OUT   |   AppleMIDI  |      All     ";
+const PROGMEM char listLegacyMIDI[]      = "   MIDI OUT   |   MIDI IN    |   MIDI THRU  ";
 const PROGMEM char listWiFiMode[] =        " Smart Config | Access Point ";
 #include "ControlChange.h"
 #include "NoteNumbers.h"
@@ -919,6 +932,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MAX,           ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
   { II_RESPONSECURVE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listResponseCurve },
   { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listOutputInterface },
+  { II_LEGACY_MIDI,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listLegacyMIDI },
   { II_WIFI,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listWiFiMode },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
@@ -1018,6 +1032,11 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         currentInterface = vBuf.value;
 
       }
+      break;
+
+    case II_LEGACY_MIDI:
+      if (bGet) vBuf.value = currentLegacyMIDIPort;
+      else currentLegacyMIDIPort = vBuf.value;
       break;
 
     case II_WIFI:
@@ -1317,6 +1336,7 @@ void setup(void)
   DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
   RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
 #endif
+  midi_routing_start();
 
   read_eeprom();
   midi_setup();
