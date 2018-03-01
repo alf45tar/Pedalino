@@ -11,6 +11,7 @@ High customizable MIDI controller for guitarists and more.
 - AppleMIDI (aka RTP-MIDI) via WiFi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
+- MIDI routing
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
@@ -78,7 +79,7 @@ Tested apps for configure SSID and password are:
 
 Boot procedure
 - On power on Pedalino will try to connect to the last know access point (fast double flashing led)
-- If it cannot connect to the last used access point it enters into Smart Config mode after 15 seconds (slow flashing led)
+- If it cannot connect to the last used access point within 15 seconds it enters into Smart Config mode (slow flashing led)
 - Start one of the tested apps to configure SSID and password 
 - If it doesn't receive any SSID and password during the next 30 seconds it switch to AP mode (led off)
 - In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required. Led is off until a client connect to AP.
