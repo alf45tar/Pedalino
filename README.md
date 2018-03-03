@@ -8,7 +8,7 @@ High customizable MIDI controller for guitarists and more.
 
 - USB MIDI class-compliant device
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
-- AppleMIDI (aka RTP-MIDI) via WiFi
+- AppleMIDI (aka RTP-MIDI) via Wi-Fi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 - MIDI routing
@@ -21,7 +21,7 @@ High customizable MIDI controller for guitarists and more.
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
-- MIDI output via USB MIDI, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via WiFi
+- MIDI output via USB MIDI, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
@@ -75,7 +75,8 @@ More information can be obtained in the following links:
 ## How to connect Pedalino to a WiFi network
 
 AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
-Pedalino is a session listener over WiFi. It does not support session initiation functionnalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
+
+Pedalino is a session listener over Wi-Fi. It does not support session initiation functionnalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
 
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
 
