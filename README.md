@@ -75,6 +75,7 @@ More information can be obtained in the following links:
 ## How to connect Pedalino to a WiFi network
 
 AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
+Pedalino is a session listener over WiFi. It does not support session initiation functionnalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
 
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
 
@@ -83,13 +84,16 @@ Tested apps for configure SSID and password are:
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
 Boot procedure
-- On power on Pedalino will try to connect to the last know access point (fast double flashing led)
-- If it cannot connect to the last used access point within 15 seconds it enters into Smart Config mode (slow flashing led)
+- On power on Pedalino will try to connect to the last know access point (double blinking led)
+- If it cannot connect to the last used access point within 15 seconds it enters into Smart Config mode (slow blinking led)
 - Start one of the tested apps to configure SSID and password 
 - If it doesn't receive any SSID and password during the next 30 seconds it switch to AP mode (led off)
 - In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required. Led is off until a client connect to AP.
-- Led is on when connected (Pedalino is connected to an AP or a client is connected to Pedalino AP)
+- Led is on when Pedalino is connected to an AP or a client is connected to Pedalino AP.
+- Led will start fast blinking when Pedalino is partecipating to an AppleMIDI session. 
 - Reboot Pedalino to restart the procedure.
+
+You can reset the last know access point via menu.
 
 ## Pre-compiled source into hex files
 
