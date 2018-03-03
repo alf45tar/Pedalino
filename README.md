@@ -33,7 +33,7 @@ High customizable MIDI controller for guitarists and more.
 - Firmware update via HTTP (http://pedalino/update)
 
 ## Bill of materials
-- Arduino Mega 2560 R3 or equivalent (a lite version for Arduino Uno R3 is on the way)
+- Arduino Mega 2560 R3 or equivalent
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
 - ESP8266 ESP-01 1M WiFi module
 - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
@@ -104,10 +104,9 @@ Uploading .hex file to Arduino it is very easy and straithforward with [Xloader]
 
 ## ToDo
 
-- [ ] Test lite version for Arduino Uno R3
+- [ ] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
 - [ ] Bluetooth MIDI
-- [ ] MIDI routing
 
 # Copyright
 Copyright 2017-2018 alfa45star
