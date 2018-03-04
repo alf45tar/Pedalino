@@ -8,13 +8,13 @@
 // https://github.com/thomasfredericks/Bounce2/wiki
 //
 // "LOCK-OUT" debounce method
-#define BOUNCE_LOCK_OUT
+//#define BOUNCE_LOCK_OUT
 // "BOUNCE_WITH_PROMPT_DETECTION" debounce method
 //#define BOUNCE_WITH_PROMPT_DETECTION
 
 #include <Bounce2.h>
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #define SIGNATURE "Pedalino(TM)"
 
@@ -110,8 +110,8 @@ byte   currentPedal           = 0;
 byte   currentInterface       = PED_USBMIDI;
 byte   currentLegacyMIDIPort  = PED_LEGACY_MIDI_OUT;
 byte   currentWiFiMode        = PED_AP;
-byte   lastUsedSwitch         = 0;
-byte   lastUsedPedal          = 0;
+byte   lastUsedSwitch         = 0xFF;
+byte   lastUsedPedal          = 0xFF;
 bool   selectBank             = true;
 
 
@@ -232,7 +232,7 @@ void load_factory_default()
 //
 //  Create new MIDI controllers setup
 //
-void midi_setup()
+void controller_setup()
 {
   // Delete previous setup
   for (byte i = 0; i < PEDALS; i++) {
@@ -240,6 +240,9 @@ void midi_setup()
     delete pedals[i].footSwitch;
     delete pedals[i].analogPedal;
   }
+
+  lastUsedSwitch = 0xFF;
+  lastUsedPedal  = 0xFF;
 
 #ifdef DEBUG_PEDALINO
   Serial.print("MIDI Interface ");
@@ -347,6 +350,7 @@ void midi_setup()
           pedals[i].analogPedal->setActivityThreshold(6.0);
           pedals[i].analogPedal->setAnalogResolution(MIDI_RESOLUTION);        // 7-bit MIDI resolution
           pedals[i].analogPedal->enableEdgeSnap();                            // ensures that values at the edges of the spectrum can be easily reached when sleep is enabled
+          if (lastUsedPedal == 0xFF) lastUsedPedal = i;
         }
         else
           pedals[i].footSwitch = new MD_UISwitch_Analog(PIN_A0 + i, kt, ARRAY_SIZE(kt));
@@ -367,7 +371,7 @@ void midi_send(byte i, byte value, bool on_off = true )
 
       if (on_off) {
 #ifdef DEBUG_PEDALINO
-        Serial.print("NOTE ON     Note ");
+        Serial.print("     NOTE ON     Note ");
         Serial.print(banks[currentBank][i].midiCode);
         Serial.print("     Velocity ");
         Serial.print(value);
@@ -389,7 +393,7 @@ void midi_send(byte i, byte value, bool on_off = true )
       }
       else {
 #ifdef DEBUG_PEDALINO
-        Serial.print("NOTE OFF    Note ");
+        Serial.print("     NOTE OFF    Note ");
         Serial.print(banks[currentBank][i].midiCode);
         Serial.print("     Velocity ");
         Serial.print(value);
@@ -414,7 +418,7 @@ void midi_send(byte i, byte value, bool on_off = true )
     case PED_CONTROL_CHANGE:
 
 #ifdef DEBUG_PEDALINO
-      Serial.print("CONTROL CHANGE     Code ");
+      Serial.print("     CONTROL CHANGE     Code ");
       Serial.print(banks[currentBank][i].midiCode);
       Serial.print("     Value ");
       Serial.print(value);
@@ -438,7 +442,7 @@ void midi_send(byte i, byte value, bool on_off = true )
     case PED_PROGRAM_CHANGE:
 
 #ifdef DEBUG_PEDALINO
-      Serial.print("PROGRAM CHANGE     Program ");
+      Serial.print("     PROGRAM CHANGE     Program ");
       Serial.print(banks[currentBank][i].midiCode);
       Serial.print("     Channel ");
       Serial.println(banks[currentBank][i].midiChannel);
@@ -461,7 +465,7 @@ void midi_send(byte i, byte value, bool on_off = true )
 
       int bend = value << 4;       // make it a 14-bit number (pad with 4 zeros)
 #ifdef DEBUG_PEDALINO
-      Serial.print("PITCH BEND     Value ");
+      Serial.print("     PITCH BEND     Value ");
       Serial.print(bend);
       Serial.print("     Channel ");
       Serial.println(banks[currentBank][i].midiChannel);
@@ -483,9 +487,9 @@ void midi_send(byte i, byte value, bool on_off = true )
 }
 
 //
-//  MIDI messages routing
+//  MIDI messages refresh
 //
-void midi_routing()
+void midi_refresh()
 {
   MD_UISwitch::keyResult_t k;
   unsigned int input;
@@ -497,57 +501,62 @@ void midi_routing()
 
         case PED_MOMENTARY:
 
-          if (pedals[i].debouncer->update())                                        // pin state changed
-          {
-            input = pedals[i].debouncer->read();                                    // reads the updated pin state
-            if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
-            value = map_digital(i, input);                                          // apply the digital map function to the value
+          switch (pedals[i].pressMode) {
+
+            case PED_PRESS_1:
+              if (pedals[i].debouncer->update())                                        // pin state changed
+              {
+                input = pedals[i].debouncer->read();                                    // reads the updated pin state
+                if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
+                value = map_digital(i, input);                                          // apply the digital map function to the value
 
 #ifdef DEBUG_PEDALINO
-            Serial.print("Pedal ");
-            if (i < 9) Serial.print(" ");
-            Serial.print(i + 1);
-            Serial.print("     raw ");
-            Serial.print(input);
-            Serial.print(" -> ");
-            Serial.print(value);
-            Serial.print(" sent     ");
+                Serial.print("Pedal ");
+                if (i < 9) Serial.print(" ");
+                Serial.print(i + 1);
+                Serial.print("     raw ");
+                Serial.print(input);
+                Serial.print(" -> ");
+                Serial.print(value);
+                Serial.println(" sent     ");
 #endif
-            switch (pedals[i].pressMode) {
-
-              case PED_PRESS_1:
                 midi_send(i, 127, value == LOW);
+                pedals[i].pedalValue = value;
+                pedals[i].lastUpdate = millis();
+                lastUsedSwitch = i;
                 break;
+              }
+              break;
 
-              case PED_PRESS_1_2:
-              case PED_PRESS_1_L:
-              case PED_PRESS_1_2_L:
-              case PED_PRESS_2:
-              case PED_PRESS_2_L:
-              case PED_PRESS_L:
-                if (pedals[i].footSwitch == nullptr) continue;      // sanity check
-                k = pedals[i].footSwitch->read();
-                switch (k) {
+            case PED_PRESS_1_2:
+            case PED_PRESS_1_L:
+            case PED_PRESS_1_2_L:
+            case PED_PRESS_2:
+            case PED_PRESS_2_L:
+            case PED_PRESS_L:
+              if (pedals[i].footSwitch == nullptr) continue;      // sanity check
+              k = pedals[i].footSwitch->read();
+              switch (k) {
 
-                  case MD_UISwitch::KEY_PRESS:
-                    midi_send(i, 127);
-                    midi_send(i, 127, false);
-                    break;
+                case MD_UISwitch::KEY_PRESS:
+                  midi_send(i, 127);
+                  midi_send(i, 127, false);
+                  break;
 
-                  case MD_UISwitch::KEY_DPRESS:
-                    midi_send(i, 63);
-                    midi_send(i, 63, false);
-                    break;
+                case MD_UISwitch::KEY_DPRESS:
+                  midi_send(i, 63);
+                  midi_send(i, 63, false);
+                  break;
 
-                  case MD_UISwitch::KEY_LONGPRESS:
-                    midi_send(i, 0);
-                    midi_send(i, 0, false);
-                    break;
-                }
-            }
-            pedals[i].pedalValue = value;
-            pedals[i].lastUpdate = millis();
-            lastUsedSwitch = i;
+                case MD_UISwitch::KEY_LONGPRESS:
+                  midi_send(i, 0);
+                  midi_send(i, 0, false);
+                  break;
+              }
+
+              pedals[i].pedalValue = value;
+              pedals[i].lastUpdate = millis();
+              lastUsedSwitch = i;
           }
           break;
 
@@ -572,7 +581,7 @@ void midi_routing()
             Serial.print(input);
             Serial.print("->");
             Serial.print(value);
-            Serial.print(" sent      ");
+            Serial.println(" sent      ");
 #endif
             midi_send(i, value, value > 63);
             pedals[i].pedalValue = value;
@@ -671,8 +680,10 @@ void screen_update(bool force = false) {
     memset(buf, 0, sizeof(buf));
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
     //sprintf(&buf[strlen(buf)], "%2x%2x%2x", currentBank + 1, banks[currentBank][lastUsedSwitch].midiChannel, banks[currentBank][lastUsedSwitch].midiCode);
-    strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue, 0, MIDI_RESOLUTION - 1, 0, 10));
-    strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue, 0, MIDI_RESOLUTION - 1, 0, 10));
+    if (lastUsedPedal >= 0 && lastUsedPedal < PEDALS) {
+      strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue, 0, MIDI_RESOLUTION - 1, 0, 10));
+      strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue, 0, MIDI_RESOLUTION - 1, 0, 10));
+    }
     if (force || strcmp(screen2, buf) != 0) {
       memset(screen2, 0, LCD_COLS + 1);
       strncpy(screen2, buf, LCD_COLS);
@@ -692,7 +703,7 @@ char foot_char (byte footswitch)
 {
   footswitch = constrain(footswitch, 0, PEDALS - 1);
   if (pedals[footswitch].function != PED_MIDI) return ' ';
-  if (footswitch == lastUsedPedal || pedals[footswitch].pedalValue == LOW) return bar1[footswitch % 10];
+  if (footswitch == lastUsedPedal || pedals[footswitch].mode == PED_MOMENTARY && pedals[footswitch].pedalValue == LOW) return bar1[footswitch % 10];
   return ' ';
 }
 
@@ -1043,7 +1054,14 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = currentWiFiMode;
       else {
         currentWiFiMode = vBuf.value;
-
+        switch (currentWiFiMode) {
+          case PED_STA:
+            RTP_MIDI.sendSysEx(5, "+STA");
+            break;
+          case PED_AP:
+            RTP_MIDI.sendSysEx(4, "+AP");
+            break;
+        }
       }
       break;
 
@@ -1066,7 +1084,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
   if (!bGet) {
     update_eeprom();
-    midi_setup();
+    controller_setup();
   }
 
   return (r);
@@ -1295,7 +1313,7 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
     if (selectBank) {
       currentBank = numberPressed - 1;
       update_eeprom();
-      midi_setup();
+      controller_setup();
     }
     else {
       pedals[numberPressed - 1].pedalValue = LOW;
@@ -1327,19 +1345,18 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
 void setup(void)
 {
-
+  // Initiate serial MIDI communications, listen to all channels
+  midi_routing_start();
 #ifdef DEBUG_PEDALINO
   Serial.begin(115200);
 #else
-  // Initiate serial MIDI communications, listen to all channels
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
+#endif
   DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
   RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
-#endif
-  midi_routing_start();
 
   read_eeprom();
-  midi_setup();
+  controller_setup();
 
   irrecv.enableIRIn();                        // Start the IR receiver
   irrecv.blink13(true);
@@ -1378,7 +1395,7 @@ void loop(void)
   M.runMenu();   // just run the menu code
 
   // Check whether the input has changed since last time, if so, send the new value over MIDI
-  midi_routing();
+  midi_refresh();
 }
 
 
