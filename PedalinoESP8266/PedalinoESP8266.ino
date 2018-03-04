@@ -10,7 +10,7 @@
 #include <MIDI.h>
 #include <AppleMidi.h>
 
-#undef PEDALINO_DEBUG
+//#define PEDALINO_DEBUG
 
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
@@ -21,14 +21,20 @@
 
 const char host[]     = "pedalino";
 
+WiFiEventHandler        stationModeConnectedHandler;
+WiFiEventHandler        stationModeDisconnectedHandler;
+WiFiEventHandler        stationConnectedHandler;
+WiFiEventHandler        stationDisconnectedHandler;
+
 ESP8266WebServer        httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
-
 
 // WiFi MIDI interface to comunicate with AppleMIDI/RTP-MDI devices
 
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, AppleMIDI); // see definition in AppleMidi_Defs.h
 
+bool          appleMidiConnected = false;
+unsigned long lastOn             = 0;
 
 // Serial MIDI interface to comunicate with Arduino
 
@@ -80,6 +86,26 @@ void handlePitchBend(byte channel, int bend)
 void handleSystemExclusive(byte* array, unsigned size)
 {
   AppleMIDI.sysEx(array, size);
+  // SysEx starts with 0xF0 and ends with 0xF7
+  if (array[2] == 'S') {
+    // Reset currently used SSID / password stored in flash
+    WiFi.persistent(true);
+    switch (WiFi.getMode()) {
+      case WIFI_STA:
+        WiFi.disconnect();
+        break;
+      case WIFI_AP:
+        WiFi.softAPdisconnect();
+        break;
+    }
+    //ESP.restart();
+    WiFi.persistent(false);
+    wifi_connect();
+  }
+  if (array[2] == 'A') {
+    ap_mode_start();
+  }
+
 }
 
 void handleTimeCodeQuarterFrame(byte data)
@@ -137,12 +163,12 @@ void handleSystemReset(void)
 
 void OnAppleMidiConnected(uint32_t ssrc, char* name)
 {
-  //isConnected  = true;
+  appleMidiConnected  = true;
 }
 
 void OnAppleMidiDisconnected(uint32_t ssrc)
 {
-  //isConnected  = false;
+  appleMidiConnected  = false;
 }
 
 void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
@@ -234,14 +260,49 @@ void OnAppleMidiReceiveReset(void)
   MIDI.sendRealTime(midi::SystemReset);
 }
 
-
-void ap_mode_start()
+void onConnected(const WiFiEventStationModeConnected& evt)
 {
-  WiFi.mode(WIFI_AP);
-  boolean result = WiFi.softAP("Pedalino");
+  BUILTIN_LED_ON();
+}
+
+void onDisconnected(const WiFiEventStationModeDisconnected& evt)
+{
   BUILTIN_LED_OFF();
 }
 
+void onStationConnected(const WiFiEventSoftAPModeStationConnected& evt)
+{
+  WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+}
+
+void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected& evt)
+{
+  WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+}
+
+void ap_mode_start()
+{
+  BUILTIN_LED_OFF();
+
+  WiFi.mode(WIFI_AP);
+  boolean result = WiFi.softAP("Pedalino");
+
+  // Call "onStationConnected" each time a station connects
+  //stationConnectedHandler = WiFi.onSoftAPModeStationConnected(&onStationConnected);
+
+  // Call "onStationDisconnected" each time a station disconnects
+  //stationDisconnectedHandler = WiFi.onSoftAPModeStationDisconnected(&onStationDisconnected);
+}
+
+void ap_mode_stop()
+{
+  if (WiFi.getMode() == WIFI_AP) {
+    stationConnectedHandler    = WiFiEventHandler();
+    stationDisconnectedHandler = WiFiEventHandler();
+    WiFi.softAPdisconnect();
+    BUILTIN_LED_OFF();
+  }
+}
 
 bool smart_config()
 {
@@ -304,6 +365,13 @@ bool auto_reconnect()
 #endif
 
   WiFi.mode(WIFI_STA);
+
+  // Call "onConnected" when connected to an AP
+  //stationModeConnectedHandler = WiFi.onStationModeConnected(&onConnected);
+
+  // Call "onDisconnected" when disconnected from an AP
+  //stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onDisconnected);
+
   for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
     status_blink();
     delay(100);
@@ -313,6 +381,8 @@ bool auto_reconnect()
     Serial.print(".");
 #endif
   }
+
+  WiFi.status() == WL_CONNECTED ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
 
 #ifdef PEDALINO_DEBUG
   if (WiFi.status() == WL_CONNECTED)
@@ -329,10 +399,15 @@ void wifi_connect()
   if (!auto_reconnect())       // WIFI_CONNECT_TIMEOUT seconds to reconnect to last used access point
     if (smart_config())        // SMART_CONFIG_TIMEOUT seconds to receive SmartConfig parameters
       auto_reconnect();        // WIFI_CONNECT_TIMEOUT seconds to connect to SmartConfig access point
-  if (WiFi.status() != WL_CONNECTED)
+  if (WiFi.status() != WL_CONNECTED) {
+    //stationModeConnectedHandler    = WiFiEventHandler();  // disconnect station mode handler
+    //stationModeDisconnectedHandler = WiFiEventHandler();  // disconnect station mode handler
     ap_mode_start();          // switch to AP mode until next reboot
+  }
   else
   {
+    // connected to an AP
+
     WiFi.hostname(host);
 
 #ifdef PEDALINO_DEBUG
@@ -366,7 +441,7 @@ void wifi_connect()
 #ifdef PEDALINO_DEBUG
     Serial.println("mDNS responder started");
 #endif
-    MDNS.addService("apple-midi", "udp", 5004);
+    //MDNS.addService("apple-midi", "udp", 5004);
   }
 
   // Start firmawre update via HTTP (connect to http://pedalino/update)
@@ -449,6 +524,8 @@ void setup()
   Serial.println("*** Pedalino(TM) ***");
 #endif
 
+  // Write SSID/password to flash only if currently used values do not match what is already stored in flash
+  WiFi.persistent(false);
   wifi_connect();
 
 #ifdef PEDALINO_DEBUG
@@ -460,23 +537,28 @@ void setup()
 
 void loop()
 {
-  switch (WiFi.getMode()) {
-    case WIFI_STA:
-      if (WiFi.isConnected())
-        BUILTIN_LED_ON();
-      else
-        BUILTIN_LED_OFF();
-      break;
-    case WIFI_AP:
-      if (WiFi.softAPgetStationNum() > 0)
-        BUILTIN_LED_ON();
-      else
-        BUILTIN_LED_OFF();
-      break;
-    default:
+  if (appleMidiConnected)
+    // led fast blinking (5 times per second)
+    if (millis() - lastOn > 200) {
+      BUILTIN_LED_ON();
+      lastOn = millis();
+    }
+    else if (millis() - lastOn > 100) {
       BUILTIN_LED_OFF();
-      break;
-  }
+    }
+    else
+      // led always on if connected to an AP or one or more client connected the the internal AP
+      switch (WiFi.getMode()) {
+        case WIFI_STA:
+          WiFi.isConnected() ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+          break;
+        case WIFI_AP:
+          WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+          break;
+        default:
+          BUILTIN_LED_OFF();
+          break;
+      }
 
   // Listen to incoming messages from Arduino
   MIDI.read();
