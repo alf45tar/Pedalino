@@ -8,13 +8,13 @@
 // https://github.com/thomasfredericks/Bounce2/wiki
 //
 // "LOCK-OUT" debounce method
-//#define BOUNCE_LOCK_OUT
+#define BOUNCE_LOCK_OUT
 // "BOUNCE_WITH_PROMPT_DETECTION" debounce method
 //#define BOUNCE_WITH_PROMPT_DETECTION
 
 #include <Bounce2.h>
 
-#define DEBUG_PEDALINO
+//#define DEBUG_PEDALINO
 
 #define SIGNATURE "Pedalino(TM)"
 
@@ -417,71 +417,77 @@ void midi_send(byte i, byte value, bool on_off = true )
 
     case PED_CONTROL_CHANGE:
 
+      if (on_off) {
 #ifdef DEBUG_PEDALINO
-      Serial.print("     CONTROL CHANGE     Code ");
-      Serial.print(banks[currentBank][i].midiCode);
-      Serial.print("     Value ");
-      Serial.print(value);
-      Serial.print("     Channel ");
-      Serial.println(banks[currentBank][i].midiChannel);
+        Serial.print("     CONTROL CHANGE     Code ");
+        Serial.print(banks[currentBank][i].midiCode);
+        Serial.print("     Value ");
+        Serial.print(value);
+        Serial.print("     Channel ");
+        Serial.println(banks[currentBank][i].midiChannel);
 #else
-      switch (currentInterface) {
-        case PED_USBMIDI:
-          USB_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-          break;
-        case PED_MIDIOUT:
-          DIN_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-          break;
-        case PED_APPLEMIDI:
-          RTP_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-          break;
-      }
+        switch (currentInterface) {
+          case PED_USBMIDI:
+            USB_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+            break;
+          case PED_MIDIOUT:
+            DIN_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+            break;
+          case PED_APPLEMIDI:
+            RTP_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+            break;
+        }
 #endif
+      }
       break;
 
     case PED_PROGRAM_CHANGE:
 
+      if (on_off) {
 #ifdef DEBUG_PEDALINO
-      Serial.print("     PROGRAM CHANGE     Program ");
-      Serial.print(banks[currentBank][i].midiCode);
-      Serial.print("     Channel ");
-      Serial.println(banks[currentBank][i].midiChannel);
+        Serial.print("     PROGRAM CHANGE     Program ");
+        Serial.print(banks[currentBank][i].midiCode);
+        Serial.print("     Channel ");
+        Serial.println(banks[currentBank][i].midiChannel);
 #else
-      switch (currentInterface) {
-        case PED_USBMIDI:
-          USB_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-          break;
-        case PED_MIDIOUT:
-          DIN_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-          break;
-        case PED_APPLEMIDI:
-          RTP_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-          break;
-      }
+        switch (currentInterface) {
+          case PED_USBMIDI:
+            USB_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_MIDIOUT:
+            DIN_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+          case PED_APPLEMIDI:
+            RTP_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+            break;
+        }
 #endif
+      }
       break;
 
     case PED_PITCH_BEND:
 
-      int bend = value << 4;       // make it a 14-bit number (pad with 4 zeros)
+      if (on_off) {
+        int bend = value << 4;       // make it a 14-bit number (pad with 4 zeros)
 #ifdef DEBUG_PEDALINO
-      Serial.print("     PITCH BEND     Value ");
-      Serial.print(bend);
-      Serial.print("     Channel ");
-      Serial.println(banks[currentBank][i].midiChannel);
+        Serial.print("     PITCH BEND     Value ");
+        Serial.print(bend);
+        Serial.print("     Channel ");
+        Serial.println(banks[currentBank][i].midiChannel);
 #else
-      switch (currentInterface) {
-        case PED_USBMIDI:
-          USB_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-          break;
-        case PED_MIDIOUT:
-          DIN_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-          break;
-        case PED_APPLEMIDI:
-          RTP_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-          break;
-      }
+        switch (currentInterface) {
+          case PED_USBMIDI:
+            USB_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
+            break;
+          case PED_MIDIOUT:
+            DIN_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
+            break;
+          case PED_APPLEMIDI:
+            RTP_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
+            break;
+        }
 #endif
+      }
       break;
   }
 }
@@ -520,7 +526,8 @@ void midi_refresh()
                 Serial.print(value);
                 Serial.println(" sent     ");
 #endif
-                midi_send(i, 127, value == LOW);
+                (value == LOW) ? midi_send(i, 127) : midi_send(i, 0);
+
                 pedals[i].pedalValue = value;
                 pedals[i].lastUpdate = millis();
                 lastUsedSwitch = i;
@@ -583,7 +590,7 @@ void midi_refresh()
             Serial.print(value);
             Serial.println(" sent      ");
 #endif
-            midi_send(i, value, value > 63);
+            midi_send(i, value);
             pedals[i].pedalValue = value;
             pedals[i].lastUpdate = millis();
             lastUsedPedal = i;
