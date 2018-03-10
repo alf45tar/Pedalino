@@ -441,7 +441,7 @@ void wifi_connect()
 #ifdef PEDALINO_DEBUG
     Serial.println("mDNS responder started");
 #endif
-    //MDNS.addService("apple-midi", "udp", 5004);
+    MDNS.addService("apple-midi", "udp", 5004);
   }
 
   // Start firmawre update via HTTP (connect to http://pedalino/update)
