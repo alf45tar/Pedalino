@@ -91,7 +91,14 @@ struct pedal {
                                              1 = latch
                                              2 = analog
                                              3 = jog wheel */
-  byte                   pressMode;
+  byte                   pressMode;       /* 0 = single click
+                                             1 = double click
+                                             2 = long click
+                                             3 = single and double click
+                                             4 = single and long click
+                                             5 = single, double and long click
+                                             6 = double and long click
+                                          */
   byte                   invertPolarity;
   byte                   mapFunction;
   int                    expZero;
@@ -377,7 +384,7 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print(value);
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
-#else
+#endif
         switch (currentInterface) {
           case PED_USBMIDI:
             USB_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
@@ -389,7 +396,6 @@ void midi_send(byte i, byte value, bool on_off = true )
             RTP_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
             break;
         }
-#endif
       }
       else {
 #ifdef DEBUG_PEDALINO
@@ -399,7 +405,7 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print(value);
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
-#else
+#endif
         switch (currentInterface) {
           case PED_USBMIDI:
             USB_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
@@ -411,7 +417,6 @@ void midi_send(byte i, byte value, bool on_off = true )
             RTP_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
             break;
         }
-#endif
       }
       break;
 
@@ -425,7 +430,7 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print(value);
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
-#else
+#endif
         switch (currentInterface) {
           case PED_USBMIDI:
             USB_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
@@ -437,7 +442,6 @@ void midi_send(byte i, byte value, bool on_off = true )
             RTP_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
             break;
         }
-#endif
       }
       break;
 
@@ -449,7 +453,7 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print(banks[currentBank][i].midiCode);
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
-#else
+#endif
         switch (currentInterface) {
           case PED_USBMIDI:
             USB_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
@@ -461,7 +465,6 @@ void midi_send(byte i, byte value, bool on_off = true )
             RTP_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
             break;
         }
-#endif
       }
       break;
 
@@ -474,7 +477,7 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print(bend);
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
-#else
+#endif
         switch (currentInterface) {
           case PED_USBMIDI:
             USB_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
@@ -486,7 +489,6 @@ void midi_send(byte i, byte value, bool on_off = true )
             RTP_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
             break;
         }
-#endif
       }
       break;
   }
@@ -1352,15 +1354,18 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
 void setup(void)
 {
-  // Initiate serial MIDI communications, listen to all channels
-  midi_routing_start();
+  // Initiate serial MIDI communications, listen to all channels and turn Thru off
+  //midi_routing_start();
 #ifdef DEBUG_PEDALINO
   Serial.begin(115200);
 #else
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
+  USB_MIDI.turnThruOff();
 #endif
   DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
+  DIN_MIDI.turnThruOff();
   RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
+  RTP_MIDI.turnThruOff();
 
   read_eeprom();
   controller_setup();
@@ -1403,6 +1408,10 @@ void loop(void)
 
   // Check whether the input has changed since last time, if so, send the new value over MIDI
   midi_refresh();
+  midi_routing();
+  //USB_MIDI.read();
+  //DIN_MIDI.read();
+  //RTP_MIDI.read();
 }
 
 

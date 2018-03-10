@@ -333,7 +333,7 @@ void OnAppleMidiReceiveReset(void)
 void midi_routing_start()
 {
   // Connect the handle function called upon reception of a MIDI message from USB MIDI interface
-  
+
   USB_MIDI.setHandleNoteOn(OnUsbMidiNoteOn);
   USB_MIDI.setHandleNoteOff(OnUsbMidiNoteOff);
   USB_MIDI.setHandleAfterTouchPoly(OnUsbMidiAfterTouchPoly);
@@ -354,7 +354,7 @@ void midi_routing_start()
   USB_MIDI.setHandleSystemReset(OnUsbMidiSystemReset);
 
   // Connect the handle function called upon reception of a MIDI message from legacy MIDI interface
-  
+
   DIN_MIDI.setHandleNoteOn(OnDinMidiNoteOn);
   DIN_MIDI.setHandleNoteOff(OnDinMidiNoteOff);
   DIN_MIDI.setHandleAfterTouchPoly(OnDinMidiAfterTouchPoly);
@@ -375,7 +375,7 @@ void midi_routing_start()
   DIN_MIDI.setHandleSystemReset(OnDinMidiSystemReset);
 
   // Connect the handle function called upon reception of a MIDI message from WiFi MIDI interface
-  
+
   RTP_MIDI.setHandleNoteOn(OnAppleMidiNoteOn);
   RTP_MIDI.setHandleNoteOff(OnAppleMidiNoteOff);
   RTP_MIDI.setHandleAfterTouchPoly(OnAppleMidiReceiveAfterTouchPoly);
@@ -396,6 +396,38 @@ void midi_routing_start()
   RTP_MIDI.setHandleSystemReset(OnAppleMidiReceiveReset);
 }
 
+void midi_routing()
+{
+  if (USB_MIDI.read())
+  {
+    // Thru on A has already pushed the input message to out A.
+    // Forward the message to out B as well.
+    RTP_MIDI.send(USB_MIDI.getType(),
+                  USB_MIDI.getData1(),
+                  USB_MIDI.getData2(),
+                  USB_MIDI.getChannel());
+    if (currentLegacyMIDIPort == PED_LEGACY_MIDI_OUT)
+      DIN_MIDI.send(USB_MIDI.getType(),
+                    USB_MIDI.getData1(),
+                    USB_MIDI.getData2(),
+                    USB_MIDI.getChannel());
+  }
+
+  if (RTP_MIDI.read())
+  {
+    // Thru on B has already pushed the input message to out B.
+    // Forward the message to out A as well.
+    USB_MIDI.send(RTP_MIDI.getType(),
+                  RTP_MIDI.getData1(),
+                  RTP_MIDI.getData2(),
+                  RTP_MIDI.getChannel());
+    if (currentLegacyMIDIPort == PED_LEGACY_MIDI_OUT)
+      DIN_MIDI.send(RTP_MIDI.getType(),
+                    RTP_MIDI.getData1(),
+                    RTP_MIDI.getData2(),
+                    RTP_MIDI.getChannel());
+  }
+}
 
 
 
