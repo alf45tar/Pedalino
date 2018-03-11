@@ -26,6 +26,8 @@
 #define PEDALS            16
 #endif
 
+#define INTERFACES         4
+
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
 #define PED_NOTE_ON_OFF     2
@@ -58,9 +60,12 @@
 #define PED_ANTILOG         2
 
 #define PED_USBMIDI         0
-#define PED_MIDIOUT         1
+#define PED_LEGACYMIDI      1
 #define PED_APPLEMIDI       2   // also known as rtpMIDI protocol
-#define PED_MIDI_ALL_INT    3
+#define PED_BLUETOOTHMIDI   3
+
+#define PED_DISABLE         0
+#define PED_ENABLE          1
 
 #define PED_LEGACY_MIDI_OUT   0
 #define PED_LEGACY_MIDI_IN    1
@@ -98,7 +103,7 @@ struct pedal {
                                              4 = single and long click
                                              5 = single, double and long click
                                              6 = double and long click
-                                          */
+*/
   byte                   invertPolarity;
   byte                   mapFunction;
   int                    expZero;
@@ -110,8 +115,16 @@ struct pedal {
   ResponsiveAnalogRead  *analogPedal;
 };
 
-bank   banks[BANKS][PEDALS];     // Banks Setup
-pedal  pedals[PEDALS];           // Pedals Setup
+struct interface {
+  byte                   midiOut;         // 0 = Enable, 1 = Disable
+  byte                   midiThru;        // 0 = Enable, 1 = Disable
+  byte                   midiRouting;     // 0 = Enable, 1 = Disable
+};
+
+bank      banks[BANKS][PEDALS];     // Banks Setup
+pedal     pedals[PEDALS];           // Pedals Setup
+interface interfaces[INTERFACES];   // Interfaces Setup
+
 byte   currentBank            = 0;
 byte   currentPedal           = 0;
 byte   currentInterface       = PED_USBMIDI;
@@ -218,7 +231,7 @@ const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 //
-//  Load factory deafult value for banks and pedals
+//  Load factory deafult value for banks, pedals and interfaces
 //
 void load_factory_default()
 {
@@ -234,6 +247,9 @@ void load_factory_default()
   pedals[2].mode = PED_ANALOG;
   pedals[14].function = PED_ESCAPE;
   pedals[15].function = PED_MENU;
+
+  for (byte i = 0; i < INTERFACES; i++)
+    interfaces[i] = {PED_ENABLE, PED_DISABLE, PED_DISABLE};
 }
 
 //
@@ -257,11 +273,14 @@ void controller_setup()
     case PED_USBMIDI:
       Serial.println("USB");
       break;
-    case PED_MIDIOUT:
-      Serial.println("MIDI OUT");
+    case PED_LEGACYMIDI:
+      Serial.println("Legacy MIDI");
       break;
     case PED_APPLEMIDI:
       Serial.println("AppleMIDI");
+      break;
+    case PED_BLUETOOTHMIDI:
+      Serial.println("Bluetooth");
       break;
   }
   Serial.print("Bank ");
@@ -385,17 +404,9 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
 #endif
-        switch (currentInterface) {
-          case PED_USBMIDI:
-            USB_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_MIDIOUT:
-            DIN_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_APPLEMIDI:
-            RTP_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-        }
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOn(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
       }
       else {
 #ifdef DEBUG_PEDALINO
@@ -406,19 +417,11 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
 #endif
-        switch (currentInterface) {
-          case PED_USBMIDI:
-            USB_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_MIDIOUT:
-            DIN_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_APPLEMIDI:
-            RTP_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-        }
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        break;
       }
-      break;
 
     case PED_CONTROL_CHANGE:
 
@@ -431,17 +434,9 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
 #endif
-        switch (currentInterface) {
-          case PED_USBMIDI:
-            USB_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_MIDIOUT:
-            DIN_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-          case PED_APPLEMIDI:
-            RTP_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            break;
-        }
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendControlChange(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
       }
       break;
 
@@ -454,17 +449,9 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
 #endif
-        switch (currentInterface) {
-          case PED_USBMIDI:
-            USB_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-            break;
-          case PED_MIDIOUT:
-            DIN_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-            break;
-          case PED_APPLEMIDI:
-            RTP_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
-            break;
-        }
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendProgramChange(banks[currentBank][i].midiCode, banks[currentBank][i].midiChannel);
       }
       break;
 
@@ -478,17 +465,9 @@ void midi_send(byte i, byte value, bool on_off = true )
         Serial.print("     Channel ");
         Serial.println(banks[currentBank][i].midiChannel);
 #endif
-        switch (currentInterface) {
-          case PED_USBMIDI:
-            USB_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-            break;
-          case PED_MIDIOUT:
-            DIN_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-            break;
-          case PED_APPLEMIDI:
-            RTP_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
-            break;
-        }
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendPitchBend(bend, banks[currentBank][i].midiChannel);
       }
       break;
   }
@@ -757,6 +736,15 @@ void update_eeprom() {
     offset += sizeof(int);
   }
 
+  for (byte i = 0; i < INTERFACES; i++) {
+    EEPROM.put(offset, interfaces[i].midiOut);
+    offset += sizeof(byte);
+    EEPROM.put(offset, interfaces[i].midiThru);
+    offset += sizeof(byte);
+    EEPROM.put(offset, interfaces[i].midiRouting);
+    offset += sizeof(byte);
+  }
+
   EEPROM.put(offset, currentBank);
   offset += sizeof(byte);
   EEPROM.put(offset, currentPedal);
@@ -823,6 +811,15 @@ void read_eeprom() {
       offset += sizeof(int);
     }
 
+    for (byte i = 0; i < INTERFACES; i++) {
+      EEPROM.get(offset, interfaces[i].midiOut);
+      offset += sizeof(byte);
+      EEPROM.get(offset, interfaces[i].midiThru);
+      offset += sizeof(byte);
+      EEPROM.get(offset, interfaces[i].midiRouting);
+      offset += sizeof(byte);
+    }
+
     EEPROM.get(offset, currentBank);
     offset += sizeof(byte);
     EEPROM.get(offset, currentPedal);
@@ -852,7 +849,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define M_ROOT            10
 #define M_BANKSETUP       11
 #define M_PEDALSETUP      12
-#define M_PROFILE         13
+#define M_INTERFACESETUP  13
+#define M_PROFILE         14
 
 #define II_BANK           20
 #define II_PEDAL          21
@@ -869,9 +867,12 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MAX            32
 #define II_RESPONSECURVE  33
 #define II_INTERFACE      34
-#define II_LEGACY_MIDI    35
-#define II_WIFI           36
-#define II_DEFAULT        37
+#define II_MIDI_OUT       35
+#define II_MIDI_THRU      36
+#define II_MIDI_ROUTING   37
+#define II_LEGACY_MIDI    40
+#define II_WIFI           41
+#define II_DEFAULT        42
 
 // Global menu data and definitions
 
@@ -880,10 +881,11 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { M_ROOT,       SIGNATURE,      10, 12, 0 },
-  { M_BANKSETUP,  "Banks Setup",  20, 34, 0 },
-  { M_PEDALSETUP, "Pedals Setup", 40, 48, 0 },
-  { M_PROFILE,    "Options",      50, 53, 0 },
+  { M_ROOT,           SIGNATURE,         10, 12, 0 },
+  { M_BANKSETUP,      "Banks Setup",     20, 34, 0 },
+  { M_PEDALSETUP,     "Pedals Setup",    40, 48, 0 },
+  { M_INTERFACESETUP, "Interface Setup", 50, 53, 0 },
+  { M_PROFILE,        "Options",         60, 63, 0 },
 };
 
 // Menu Items ----------
@@ -892,7 +894,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   // Starting (Root) menu
   { 10, "Banks Setup",     MD_Menu::MNU_MENU,  M_BANKSETUP },
   { 11, "Pedals Setup",    MD_Menu::MNU_MENU,  M_PEDALSETUP },
-  { 12, "Options",         MD_Menu::MNU_MENU,  M_PROFILE },
+  { 12, "Interface Setup", MD_Menu::MNU_MENU,  M_INTERFACESETUP },
+  { 13, "Options",         MD_Menu::MNU_MENU,  M_PROFILE },
   // Banks Setup
   { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
   { 30, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
@@ -910,21 +913,27 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 46, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
   { 47, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 48, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
+  // Interface Setup
+  { 50, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 51, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  { 52, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
+  { 53, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
   // Options
-  { 50, "OutputInterface", MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 51, "LegacyMIDIPort",  MD_Menu::MNU_INPUT, II_LEGACY_MIDI },
-  { 52, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
-  { 53, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 60, "OutputInterface", MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 61, "LegacyMIDIPort",  MD_Menu::MNU_INPUT, II_LEGACY_MIDI },
+  { 62, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
+  { 63, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
-const PROGMEM char listMidiMessage[] =     "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
-const PROGMEM char listPedalFunction[] =   "     MIDI     |    Bank +    |    Bank -    |     Menu     |    Confirm   |    Escape    |     Next     ";
-const PROGMEM char listPedalMode[] =       "   Momentary  |     Latch    |    Analog    |   Jog Wheel  ";
-const PROGMEM char listPedalPressMode[] =  "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
-const PROGMEM char listPolarity[] =        " No|Yes";
-const PROGMEM char listResponseCurve[] =   "    Linear    |      Log     |   Anti-Log   ";
-const PROGMEM char listOutputInterface[] = "     USB      |   MIDI OUT   |   AppleMIDI  |      All     ";
+const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
+const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Menu     |    Confirm   |    Escape    |     Next     ";
+const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  ";
+const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
+const PROGMEM char listPolarity[]        = " No|Yes";
+const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
+const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
+const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
 const PROGMEM char listLegacyMIDI[]      = "   MIDI OUT   |   MIDI IN    |   MIDI THRU  ";
 const PROGMEM char listWiFiMode[] =        " Smart Config | Access Point ";
 #include "ControlChange.h"
@@ -951,7 +960,10 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_ZERO,          ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
   { II_MAX,           ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
   { II_RESPONSECURVE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listResponseCurve },
-  { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listOutputInterface },
+  { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listInterface },
+  { II_MIDI_OUT,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_THRU,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_ROUTING,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_LEGACY_MIDI,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listLegacyMIDI },
   { II_WIFI,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listWiFiMode },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
@@ -1054,6 +1066,26 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       }
       break;
 
+    case II_MIDI_OUT:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiOut;
+      else interfaces[currentInterface].midiOut = vBuf.value;
+      break;
+
+    case II_MIDI_THRU:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiThru;
+      else {
+        interfaces[currentInterface].midiThru = vBuf.value;
+        interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
+        interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
+        interfaces[PED_APPLEMIDI].midiThru  ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
+      }
+      break;
+
+    case II_MIDI_ROUTING:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiRouting;
+      else interfaces[currentInterface].midiRouting = vBuf.value;
+      break;
+
     case II_LEGACY_MIDI:
       if (bGet) vBuf.value = currentLegacyMIDIPort;
       else currentLegacyMIDIPort = vBuf.value;
@@ -1132,6 +1164,22 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         lcd.print(" Pedal ");
         if (currentPedal < 9) lcd.print(" ");
         lcd.print(currentPedal + 1);
+      }
+      else if (strcmp(msg, "Interface Setup") == 0) {
+        switch (currentInterface) {
+          case PED_USBMIDI:
+            lcd.print("USB MIDI");
+            break;
+          case PED_LEGACYMIDI:
+            lcd.print("Legacy MIDI");
+            break;
+          case PED_APPLEMIDI:
+            lcd.print("AppleMIDI");
+            break;
+          case PED_BLUETOOTHMIDI:
+            lcd.print("Bluetooth MIDI");
+            break;
+        }
       }
       else
         lcd.print(msg);
@@ -1354,20 +1402,21 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
 void setup(void)
 {
+  read_eeprom();
+
   // Initiate serial MIDI communications, listen to all channels and turn Thru off
   //midi_routing_start();
 #ifdef DEBUG_PEDALINO
   Serial.begin(115200);
 #else
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
-  USB_MIDI.turnThruOff();
+  interfaces[PED_USBMIDI].midiThru ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
 #endif
   DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
-  DIN_MIDI.turnThruOff();
+  interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
   RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
-  RTP_MIDI.turnThruOff();
+  interfaces[PED_APPLEMIDI].midiThru ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
 
-  read_eeprom();
   controller_setup();
 
   irrecv.enableIRIn();                        // Start the IR receiver
