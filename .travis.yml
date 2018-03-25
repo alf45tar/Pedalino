@@ -27,7 +27,7 @@ install:
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire"
 
-deploy:
+deploy-no:
   provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
