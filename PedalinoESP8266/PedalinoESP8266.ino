@@ -10,12 +10,22 @@
 #include <MIDI.h>
 #include <AppleMidi.h>
 
-//#define PEDALINO_DEBUG
+#define PEDALINO_SERIAL_DEBUG
+#define PEDALINO_TELNET_DEBUG
+
+#ifdef PEDALINO_TELNET_DEBUG
+#include "RemoteDebug.h"          // Remote debug over telnet - not recommended for production, only for development    
+RemoteDebug Debug;
+#endif
 
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
 
+#ifdef PEDALINO_SERIAL_DEBUG
+#define BUILTIN_LED       0  // onboard LED on GPIO2 is shared with Serial1 TX
+#else
 #define BUILTIN_LED       2  // onboard LED, used as status indicator
+#endif
 #define BUILTIN_LED_OFF() digitalWrite(BUILTIN_LED, HIGH)
 #define BUILTIN_LED_ON()  digitalWrite(BUILTIN_LED, LOW)
 
@@ -44,6 +54,7 @@ struct SerialMIDISettings : public midi::DefaultSettings
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
+//MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
 
 
 // Forward messages received from serial MIDI interface to WiFI MIDI interface
@@ -86,8 +97,9 @@ void handlePitchBend(byte channel, int bend)
 void handleSystemExclusive(byte* array, unsigned size)
 {
   AppleMIDI.sysEx(array, size);
-  // SysEx starts with 0xF0 and ends with 0xF7
-  if (array[2] == 'S') {
+  /*
+    // SysEx starts with 0xF0 and ends with 0xF7
+    if (array[2] == 'S') {
     // Reset currently used SSID / password stored in flash
     WiFi.persistent(true);
     switch (WiFi.getMode()) {
@@ -101,11 +113,11 @@ void handleSystemExclusive(byte* array, unsigned size)
     //ESP.restart();
     WiFi.persistent(false);
     wifi_connect();
-  }
-  if (array[2] == 'A') {
+    }
+    if (array[2] == 'A') {
     ap_mode_start();
-  }
-
+    }
+  */
 }
 
 void handleTimeCodeQuarterFrame(byte data)
@@ -164,11 +176,17 @@ void handleSystemReset(void)
 void OnAppleMidiConnected(uint32_t ssrc, char* name)
 {
   appleMidiConnected  = true;
+#ifdef PEDALINO_TELNET_DEBUG
+  DEBUG("AppleMIDI Connected Session %d %s\n", ssrc, name);
+#endif
 }
 
 void OnAppleMidiDisconnected(uint32_t ssrc)
 {
   appleMidiConnected  = false;
+#ifdef PEDALINO_TELNET_DEBUG
+  DEBUG("AppleMIDI Disonnected Session ID %d\n", ssrc);
+#endif
 }
 
 void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
@@ -319,28 +337,28 @@ bool smart_config()
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
 
-#ifdef PEDALINO_DEBUG
-  Serial.println("");
-  Serial.print("SmartConfig started");
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.println("");
+  Serial1.print("SmartConfig started");
 #endif
 
   for (int i = 0; i < SMART_CONFIG_TIMEOUT && !WiFi.smartConfigDone(); i++) {
     status_blink();
     delay(950);
-#ifdef PEDALINO_DEBUG
-    Serial.print(".");
+#ifdef PEDALINO_SERIAL_DEBUG
+    Serial1.print(".");
 #endif
   }
 
-#ifdef PEDALINO_DEBUG
+#ifdef PEDALINO_SERIAL_DEBUG
   if (WiFi.smartConfigDone())
   {
-    Serial.println("[SUCCESS]");
-    Serial.printf("SSID        : %s\n", WiFi.SSID().c_str());
-    Serial.printf("Password    : %s\n", WiFi.psk().c_str());
+    Serial1.println("[SUCCESS]");
+    Serial1.printf("SSID        : %s\n", WiFi.SSID().c_str());
+    Serial1.printf("Password    : %s\n", WiFi.psk().c_str());
   }
   else
-    Serial.println("[NO SUCCESS]");
+    Serial1.println("[NO SUCCESS]");
 #endif
 
   if (WiFi.smartConfigDone())
@@ -359,9 +377,9 @@ bool auto_reconnect()
 {
   // Return 'true' if connected to the (last used) access point within WIFI_CONNECT_TIMEOUT seconds
 
-#ifdef PEDALINO_DEBUG
-  Serial.println("");
-  Serial.printf("Connecting to %s ", WiFi.SSID().c_str());
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.println("");
+  Serial1.printf("Connecting to %s ", WiFi.SSID().c_str());
 #endif
 
   WiFi.mode(WIFI_STA);
@@ -377,18 +395,18 @@ bool auto_reconnect()
     delay(100);
     status_blink();
     delay(300);
-#ifdef PEDALINO_DEBUG
-    Serial.print(".");
+#ifdef PEDALINO_SERIAL_DEBUG
+    Serial1.print(".");
 #endif
   }
 
   WiFi.status() == WL_CONNECTED ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
 
-#ifdef PEDALINO_DEBUG
+#ifdef PEDALINO_SERIAL_DEBUG
   if (WiFi.status() == WL_CONNECTED)
-    Serial.println("[SUCCESS]");
+    Serial1.println("[SUCCESS]");
   else
-    Serial.println("[NO SUCCESS]");
+    Serial1.println("[NO SUCCESS]");
 #endif
 
   return WiFi.status() == WL_CONNECTED;
@@ -410,36 +428,36 @@ void wifi_connect()
 
     WiFi.hostname(host);
 
-#ifdef PEDALINO_DEBUG
-    Serial.println("");
-    WiFi.printDiag(Serial);
-    Serial.println("");
+#ifdef PEDALINO_SERIAL_DEBUG
+    Serial1.println("");
+    WiFi.printDiag(Serial1);
+    Serial1.println("");
 
     uint8_t macAddr[6];
     WiFi.macAddress(macAddr);
-    Serial.printf("BSSID       : %s\n", WiFi.BSSIDstr().c_str());
-    Serial.printf("RSSI        : %d dBm\n", WiFi.RSSI());
-    Serial.printf("Hostname    : %s\n", WiFi.hostname().c_str());
-    Serial.printf("STA         : %02X:%02X:%02X:%02X:%02X:%02X\n", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
-    Serial.printf("IP address  : %s\n", WiFi.localIP().toString().c_str());
-    Serial.printf("Subnet mask : %s\n", WiFi.subnetMask().toString().c_str());
-    Serial.printf("Gataway IP  : %s\n", WiFi.gatewayIP().toString().c_str());
-    Serial.printf("DNS 1       : %s\n", WiFi.dnsIP(0).toString().c_str());
-    Serial.printf("DNS 2       : %s\n", WiFi.dnsIP(1).toString().c_str());
-    Serial.println("");
+    Serial1.printf("BSSID       : %s\n", WiFi.BSSIDstr().c_str());
+    Serial1.printf("RSSI        : %d dBm\n", WiFi.RSSI());
+    Serial1.printf("Hostname    : %s\n", WiFi.hostname().c_str());
+    Serial1.printf("STA         : %02X:%02X:%02X:%02X:%02X:%02X\n", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+    Serial1.printf("IP address  : %s\n", WiFi.localIP().toString().c_str());
+    Serial1.printf("Subnet mask : %s\n", WiFi.subnetMask().toString().c_str());
+    Serial1.printf("Gataway IP  : %s\n", WiFi.gatewayIP().toString().c_str());
+    Serial1.printf("DNS 1       : %s\n", WiFi.dnsIP(0).toString().c_str());
+    Serial1.printf("DNS 2       : %s\n", WiFi.dnsIP(1).toString().c_str());
+    Serial1.println("");
 #endif
   }
 
   // Start LLMNR (Link-Local Multicast Name Resolution) responder
   LLMNR.begin(host);
-#ifdef PEDALINO_DEBUG
-  Serial.println("LLMNR responder started");
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.println("LLMNR responder started");
 #endif
 
   // Start mDNS (Multicast DNS) responder
   if (MDNS.begin(host, WiFi.localIP())) {
-#ifdef PEDALINO_DEBUG
-    Serial.println("mDNS responder started");
+#ifdef PEDALINO_SERIAL_DEBUG
+    Serial1.println("mDNS responder started");
 #endif
     MDNS.addService("apple-midi", "udp", 5004);
   }
@@ -448,9 +466,12 @@ void wifi_connect()
   httpUpdater.setup(&httpServer);
   httpServer.begin();
   MDNS.addService("http", "tcp", 80);
-#ifdef PEDALINO_DEBUG
-  Serial.println("HTTP server started");
-  Serial.println("Connect to http://pedalino/update for firmware update");
+#ifdef PEDALINO_TELNET_DEBUG
+  MDNS.addService("telnet", "tcp", 23);
+#endif
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.println("HTTP server started");
+  Serial1.println("Connect to http://pedalino/update for firmware update");
 #endif
 }
 
@@ -517,19 +538,25 @@ void setup()
 {
   pinMode(BUILTIN_LED, OUTPUT);
 
-#ifdef PEDALINO_DEBUG
-  Serial.begin(115200);
-  Serial.println("");
-  Serial.println("");
-  Serial.println("*** Pedalino(TM) ***");
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.begin(115200);
+  Serial1.setDebugOutput(true);
+  Serial1.println("");
+  Serial1.println("");
+  Serial1.println("*** Pedalino(TM) ***");
 #endif
 
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
   wifi_connect();
 
-#ifdef PEDALINO_DEBUG
-  Serial.flush();
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.flush();
+#endif
+#ifdef PEDALINO_TELNET_DEBUG
+  // Initialize the telnet server of RemoteDebug
+  Debug.begin(host);              // Initiaze the telnet server
+  Debug.setResetCmdEnabled(true); // Enable the reset command
 #endif
 
   midi_connect();
@@ -537,7 +564,7 @@ void setup()
 
 void loop()
 {
-  if (appleMidiConnected)
+  if (appleMidiConnected) {
     // led fast blinking (5 times per second)
     if (millis() - lastOn > 200) {
       BUILTIN_LED_ON();
@@ -546,28 +573,41 @@ void loop()
     else if (millis() - lastOn > 100) {
       BUILTIN_LED_OFF();
     }
-    else
-      // led always on if connected to an AP or one or more client connected the the internal AP
-      switch (WiFi.getMode()) {
-        case WIFI_STA:
-          WiFi.isConnected() ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
-          break;
-        case WIFI_AP:
-          WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
-          break;
-        default:
-          BUILTIN_LED_OFF();
-          break;
-      }
+  }
+  else
+    // led always on if connected to an AP or one or more client connected the the internal AP
+    switch (WiFi.getMode()) {
+      case WIFI_STA:
+        WiFi.isConnected() ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+        break;
+      case WIFI_AP:
+        WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+        break;
+      default:
+        BUILTIN_LED_OFF();
+        break;
+    }
 
   // Listen to incoming messages from Arduino
+
+#ifdef PEDALINO_TELNET_DEBUG
+    if (MIDI.read()) {
+      DEBUG("Received MIDI message:   Type 0x%02x   Data1 0x%02x   Data2 0x%02x   Channel 0x%02x\n", MIDI.getType(), MIDI.getData1(), MIDI.getData2(), MIDI.getChannel());
+    }
+#else
   MIDI.read();
+#endif
 
   // Listen to incoming messages from WiFi
   AppleMIDI.run();
 
   // Run HTTP Updater
   httpServer.handleClient();
+
+#ifdef PEDALINO_TELNET_DEBUG
+  // Remote debug over telnet
+  Debug.handle();
+#endif
 }
 
 
