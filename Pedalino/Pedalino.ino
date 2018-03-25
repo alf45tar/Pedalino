@@ -881,11 +881,11 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { M_ROOT,           SIGNATURE,         10, 12, 0 },
+  { M_ROOT,           SIGNATURE,         10, 13, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 34, 0 },
   { M_PEDALSETUP,     "Pedals Setup",    40, 48, 0 },
   { M_INTERFACESETUP, "Interface Setup", 50, 53, 0 },
-  { M_PROFILE,        "Options",         60, 63, 0 },
+  { M_PROFILE,        "Options",         60, 61, 0 },
 };
 
 // Menu Items ----------
@@ -919,10 +919,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 52, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
   { 53, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
   // Options
-  { 60, "OutputInterface", MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 61, "LegacyMIDIPort",  MD_Menu::MNU_INPUT, II_LEGACY_MIDI },
-  { 62, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
-  { 63, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 60, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
+  { 61, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
