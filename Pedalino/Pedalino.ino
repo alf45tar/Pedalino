@@ -14,7 +14,7 @@
 
 #include <Bounce2.h>
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #define SIGNATURE "Pedalino(TM)"
 
@@ -102,8 +102,10 @@ struct pedal {
                                              3 = single and double click
                                              4 = single and long click
                                              5 = single, double and long click
-                                             6 = double and long click
-*/
+                                             6 = double and long click */
+  byte                   value_single;
+  byte                   value_double;
+  byte                   value_long;
   byte                   invertPolarity;
   byte                   mapFunction;
   int                    expZero;
@@ -240,7 +242,7 @@ void load_factory_default()
       banks[b][p] = {PED_CONTROL_CHANGE, b + 1, p + 1};
 
   for (byte p = 0; p < PEDALS; p++)
-    pedals[p] = {PED_MIDI, PED_MOMENTARY, PED_PRESS_1, 0, 0, 50, 930, 0, millis(), nullptr, nullptr, nullptr};
+    pedals[p] = {PED_MIDI, PED_MOMENTARY, PED_PRESS_1, 0, 127, 64, 0, 0, 50, 930, 0, millis(), nullptr, nullptr, nullptr};
 
   pedals[0].mode = PED_ANALOG;
   pedals[1].mode = PED_ANALOG;
@@ -420,9 +422,9 @@ void midi_send(byte i, byte value, bool on_off = true )
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-        break;
       }
-
+      break;
+      
     case PED_CONTROL_CHANGE:
 
       if (on_off) {
@@ -527,18 +529,18 @@ void midi_refresh()
               switch (k) {
 
                 case MD_UISwitch::KEY_PRESS:
-                  midi_send(i, 127);
-                  midi_send(i, 127, false);
+                  midi_send(i, pedals[i].value_single);
+                  midi_send(i, pedals[i].value_single, false);
                   break;
 
                 case MD_UISwitch::KEY_DPRESS:
-                  midi_send(i, 63);
-                  midi_send(i, 63, false);
+                  midi_send(i, pedals[i].value_double);
+                  midi_send(i, pedals[i].value_double, false);
                   break;
 
                 case MD_UISwitch::KEY_LONGPRESS:
-                  midi_send(i, 0);
-                  midi_send(i, 0, false);
+                  midi_send(i, pedals[i].value_long);
+                  midi_send(i, pedals[i].value_long, false);
                   break;
               }
 
@@ -861,18 +863,21 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_FUNCTION       26
 #define II_MODE           27
 #define II_PRESS_MODE     28
-#define II_POLARITY       29
-#define II_CALIBRATE      30
-#define II_ZERO           31
-#define II_MAX            32
-#define II_RESPONSECURVE  33
-#define II_INTERFACE      34
-#define II_MIDI_OUT       35
-#define II_MIDI_THRU      36
-#define II_MIDI_ROUTING   37
-#define II_LEGACY_MIDI    40
-#define II_WIFI           41
-#define II_DEFAULT        42
+#define II_VALUE_SINGLE   29
+#define II_VALUE_DOUBLE   30
+#define II_VALUE_LONG     31
+#define II_POLARITY       32
+#define II_CALIBRATE      33
+#define II_ZERO           34
+#define II_MAX            35
+#define II_RESPONSECURVE  36
+#define II_INTERFACE      37
+#define II_MIDI_OUT       38
+#define II_MIDI_THRU      39
+#define II_MIDI_ROUTING   40
+#define II_LEGACY_MIDI    41
+#define II_WIFI           42
+#define II_DEFAULT        43
 
 // Global menu data and definitions
 
@@ -883,9 +888,9 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
   { M_ROOT,           SIGNATURE,         10, 13, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 34, 0 },
-  { M_PEDALSETUP,     "Pedals Setup",    40, 48, 0 },
-  { M_INTERFACESETUP, "Interface Setup", 50, 53, 0 },
-  { M_PROFILE,        "Options",         60, 61, 0 },
+  { M_PEDALSETUP,     "Pedals Setup",    40, 51, 0 },
+  { M_INTERFACESETUP, "Interface Setup", 60, 63, 0 },
+  { M_PROFILE,        "Options",         70, 71, 0 },
 };
 
 // Menu Items ----------
@@ -913,14 +918,17 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 46, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
   { 47, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 48, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
+  { 49, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
+  { 50, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
+  { 51, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
-  { 50, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 51, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
-  { 52, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
-  { 53, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
+  { 60, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 61, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  { 62, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
+  { 63, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
   // Options
-  { 60, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
-  { 61, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 70, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
+  { 71, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -949,10 +957,12 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDIMESSAGE,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiMessage },
   { II_MIDICODE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiControlChange },
   { II_MIDINOTE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiNoteNumbers },
-  //  { II_MIDICODE,      "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,    127, 0, 10, nullptr },
   { II_FUNCTION,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalFunction },
   { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalMode },
   { II_PRESS_MODE,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalPressMode },
+  { II_VALUE_SINGLE,  "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_DOUBLE,  "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_LONG,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
   { II_POLARITY,      "Invert:    " , MD_Menu::INP_LIST,  mnuValueRqst,  3, 0, 0,                  0, 0,  0, listPolarity },
   { II_CALIBRATE,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_ZERO,          ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
@@ -1020,6 +1030,21 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_PRESS_MODE:
       if (bGet) vBuf.value = pedals[currentPedal].pressMode;
       else pedals[currentPedal].pressMode = vBuf.value;
+      break;
+
+    case II_VALUE_SINGLE:
+      if (bGet) vBuf.value = pedals[currentPedal].value_single;
+      else pedals[currentPedal].value_single = vBuf.value;
+      break;
+
+    case II_VALUE_DOUBLE:
+      if (bGet) vBuf.value = pedals[currentPedal].value_double;
+      else pedals[currentPedal].value_double = vBuf.value;
+      break;
+
+    case II_VALUE_LONG:
+      if (bGet) vBuf.value = pedals[currentPedal].value_long;
+      else pedals[currentPedal].value_long = vBuf.value;
       break;
 
     case II_POLARITY:
