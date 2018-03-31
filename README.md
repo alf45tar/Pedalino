@@ -16,6 +16,7 @@ High customizable wireless MIDI controller for guitarists and more.
 ## Applications
 - Change preset to your favourite guitar rig
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
+- Transform wired MIDI equipment into wireless MIDI equipment
 - Connect Windows PC to macOS and iOS devices via AppleMIDI
 
 ## Features
