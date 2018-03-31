@@ -566,7 +566,7 @@ void midi_refresh()
           if (pedals[i].analogPedal->hasChanged())                  // if the value changed since last time
           {
             value = pedals[i].analogPedal->getValue();              // get the responsive analog average value
-            int velocity = (value - pedals[i].pedalValue) / (millis() - pedals[i].lastUpdate);
+            double velocity = ((double)value - pedals[i].pedalValue) / (millis() - pedals[i].lastUpdate);
 #ifdef DEBUG_PEDALINO
             Serial.print("Pedal ");
             if (i < 9) Serial.print(" ");
@@ -575,9 +575,12 @@ void midi_refresh()
             Serial.print(input);
             Serial.print("->");
             Serial.print(value);
-            Serial.println(" sent      ");
+            Serial.print(" sent      ");
+            Serial.print("velocity: ");
+            Serial.println(velocity);
 #endif
             midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+            midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel, false);
             pedals[i].pedalValue = value;
             pedals[i].lastUpdate = millis();
             lastUsedPedal = i;
