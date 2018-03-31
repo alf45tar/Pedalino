@@ -4,7 +4,7 @@
 
 
 # Pedalino™
-High customizable MIDI controller for guitarists and more.
+High customizable wireless MIDI controller for guitarists and more.
 
 - USB MIDI class-compliant device
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
