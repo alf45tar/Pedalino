@@ -124,6 +124,6 @@ const PROGMEM char listMidiNoteNumbers[] = ""
     "7A D10|"
     "7B D#10|"
     "7C E10|"
-    "7D F2|"
-    "7E F#2|"
-    "7F G2|";
+    "7D F10|"
+    "7E F#10|"
+    "7F G10|";
