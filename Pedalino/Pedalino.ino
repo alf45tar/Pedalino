@@ -89,16 +89,21 @@ struct bank {
                                              1 = Control Code
                                              2 = Note On/Note Off
                                              3 = Pitch Bend */
-  byte                   midiChannel;     // MIDI channel 1-16
-  byte                   midiCode;        // Program Change, Control Code, Note or Pitch Bend value to send
+  byte                   midiChannel;     /* MIDI channel 1-16 */
+  byte                   midiCode;        /* Program Change, Control Code, Note or Pitch Bend value to send */
 };
 
 struct pedal {
   byte                   function;        /* 0 = MIDI
-                                             1 = Bank+
-                                             2 = Bank- */
-  byte                   autoSensing;     /* 0 = No
-                                             1 = Yes   */
+                                             1 = bank+
+                                             2 = bank-
+                                             3 = menu
+                                             4 = confirm
+                                             5 = escape
+                                             6 = next
+                                             7 = previous */
+  byte                   autoSensing;     /* 0 = disable
+                                             1 = enable   */
   byte                   mode;            /* 0 = momentary
                                              1 = latch
                                              2 = analog
@@ -125,9 +130,9 @@ struct pedal {
 };
 
 struct interface {
-  byte                   midiOut;         // 0 = Enable, 1 = Disable
-  byte                   midiThru;        // 0 = Enable, 1 = Disable
-  byte                   midiRouting;     // 0 = Enable, 1 = Disable
+  byte                   midiOut;         // 0 = disable, 1 = enable
+  byte                   midiThru;        // 0 = disable, 1 = enable
+  byte                   midiRouting;     // 0 = disable, 1 = enable
 };
 
 bank      banks[BANKS][PEDALS];     // Banks Setup
@@ -252,10 +257,11 @@ void load_factory_default()
   for (byte p = 0; p < PEDALS; p++)
     pedals[p] = {PED_MIDI, 1, PED_MOMENTARY, PED_PRESS_1, 0, 127, 64, 0, 0, 50, 930, 0, millis(), nullptr, nullptr, nullptr};
 
-  pedals[0].mode = PED_ANALOG;
-  pedals[1].mode = PED_ANALOG;
-  pedals[2].mode = PED_ANALOG;
-  pedals[14].function = PED_ESCAPE;
+  //pedals[0].mode = PED_ANALOG;
+  //pedals[1].mode = PED_ANALOG;
+  //pedals[2].mode = PED_ANALOG;
+  pedals[13].function = PED_ESCAPE;
+  pedals[14].function = PED_PREVIOUS;
   pedals[15].function = PED_MENU;
 
   for (byte i = 0; i < INTERFACES; i++)
@@ -303,7 +309,7 @@ void autosensing_setup()
       }
       Serial.print("    Ring Pin A");
       Serial.print(p);
-      if (p < 9) Serial.print(" ");
+      if (p < 10) Serial.print(" ");
       Serial.print(" ");
 #endif
 
@@ -344,8 +350,9 @@ void autosensing_setup()
         pedals[p].mode = PED_MOMENTARY;
         if (tip == LOW) pedals[p].invertPolarity = true; // switch normally closed
 #ifdef DEBUG_PEDALINO
-        Serial.println(" MOMENTARY");
-        if (pedals[p].invertPolarity) Serial.println(" POLARITY-");
+        Serial.print(" MOMENTARY");
+        if (pedals[p].invertPolarity) Serial.print(" POLARITY-");
+        Serial.println("");
 #endif
       }
       else if (ring > 0) {
@@ -563,7 +570,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 
     case PED_NOTE_ON_OFF:
 
-      if (on_off) {
+      if (on_off && value > 0) {
 #ifdef DEBUG_PEDALINO
         Serial.print("     NOTE ON     Note ");
         Serial.print(code);
@@ -666,14 +673,14 @@ void midi_refresh()
                 value = map_digital(i, input);                                          // apply the digital map function to the value
 
 #ifdef DEBUG_PEDALINO
+                Serial.println("");
                 Serial.print("Pedal ");
                 if (i < 9) Serial.print(" ");
                 Serial.print(i + 1);
-                Serial.print("     raw ");
+                Serial.print("   input ");
                 Serial.print(input);
-                Serial.print(" -> ");
+                Serial.print(" output ");
                 Serial.print(value);
-                Serial.println(" sent     ");
 #endif
                 if (value == LOW)
                   midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, 127, banks[currentBank][i].midiChannel);
@@ -733,16 +740,16 @@ void midi_refresh()
             value = pedals[i].analogPedal->getValue();              // get the responsive analog average value
             double velocity = ((double)value - pedals[i].pedalValue) / (millis() - pedals[i].lastUpdate);
 #ifdef DEBUG_PEDALINO
+            Serial.println("");
             Serial.print("Pedal ");
             if (i < 9) Serial.print(" ");
             Serial.print(i + 1);
-            Serial.print("     raw ");
+            Serial.print("   input ");
             Serial.print(input);
-            Serial.print("->");
+            Serial.print(" output ");
             Serial.print(value);
-            Serial.print(" sent      ");
-            Serial.print("velocity: ");
-            Serial.println(velocity);
+            Serial.print(" velocity ");
+            Serial.print(velocity);
 #endif
             midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
             midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel, false);
@@ -1115,7 +1122,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 
 // Input Items ---------
 const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
-const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Menu     |    Confirm   |    Escape    |     Next     ";
+const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
 const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  ";
 const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[]        = " No|Yes";
