@@ -3,6 +3,8 @@
 #include <MD_UISwitch.h>
 #include <ResponsiveAnalogRead.h>
 #include <MD_Menu.h>
+#include "ControlChange.h"
+#include "NoteNumbers.h"
 
 // Bounce 2 library
 // https://github.com/thomasfredericks/Bounce2/wiki
@@ -17,6 +19,7 @@
 #define DEBUG_PEDALINO
 
 #define SIGNATURE "Pedalino(TM)"
+#define AUTOSENSING
 
 #define BANKS             10
 
@@ -26,7 +29,9 @@
 #define PEDALS            16
 #endif
 
-#define INTERFACES         4
+#define PIN_D(x)            23+2*x    // map 0..15 to 23,25,...53
+
+#define INTERFACES          4
 
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
@@ -92,6 +97,8 @@ struct pedal {
   byte                   function;        /* 0 = MIDI
                                              1 = Bank+
                                              2 = Bank- */
+  byte                   autoSensing;     /* 0 = No
+                                             1 = Yes   */
   byte                   mode;            /* 0 = momentary
                                              1 = latch
                                              2 = analog
@@ -243,7 +250,7 @@ void load_factory_default()
       banks[b][p] = {PED_CONTROL_CHANGE, b + 1, p + 1};
 
   for (byte p = 0; p < PEDALS; p++)
-    pedals[p] = {PED_MIDI, PED_MOMENTARY, PED_PRESS_1, 0, 127, 64, 0, 0, 50, 930, 0, millis(), nullptr, nullptr, nullptr};
+    pedals[p] = {PED_MIDI, 1, PED_MOMENTARY, PED_PRESS_1, 0, 127, 64, 0, 0, 50, 930, 0, millis(), nullptr, nullptr, nullptr};
 
   pedals[0].mode = PED_ANALOG;
   pedals[1].mode = PED_ANALOG;
@@ -253,6 +260,115 @@ void load_factory_default()
 
   for (byte i = 0; i < INTERFACES; i++)
     interfaces[i] = {PED_ENABLE, PED_DISABLE, PED_DISABLE};
+}
+
+//
+//  Autosensing setup
+//
+void autosensing_setup()
+{
+  int tip;    // tip connected to an input digital pin 23, 25, ... 53 with internal pull-up resistor
+  int ring;   // ring connected to an input analog pin A0, A1, ... A15
+  /*        */// sleeve connected to GND */
+  int ring_min;
+  int ring_max;
+  Bounce debouncer;
+
+#ifdef DEBUG_PEDALINO
+  Serial.println("Pedal autosensing...");
+#endif
+
+  for (byte p = 0; p < PEDALS; p++) {
+    pinMode(PIN_D(p), INPUT_PULLUP);
+    if (pedals[p].autoSensing) {
+      debouncer.attach(PIN_D(p));
+      debouncer.interval(50);
+      debouncer.update();
+      tip = debouncer.read();
+
+#ifdef DEBUG_PEDALINO
+      Serial.print("Pedal ");
+      if (p < 9) Serial.print(" ");
+      Serial.print(p + 1);
+      Serial.print("   Tip Pin ");
+      Serial.print(PIN_D(p));
+      Serial.print(" ");
+      switch (tip) {
+        case LOW:
+          Serial.print("LOW ");
+          break;
+        case HIGH:
+          Serial.print("HIGH");
+          break;
+      }
+      Serial.print("    Ring Pin A");
+      Serial.print(p);
+      if (p < 9) Serial.print(" ");
+      Serial.print(" ");
+#endif
+
+      ring_min = ADC_RESOLUTION;
+      ring_max = 0;
+      for (int i = 0; i < 10; i++) {
+        ring = analogRead(PIN_A0 + p);
+        ring_min = min(ring, ring_min);
+        ring_max = max(ring, ring_max);
+
+#ifdef DEBUG_PEDALINO
+        Serial.print(ring);
+        Serial.print(" ");
+#endif
+
+      }
+      if ((ring_max - ring_min) > 1) {
+        if (tip == LOW) {
+          // tip connected to GND
+          // switch between tip and ring normally closed
+          pedals[p].mode = PED_MOMENTARY;
+          pedals[p].invertPolarity = true;
+#ifdef DEBUG_PEDALINO
+          Serial.println(" MOMENTARY POLARITY-");
+#endif
+        }
+        else {
+          // not connected
+          pedals[p].mode = PED_MOMENTARY;
+#ifdef DEBUG_PEDALINO
+          Serial.println(" FLOATING PIN - NOT CONNECTED ");
+#endif
+        }
+      }
+      else if (ring == 0) {
+        // ring connected to sleeve (GND)
+        // switch between tip and ring
+        pedals[p].mode = PED_MOMENTARY;
+        if (tip == LOW) pedals[p].invertPolarity = true; // switch normally closed
+#ifdef DEBUG_PEDALINO
+        Serial.println(" MOMENTARY");
+        if (pedals[p].invertPolarity) Serial.println(" POLARITY-");
+#endif
+      }
+      else if (ring > 0) {
+        // analog
+        pedals[p].mode = PED_ANALOG;
+        pedals[p].invertPolarity = true;
+#ifdef DEBUG_PEDALINO
+        Serial.println(" ANALOG POLARITY-");
+#endif
+      }
+    }
+    else {
+#ifdef DEBUG_PEDALINO
+      Serial.print("Pedal ");
+      if (p < 9) Serial.print(" ");
+      Serial.print(p + 1);
+      Serial.print(" autosensing disabled");
+#endif
+    }
+  }
+#ifdef DEBUG_PEDALINO
+  Serial.println("");
+#endif
 }
 
 //
@@ -297,20 +413,59 @@ void controller_setup()
     Serial.print("Pedal ");
     if (i < 9) Serial.print(" ");
     Serial.print(i + 1);
-    Serial.print("     Function ");
-    Serial.print(pedals[i].function);
-    Serial.print("     Mode ");
-    Serial.print(pedals[i].mode);
-    Serial.print("     Press Mode ");
-    Serial.print(pedals[i].pressMode);
-    Serial.print("   Polarity ");
-    Serial.print(pedals[i].invertPolarity);
-    Serial.print("   Message ");
-    Serial.print(banks[currentBank][i].midiMessage);
+    Serial.print("     ");
+    switch (pedals[i].function) {
+      case PED_MIDI:        Serial.print("MIDI      "); break;
+      case PED_BANK_PLUS:   Serial.print("BANK_PLUS "); break;
+      case PED_BANK_MINUS:  Serial.print("BANK_MINUS"); break;
+      case PED_MENU:        Serial.print("MENU      "); break;
+      case PED_CONFIRM:     Serial.print("CONFIRM   "); break;
+      case PED_ESCAPE:      Serial.print("ESCAPE    "); break;
+      case PED_NEXT:        Serial.print("NEXT      "); break;
+      case PED_PREVIOUS:    Serial.print("PREVIOUS  "); break;
+    }
+    Serial.print("   ");
+    switch (pedals[i].mode) {
+      case PED_MOMENTARY:   Serial.print("MOMENTARY"); break;
+      case PED_LATCH:       Serial.print("LATCH    "); break;
+      case PED_ANALOG:      Serial.print("ANALOG   "); break;
+      case PED_JOG_WHEEL:   Serial.print("JOG_WHEEL"); break;
+    }
+    Serial.print("   ");
+    switch (pedals[i].pressMode) {
+      case PED_PRESS_1:     Serial.print("PRESS_1    "); break;
+      case PED_PRESS_2:     Serial.print("PRESS_2    "); break;
+      case PED_PRESS_L:     Serial.print("PRESS_L    "); break;
+      case PED_PRESS_1_2:   Serial.print("PRESS_1_2  "); break;
+      case PED_PRESS_1_L:   Serial.print("PRESS_1_L  "); break;
+      case PED_PRESS_1_2_L: Serial.print("PRESS_1_2_L"); break;
+      case PED_PRESS_2_L:   Serial.print("PRESS_2_L  "); break;
+    }
+    Serial.print("   ");
+    switch (pedals[i].invertPolarity) {
+      case false:           Serial.print("POLARITY+"); break;
+      case true:            Serial.print("POLARITY-"); break;
+    }
+    Serial.print("   ");
+    switch (banks[currentBank][i].midiMessage) {
+      case PED_PROGRAM_CHANGE:
+        Serial.print("PROGRAM_CHANGE ");
+        Serial.print(banks[currentBank][i].midiCode);
+        break;
+      case PED_CONTROL_CHANGE:
+        Serial.print("CONTROL_CHANGE ");
+        Serial.print(banks[currentBank][i].midiCode);
+        break;
+      case PED_NOTE_ON_OFF:
+        Serial.print("NOTE_ON_OFF    ");
+        Serial.print(banks[currentBank][i].midiCode);
+        break;
+      case PED_PITCH_BEND:
+        Serial.print("PITCH_BEND     ");
+        break;
+    }
     Serial.print("   Channel ");
     Serial.print(banks[currentBank][i].midiChannel);
-    Serial.print("   Code ");
-    Serial.print(banks[currentBank][i].midiCode);
     Serial.println("");
 #endif
 
@@ -320,7 +475,11 @@ void controller_setup()
         unsigned int input;
         unsigned int value;
         pedals[i].debouncer = new Bounce();
+#ifdef AUTOSENSING
+        pedals[i].debouncer->attach(PIN_D(i));
+#else
         pedals[i].debouncer->attach(PIN_A0 + i);
+#endif
         pedals[i].debouncer->interval(50);
         pedals[i].debouncer->update();
         input = pedals[i].debouncer->read();                                    // reads the updated pin state
@@ -329,7 +488,11 @@ void controller_setup()
         pedals[i].pedalValue = value;
         pedals[i].lastUpdate = millis();
 
+#ifdef AUTOSENSING
+        pedals[i].footSwitch = new MD_UISwitch_Digital(PIN_D(i), pedals[i].invertPolarity ? HIGH : LOW);
+#else
         pedals[i].footSwitch = new MD_UISwitch_Digital(PIN_A0 + i, pedals[i].invertPolarity ? HIGH : LOW);
+#endif
         pedals[i].footSwitch->begin();
         pedals[i].footSwitch->setDebounceTime(50);
         if (pedals[i].function == PED_MIDI) {
@@ -374,6 +537,8 @@ void controller_setup()
         break;
 
       case PED_ANALOG:
+        pinMode(PIN_D(i), OUTPUT);
+        digitalWrite(PIN_D(i), HIGH);
         if (pedals[i].function == PED_MIDI) {
           pedals[i].analogPedal = new ResponsiveAnalogRead(PIN_A0 + i, true);
           pedals[i].analogPedal->setActivityThreshold(6.0);
@@ -869,25 +1034,26 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MIDICODE       24
 #define II_MIDINOTE       25
 #define II_FUNCTION       26
-#define II_MODE           27
-#define II_PRESS_MODE     28
-#define II_VALUE_SINGLE   29
-#define II_VALUE_DOUBLE   30
-#define II_VALUE_LONG     31
-#define II_POLARITY       32
-#define II_CALIBRATE      33
-#define II_ZERO           34
-#define II_MAX            35
-#define II_RESPONSECURVE  36
-#define II_INTERFACE      37
-#define II_MIDI_OUT       38
-#define II_MIDI_THRU      39
-#define II_MIDI_ROUTING   40
-#define II_LEGACY_MIDI    41
-#define II_PROFILE_LOAD   42
-#define II_PROFILE_SAVE   43
-#define II_WIFI           44
-#define II_DEFAULT        45
+#define II_AUTOSENSING    27
+#define II_MODE           28
+#define II_PRESS_MODE     29
+#define II_VALUE_SINGLE   30
+#define II_VALUE_DOUBLE   31
+#define II_VALUE_LONG     32
+#define II_POLARITY       33
+#define II_CALIBRATE      34
+#define II_ZERO           35
+#define II_MAX            36
+#define II_RESPONSECURVE  37
+#define II_INTERFACE      38
+#define II_MIDI_OUT       39
+#define II_MIDI_THRU      40
+#define II_MIDI_ROUTING   41
+#define II_LEGACY_MIDI    42
+#define II_PROFILE_LOAD   43
+#define II_PROFILE_SAVE   44
+#define II_WIFI           45
+#define II_DEFAULT        46
 
 // Global menu data and definitions
 
@@ -911,7 +1077,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 10, "Banks Setup",     MD_Menu::MNU_MENU,  M_BANKSETUP },
   { 11, "Pedals Setup",    MD_Menu::MNU_MENU,  M_PEDALSETUP },
   { 12, "Interface Setup", MD_Menu::MNU_MENU,  M_INTERFACESETUP },
-  { 13, "Profiles",        MD_Menu::MNU_MENU,  M_PROFILE },  
+  { 13, "Profiles",        MD_Menu::MNU_MENU,  M_PROFILE },
   { 14, "Options",         MD_Menu::MNU_MENU,  M_OPTIONS },
   // Banks Setup
   { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
@@ -923,16 +1089,17 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   // Pedals Setup
   { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
   { 41, "Set Function",    MD_Menu::MNU_INPUT, II_FUNCTION },
-  { 42, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
-  { 43, "Set Press Mode",  MD_Menu::MNU_INPUT, II_PRESS_MODE },
-  { 44, "Set Polarity",    MD_Menu::MNU_INPUT, II_POLARITY },
-  { 45, "Calibrate",       MD_Menu::MNU_INPUT, II_CALIBRATE },
-  { 46, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
-  { 47, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
-  { 48, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
-  { 49, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
-  { 50, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
-  { 51, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
+  { 42, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
+  { 43, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
+  { 44, "Set Press Mode",  MD_Menu::MNU_INPUT, II_PRESS_MODE },
+  { 45, "Set Polarity",    MD_Menu::MNU_INPUT, II_POLARITY },
+  { 46, "Calibrate",       MD_Menu::MNU_INPUT, II_CALIBRATE },
+  { 47, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
+  { 48, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
+  { 49, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
+  { 50, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
+  { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
+  { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
   { 60, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
   { 61, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
@@ -957,8 +1124,6 @@ const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   App
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
 const PROGMEM char listLegacyMIDI[]      = "   MIDI OUT   |   MIDI IN    |   MIDI THRU  ";
 const PROGMEM char listWiFiMode[] =        " Smart Config | Access Point ";
-#include "ControlChange.h"
-#include "NoteNumbers.h"
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
@@ -973,6 +1138,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDICODE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiControlChange },
   { II_MIDINOTE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiNoteNumbers },
   { II_FUNCTION,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalFunction },
+  { II_AUTOSENSING,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalMode },
   { II_PRESS_MODE,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalPressMode },
   { II_VALUE_SINGLE,  "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
@@ -1037,6 +1203,11 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_FUNCTION:
       if (bGet) vBuf.value = pedals[currentPedal].function;
       else pedals[currentPedal].function = vBuf.value;
+      break;
+
+    case II_AUTOSENSING:
+      if (bGet) vBuf.value = pedals[currentPedal].autoSensing;
+      else pedals[currentPedal].autoSensing = vBuf.value;
       break;
 
     case II_MODE:
@@ -1457,6 +1628,7 @@ void setup(void)
   RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
   interfaces[PED_APPLEMIDI].midiThru ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
 
+  autosensing_setup();
   controller_setup();
 
   irrecv.enableIRIn();                        // Start the IR receiver
