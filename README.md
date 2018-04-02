@@ -12,6 +12,7 @@ High customizable wireless MIDI controller for guitarists and more.
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 - MIDI routing
+- Auto-sensing foot switchs and expression pedals
 
 ## Applications
 - Change preset to your favourite guitar rig
