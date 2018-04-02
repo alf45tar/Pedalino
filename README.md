@@ -4,8 +4,10 @@
 
 
 # Pedalino™
-High customizable wireless MIDI controller for guitarists and more.
+Smart wireless MIDI foot controller for guitarists and more.
 
+- High customizable
+- Multi purpose
 - USB MIDI class-compliant device
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - AppleMIDI (aka RTP-MIDI) via Wi-Fi
