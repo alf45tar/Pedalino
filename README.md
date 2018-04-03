@@ -70,11 +70,14 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). 
 Pedalino is designed to work with the majority of foot switches on the market. We supported the following wiring:
 
 - Mono 1/4" TRS connector
-  - 1 switch (momentary or latch) between tip and sleeve. Normally open and normally closed is supported and can be inverted by software if your switch do not have polarity switch.
+  - 1 switch between tip and sleeve. 
 - Stereo 1/4" TRS connector
-  - 2 foot switches
-  - 3 foot switches
+  - 2 switches
+    - 1st switch between tip and sleeve
+    - 2nd switch between ring and sleeve
+  - 3 switches
 
+Normally open and normally closed is always supported and configurable by software if your switch do not have polarity switch.
 
 ## Expression pedals
 
