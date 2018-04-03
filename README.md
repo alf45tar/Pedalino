@@ -71,21 +71,29 @@ This is just an example for pots and switch connection.
 ## Foot switches
 
 
+
 ## Expression pedals
 
 There is no recognized standard for expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find an expression pedal that will work well with particular devices.
 
 Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wiper. Amazingly, there are multiple different ways these can be wired, all achieving largely the same result, which means yet more variations for expression pedals. The most common expression pedal wiring is to connect the pot to a 1/4″ stereo (TRS) instrument jack as follows:
 
-CW —— Sleeve
-Wiper — Tip
-CCW —– Ring
+Roland standard
+
+CW —> Sleeve
+Wiper —> Tip
+CCW —> Ring
 
 An alternative is with the tip and the ring reversed as follows:
 
-CW —— Sleeve
-Wiper — Ring
-CCW —– Tip
+Yamaha standard
+
+CW —> Sleeve
+Wiper —> Ring
+CCW —> Tip
+
+
+
 
 An expression pedal with wiring polarity that matches the equipment specifications is required. Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements of your equipment.
 
