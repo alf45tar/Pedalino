@@ -76,8 +76,13 @@ Pedalino is designed to work with the majority of foot switches on the market. W
     - 1st switch between tip and sleeve
     - 2nd switch between ring and sleeve
   - 3 switches
+    - 1st switch close tip and sleeve
+    - 2nd switch close ring and sleeve
+    - 3rd switch close tip, ring and sleeve
 
-Normally open and normally closed is always supported and configurable by software if your switch do not have polarity switch.
+Momentary and latch type switches are supported.
+
+Normally open (NO) and normally closed (NC) is always supported and configurable by software if your foot switch do not have polarity switch.
 
 ## Expression pedals
 
