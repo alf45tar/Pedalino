@@ -21,6 +21,8 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
 - Transform wired MIDI equipment into wireless MIDI equipment
 - Connect Windows PC to macOS and iOS devices via AppleMIDI
+- Hands-free way to control your audio parameters during live performance
+- Dramatically expanded audio system parameter control via WIFI, USB or MIDI.
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
