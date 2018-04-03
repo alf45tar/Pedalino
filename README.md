@@ -80,17 +80,17 @@ Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wip
 
 Roland standard
 
-CW —> Sleeve
-Wiper —> Tip
-CCW —> Ring
+- CW —> Sleeve
+- Wiper —> Tip
+- CCW —> Ring
 
 An alternative is with the tip and the ring reversed as follows:
 
 Yamaha standard
 
-CW —> Sleeve
-Wiper —> Ring
-CCW —> Tip
+- CW —> Sleeve
+- Wiper —> Ring
+- CCW —> Tip
 
 
 
