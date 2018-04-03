@@ -76,6 +76,8 @@ This is just an example for pots and switch connection.
 
 There is no recognized standard for expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find an expression pedal that will work well with particular devices.
 
+Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
+
 Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wiper. Amazingly, there are multiple different ways these can be wired, all achieving largely the same result, which means yet more variations for expression pedals. The most common expression pedal wiring is to connect the pot to a 1/4″ stereo (TRS) instrument jack as follows:
 
 Roland standard
@@ -142,6 +144,11 @@ You can reset the last know access point via menu.
 
 I know compile the source code requires a lot of dependancies. I decided to provide also the .hex file for your convenience.
 Uploading .hex file to Arduino it is very easy and straithforward with [Xloader](http://xloader.russemotto.com/).
+
+## Commercial alternatives
+
+- [ControllerHub 8](https://ameliascompass.com/product/controllerhub-8/)
+- [Audifront MIDI Expression](https://www.audiofront.net/MIDIExpression.php)
 
 
 ## ToDo
