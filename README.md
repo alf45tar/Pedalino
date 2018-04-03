@@ -27,6 +27,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
+- Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
 - MIDI output via USB MIDI, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
@@ -66,6 +67,13 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). 
 
 ## Foot switches
 
+Pedalino is designed to work with the majority of foot switches on the market. We supported the following wiring:
+
+- Mono 1/4" TRS connector
+  - 1 switch (momentary or latch) between tip and sleeve. Normally open and normally closed is supported and can be inverted by software if your switch do not have polarity switch.
+- Stereo 1/4" TRS connector
+  - 2 foot switches
+  - 3 foot switches
 
 
 ## Expression pedals
@@ -93,7 +101,7 @@ Yamaha standard
 
 
 
-An expression pedal with wiring polarity that matches the equipment specifications is required. Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements of your equipment.
+Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements.
 
 ### Calibration
 
