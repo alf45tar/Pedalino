@@ -67,7 +67,7 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). 
 
 ## Foot switches
 
-Pedalino is designed to work with the majority of foot switches on the market. We supported the following wiring:
+Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
 
 - Mono 1/4" TRS connector
   - 1 switch between tip and sleeve. 
