@@ -65,6 +65,16 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). 
 
 ## Auto Sensing
 
+Pedalino is able to recognize most of the commercial foot switches and expression pedals at startup.
+
+Each pedal is internally connected as follow.
+
+Pedal|Digital Pin (TIP)|Analog Pin (RING)|Ground (SLEEVE)
+-----|-----|-----|-----
+1|23|A0|GND
+2|25|A1|GND
+3|27|A2|GND
+
 ## Foot switches
 
 Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
