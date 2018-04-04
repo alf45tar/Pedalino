@@ -275,7 +275,7 @@ void autosensing_setup()
 {
   int tip;    // tip connected to an input digital pin 23, 25, ... 53 with internal pull-up resistor
   int ring;   // ring connected to an input analog pin A0, A1, ... A15
-  /*        */// sleeve connected to GND */
+  /*        */// sleeve connected to GND
   int ring_min;
   int ring_max;
   Bounce debouncer;
@@ -359,6 +359,9 @@ void autosensing_setup()
         // analog
         pedals[p].mode = PED_ANALOG;
         pedals[p].invertPolarity = true;
+        // inititalize continuos calibration
+        pedals[p].expZero = ADC_RESOLUTION - 1;
+        pedals[p].expMax = 0;
 #ifdef DEBUG_PEDALINO
         Serial.println(" ANALOG POLARITY-");
 #endif
@@ -731,6 +734,28 @@ void midi_refresh()
           if (pedals[i].analogPedal == nullptr) continue;           // sanity check
 
           input = analogRead(PIN_A0 + i);                           // read the raw analog input value
+          if (pedals[i].autoSensing) {                              // continuos calibration
+#ifdef DEBUG_PEDALINO
+            if (pedals[i].expZero > round(1.1 * input)) {
+              Serial.print("Pedal ");
+              if (i < 9) Serial.print(" ");
+              Serial.print(i + 1);
+              Serial.print(" calibration min ");
+              Serial.print(round(1.1 * input));
+              Serial.println("");
+            }
+            if (pedals[i].expMax < round(0.9 * input)) {
+              Serial.print("Pedal ");
+              if (i < 9) Serial.print(" ");
+              Serial.print(i + 1);
+              Serial.print(" calibration max ");
+              Serial.print(round(0.9 * input));
+              Serial.println("");
+            }
+#endif
+            pedals[i].expZero = min(pedals[i].expZero, round(1.1 * input));
+            pedals[i].expMax  = max(pedals[i].expMax,  round(0.9 * input));
+          }
           if (pedals[i].invertPolarity) input = ADC_RESOLUTION - 1 - input;     // invert the scale
           value = map_analog(i, input);                             // apply the digital map function to the value
           value = value >> 3;                                       // map from 10-bit value [0, 1023] to the 7-bit MIDI value [0, 127]
