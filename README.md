@@ -69,11 +69,11 @@ Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). 
 
 Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
 
-![TS_TRS](https://github.com/alf45tar/Pedalino/blob/master/ts_trs.jpg)
-
 - Mono 1/4" TS connector
+![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)
   - 1 switch between Tip and Sleeve. 
 - Stereo 1/4" TRS connector
+![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)
   - 2 switches
     - 1st switch between tip and sleeve
     - 2nd switch between ring and sleeve
