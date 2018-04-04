@@ -69,11 +69,24 @@ Pedalino is able to recognize most of the commercial foot switches and expressio
 
 Each pedal is internally connected as follow.
 
-Pedal|Digital Pin (TIP)|Analog Pin (RING)|Ground (SLEEVE)
+Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 -----|-----|-----|-----
 1|23|A0|GND
 2|25|A1|GND
 3|27|A2|GND
+4|29|A3|GND
+5|31|A4|GND
+6|33|A5|GND
+7|35|A6|GND
+8|37|A7|GND
+9|39|A8|GND
+10|41|A9|GND
+11|43|A10|GND
+12|45|A11|GND
+13|47|A12|GND
+14|49|A13|GND
+15|52|A14|GND
+16|53|A15|GND
 
 ## Foot switches
 
