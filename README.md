@@ -15,6 +15,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 - MIDI routing
 - Auto-sensing foot switchs and expression pedals
+- Battery operation also possible via an USB battery pack
 
 ## Applications
 - Change preset to your favourite guitar rig
