@@ -102,12 +102,12 @@ Pedalino is designed to work with the majority of foot switches on the market. W
  
 - Stereo 1/4" TRS connector
   - 2 switches
-    - 1st switch between tip and sleeve
-    - 2nd switch between ring and sleeve
+    - 1<sup>st</sup> switch between tip and sleeve
+    - 2<sup>nd</sup> switch between ring and sleeve
   - 3 switches
-    - 1st switch close tip and sleeve
-    - 2nd switch close ring and sleeve
-    - 3rd switch close tip, ring and sleeve
+    - 1<sup>st</sup> switch close tip and sleeve
+    - 2<sup>nd</sup> switch close ring and sleeve
+    - 3<sup>rd</sup> switch close tip, ring and sleeve
 
 Momentary and latch type switches are supported.
 
