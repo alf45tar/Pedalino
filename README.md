@@ -58,17 +58,15 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 ## Pedalino™ Shield
 
-Connect up to 16 pots and switches from pin A0 (pedal 1) to pin A15 (pedal 16). Potenziometers and switches can be replaced with any commercial footswitch or expression pedal for musical instruments.
-
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShieldOverview_bb.png)
 
 ## Auto Sensing
 
-Pedalino is able to recognize most of the commercial foot switches and expression pedals at startup.
+Pedalino is is designed to work with the majority of the foot switches and expression pedals on the market.
 
-Each pedal is internally connected as follow.
+Each port is a stereo 1/4" TRS socket connected as follow.
 
 Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 -----|-----|-----|-----
@@ -111,7 +109,7 @@ Pedalino is designed to work with the majority of foot switches on the market. W
 
 Momentary and latch type switches are supported.
 
-Normally open (NO) and normally closed (NC) is always supported and configurable by software if your foot switch do not have polarity switch.
+Normally open (NO) and normally closed (NC) is always supported and configurable by software if your foot switch do not have a polarity switch.
 
 ## Expression pedals
 
