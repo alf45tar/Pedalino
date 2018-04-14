@@ -499,6 +499,7 @@ void controller_setup()
         unsigned int value;
         for (byte p = 0; p < 2; p++) {
           if (pedals[i].mode == PED_MOMENTARY1 && p == 1) continue;
+
           pedals[i].debouncer[p] = new Bounce();
           switch (p) {
             case 0:
@@ -515,13 +516,15 @@ void controller_setup()
           value = map_digital(i, input);                                          // apply the digital map function to the value
           pedals[i].pedalValue[p] = value;
           pedals[i].lastUpdate[p] = millis();
-        }
-        pedals[i].footSwitch[0] = new MD_UISwitch_Digital(PIN_D(i), pedals[i].invertPolarity ? HIGH : LOW);
-        if (pedals[i].mode != PED_MOMENTARY1)
-          pedals[i].footSwitch[1] = new MD_UISwitch_Digital(PIN_A(i), pedals[i].invertPolarity ? HIGH : LOW);
 
-        for (byte p = 0; p < 2; p++) {
-          if (pedals[i].mode == PED_MOMENTARY1 && p == 1) continue;
+          switch (p) {
+            case 0:
+              pedals[i].footSwitch[0] = new MD_UISwitch_Digital(PIN_D(i), pedals[i].invertPolarity ? HIGH : LOW);
+              break;
+            case 1:
+              pedals[i].footSwitch[1] = new MD_UISwitch_Digital(PIN_A(i), pedals[i].invertPolarity ? HIGH : LOW);
+              break;
+          }
           pedals[i].footSwitch[p]->begin();
           pedals[i].footSwitch[p]->setDebounceTime(50);
           if (pedals[i].function == PED_MIDI) {
@@ -924,7 +927,9 @@ char foot_char (byte footswitch)
 {
   footswitch = constrain(footswitch, 0, PEDALS - 1);
   if (pedals[footswitch].function != PED_MIDI) return ' ';
-  if (footswitch == lastUsedPedal || pedals[footswitch].mode == PED_MOMENTARY1 && pedals[footswitch].pedalValue[0] == LOW) return bar1[footswitch % 10];
+  if (footswitch == lastUsedPedal ||
+      pedals[footswitch].mode == PED_MOMENTARY1 && pedals[footswitch].pedalValue[0] == LOW ||
+      pedals[footswitch].mode == PED_MOMENTARY2 && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
   return ' ';
 }
 
