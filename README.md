@@ -91,10 +91,11 @@ Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 
 Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
 
-Connector|Description|Details
+Switches per port|Connector|Connector image|Wiring|Details
 -----|-----|-----
-Mono 1/4" TS|![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)|1 switch between Tip and Sleeve
-Stereo 1/4" TRS|![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|2 switches
+1|Mono 1/4" TS|![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)||1 switch between Tip and Sleeve
+2|Stereo 1/4" TRS|![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||2 switches
+3|Stereo 1/4" TRS|![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||3 switches
 
 
 ![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)
