@@ -91,11 +91,11 @@ Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 
 Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
 
-Switches per port|Connector|Connector image|Wiring|Details|Example
------|-----|-----|-----|-----|-----
-1|Mono 1/4" TS|![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)||1 switch between Tip and Sleeve|[Boss FS-5U/FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
-2|Stereo 1/4" TRS|![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||2 switches|[Boss FS-7](https://www.boss.info/us/products/fs-7/)
-3|Stereo 1/4" TRS|![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||3 switches|...
+Switches per port|Connector|Wiring|Details|Example
+-----|-----|-----|-----|-----
+1|Mono 1/4" TS ![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)||1 switch between Tip and Sleeve|[Boss FS-5U/FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
+2|Stereo 1/4" TRS ![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||2 switches|[Boss FS-7](https://www.boss.info/us/products/fs-7/)
+3|Stereo 1/4" TRS| [TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)||3 switches|...
 
 
 ![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)
