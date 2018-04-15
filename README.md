@@ -94,14 +94,15 @@ Pedalino is designed to work with the majority of foot switches on the market. W
 ![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)
 
 - Mono 1/4" TS connector
-  - 1 switch between Tip and Sleeve (for example Boss [FS-5U/FS-5L](https://www.boss.info/us/products/fs-5u_5l/))
+  - 1 switch between Tip and Sleeve (for example [Boss FS-5U/FS-5L](https://www.boss.info/us/products/fs-5u_5l/))
   
 ![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)
  
 - Stereo 1/4" TRS connector
-  - 2 switches (for example Boss [FS-7](https://www.boss.info/us/products/fs-7/)
+  - 2 switches (for example [Boss FS-7](https://www.boss.info/us/products/fs-7/))
     - 1<sup>st</sup> switch between tip and sleeve
     - 2<sup>nd</sup> switch between ring and sleeve
+    Click here for wiring details.
   - 3 switches
     - 1<sup>st</sup> switch close tip and sleeve
     - 2<sup>nd</sup> switch close ring and sleeve
