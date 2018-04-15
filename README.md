@@ -99,11 +99,10 @@ Pedalino is designed to work with the majority of foot switches on the market. W
 ![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)
  
 - Stereo 1/4" TRS connector
-  - 2 switches (for example [Boss FS-7](https://www.boss.info/us/products/fs-7/))
+  - 2 switches - [wiring details](https://github.com/alf45tar/Pedalino/blob/master/trs-2-wiring.png) (for example [Boss FS-7](https://www.boss.info/us/products/fs-7/))
     - 1<sup>st</sup> switch between tip and sleeve
     - 2<sup>nd</sup> switch between ring and sleeve
-    Click here for wiring details.
-  - 3 switches
+  - 3 switches - [wiring details](https://github.com/alf45tar/Pedalino/blob/master/trs-3-wiring.png) 
     - 1<sup>st</sup> switch close tip and sleeve
     - 2<sup>nd</sup> switch close ring and sleeve
     - 3<sup>rd</sup> switch close tip, ring and sleeve
