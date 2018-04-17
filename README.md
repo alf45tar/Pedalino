@@ -95,7 +95,7 @@ Switches per port|Connector|Wiring|Example
 -----|-----|-----|-----
 1|Mono 1/4" TS<br>![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)|1 switch between T and S|[Boss FS-5U](https://www.boss.info/us/products/fs-5u_5l/)<br>[Boss FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
 2|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|1<sup>st</sup> switch between T and S <br>2<sup>nd</sup> switch between R and S|[Boss FS-6](https://www.boss.info/us/products/fs-6/)<br>[Boss FS-7](https://www.boss.info/us/products/fs-7/)
-3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|1<sup>st</sup> switch close T and S<br>2<sup>nd</sup> switch close R and S<br>3<sup>rd</sup> switch close T, R and S|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
+3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|1<sup>st</sup> switch close T and S<br>2<sup>nd</sup> switch close R and S<br>3<sup>rd</sup> switch close T, R and S<br>![3Button](https://github.com/alf45tar/Pedalino/blob/master/3button.gif)|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
 
 Momentary and latch type switches are supported.
 
@@ -132,7 +132,7 @@ Using a pedal with incompatible wiring can result in limited range, jumping or n
 
 Pedalino like some of the more sophisticated effects and controllers incorporate a calibration utility that can mitigate some of the issues with pot rotation. There is a software option that allows the user to match the device to a specific expression pedal. This involves moving the pedal between it’s maximum and minimum settings and the device measuring the result. It then sets it’s internal parameters so that it recognizes where the maximum and minimum settings are of that particular pedal. This can often resolve problems of limited range. It’s important to calibrate all expression pedals. If the pedal is ever replaced, even with the same model, calibration should be run again.
 
-Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement od the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
+Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
 
 ## USB MIDI
