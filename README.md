@@ -95,7 +95,7 @@ Switches per port|Connector|Wiring|Example
 -----|-----|-----|-----
 1|Mono 1/4" TS<br>![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.png)|1 switch between T and S|[Boss FS-5U](https://www.boss.info/us/products/fs-5u_5l/)<br>[Boss FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
 2|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|1<sup>st</sup> switch between T and S <br>2<sup>nd</sup> switch between R and S|[Boss FS-6](https://www.boss.info/us/products/fs-6/)<br>[Boss FS-7](https://www.boss.info/us/products/fs-7/)
-3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|![3Button](https://github.com/alf45tar/Pedalino/blob/master/trs3button.jpg)|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
+3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.png)|![3Button](https://github.com/alf45tar/Pedalino/blob/master/trs3button.gif)|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
 
 Momentary and latch type switches are supported.
 
