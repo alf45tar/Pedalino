@@ -6,7 +6,7 @@
 # Pedalino™
 Smart wireless MIDI foot controller for guitarists and more.
 
-- High customizable
+- High customizable: any number of pedals of any type in any order
 - Multi purpose
 - USB MIDI class-compliant device
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
@@ -14,7 +14,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - Legacy MIDI DIN connector configured as MIDI OUT or MIDI IN or MIDI THRU
 - MIDI routing
-- Auto-sensing foot switchs and expression pedals
+- Auto-sensing footswitches and expression pedals
 - Battery operation also possible via an USB battery pack
 
 ## Applications
