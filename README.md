@@ -62,9 +62,11 @@ Smart wireless MIDI foot controller for guitarists and more.
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShieldOverview_bb.png)
 
-## Auto Sensing
+## Pedal Wiring
 
-Pedalino is is designed to work with the majority of the foot switches and expression pedals on the market.
+There is no recognized standard for footswitch and expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find a footswitch or an expression pedal that will work well with particular devices.
+
+Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
 
 Each port is a stereo 1/4" TRS socket connected as follow.
 
@@ -87,9 +89,15 @@ Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 15|52|A14|GND
 16|53|A15|GND
 
+## Auto Sensing
+
+Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
+
+Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
+
 ## Foot switches
 
-Pedalino is designed to work with the majority of foot switches on the market. We support the following wiring:
+Pedalino supports the following wiring:
 
 Switches per port|Connector|Wiring|Example
 -----|-----|-----|-----
@@ -102,10 +110,6 @@ Momentary and latch type switches are supported.
 Normally open (NO) and normally closed (NC) is always supported and configurable by software if your foot switch do not have a polarity switch.
 
 ## Expression pedals
-
-There is no recognized standard for expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find an expression pedal that will work well with particular devices.
-
-Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
 
 Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wiper. Amazingly, there are multiple different ways these can be wired, all achieving largely the same result, which means yet more variations for expression pedals. The most common expression pedal wiring is to connect the pot to a 1/4″ stereo (TRS) instrument jack as follows:
 
@@ -123,16 +127,11 @@ Yamaha standard
 - Wiper —> Ring
 - CCW —> Tip
 
-
-
-
 Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements.
 
 ### Calibration
 
 Pedalino like some of the more sophisticated effects and controllers incorporate a calibration utility that can mitigate some of the issues with pot rotation. There is a software option that allows the user to match the device to a specific expression pedal. This involves moving the pedal between it’s maximum and minimum settings and the device measuring the result. It then sets it’s internal parameters so that it recognizes where the maximum and minimum settings are of that particular pedal. This can often resolve problems of limited range. It’s important to calibrate all expression pedals. If the pedal is ever replaced, even with the same model, calibration should be run again.
-
-Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
 
 ## USB MIDI
