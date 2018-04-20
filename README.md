@@ -68,7 +68,9 @@ There is no recognized standard for footswitch and expression pedal inputs. Effe
 
 Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
 
-Each port is a stereo 1/4" TRS socket connected as follow.
+Pedalino is designed to work with external footswitch and expression pedal connected via a stereo 1/4" TRS jack.
+
+Each stereo TRS socket should be connected as follow.
 
 Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 -----|-----|-----|-----
@@ -90,6 +92,8 @@ Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 16|53|A15|GND
 
 ## Auto Sensing
+
+Pedalino cona
 
 Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
 
