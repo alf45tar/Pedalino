@@ -105,6 +105,8 @@ Normally open (NO) and normally closed (NC) is always supported and configurable
 
 ## Expression pedals
 
+An expression pedal is more or less a pot with a 1/4" TRS jack plug.
+
 Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wiper. Amazingly, there are multiple different ways these can be wired, all achieving largely the same result, which means yet more variations for expression pedals. The most common expression pedal wiring is to connect the pot to a 1/4″ stereo (TRS) instrument jack as follows:
 
 Roland standard
