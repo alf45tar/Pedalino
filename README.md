@@ -64,13 +64,11 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 ## Pedal Wiring
 
-There is no recognized standard for footswitch and expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find a footswitch or an expression pedal that will work well with particular devices.
-
 Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
 
-Pedalino is designed to work with external footswitch and expression pedal connected via a stereo 1/4" TRS jack.
+There is no recognized standard for footswitch and expression pedal inputs. Effects and amp manufacturers use whatever variations are appropriate for their particular application. This can cause problems for the consumer needing to find a footswitch or an expression pedal that will work well with particular devices.
 
-Each stereo TRS socket should be connected as follow.
+Pedals connector is usually a 1/4" TRS jack. Each stereo TRS socket should be connected as follow.
 
 Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 -----|-----|-----|-----
@@ -90,14 +88,6 @@ Pedal|TIP - Digital Pin|RING - Analog Pin|SLEEVE - Ground
 14|49|A13|GND
 15|52|A14|GND
 16|53|A15|GND
-
-## Auto Sensing
-
-Pedalino cona
-
-Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
-
-Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
 ## Foot switches
 
@@ -136,6 +126,14 @@ Using a pedal with incompatible wiring can result in limited range, jumping or n
 ### Calibration
 
 Pedalino like some of the more sophisticated effects and controllers incorporate a calibration utility that can mitigate some of the issues with pot rotation. There is a software option that allows the user to match the device to a specific expression pedal. This involves moving the pedal between it’s maximum and minimum settings and the device measuring the result. It then sets it’s internal parameters so that it recognizes where the maximum and minimum settings are of that particular pedal. This can often resolve problems of limited range. It’s important to calibrate all expression pedals. If the pedal is ever replaced, even with the same model, calibration should be run again.
+
+## Auto Sensing
+
+Pedalino cona
+
+Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
+
+Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
 
 ## USB MIDI
