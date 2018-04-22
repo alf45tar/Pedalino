@@ -349,7 +349,7 @@ void autosensing_setup()
 #endif
         }
       }
-      else if (ring == 0) {
+      else if (ring <= 1) {
         // ring connected to sleeve (GND)
         // switch between tip and ring
         pedals[p].mode = PED_MOMENTARY1;
