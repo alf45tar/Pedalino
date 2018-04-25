@@ -18,7 +18,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Legacy MIDI OUT and MIDI IN connector
 - Every MIDI port can route MIDI messages received from other interface
 - Auto-sensing footswitches and expression pedals
-- Modular assemply of easy to find pieces of hardware and re-use of open source software libraries
+- Modular assembly of easy to find pieces of hardware and re-use of open source software libraries
 
 ## Applications
 - Change preset to your favourite guitar rig
