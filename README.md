@@ -56,6 +56,9 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 The rest is not mandatory but depends of with feature you want to support.
 
+- USB MIDI class-compliant device
+  - [MocoLUFA](https://github.com/kuwatay/mocolufa) firmware
+
 - AppleMIDI via WIFI
   - ESP8266 ESP-01 1M WiFi module
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
