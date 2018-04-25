@@ -18,6 +18,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Legacy MIDI OUT and MIDI IN connector
 - Every MIDI port can route MIDI messages received from other interface
 - Auto-sensing footswitches and expression pedals
+- Modular assemply of easy to find pieces of hardware and re-use of open source software libraries
 
 ## Applications
 - Change preset to your favourite guitar rig
@@ -43,20 +44,29 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Firmware update via HTTP (http://pedalino/update)
 
 ## Bill of materials
+
 - Arduino Mega 2560 R3 or equivalent
 - 16x2 LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset
-- ESP8266 ESP-01 1M WiFi module
-- Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
-- ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
-- [Arduino MIDI](https://github.com/FortySevenEffects/arduino_midi_library) library
-- [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library (may works also with standard LiquidCrystal library with minimal changes)
+- [New Liquid Crystal](https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home) library
 - [Bounce2](https://github.com/thomasfredericks/Bounce2) library
 - [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library
 - [MD_Menu](https://github.com/MajicDesigns/MD_Menu) library
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
-- [IRremore](https://github.com/z3t0/Arduino-IRremote) library
-- [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
-- [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
+- [Arduino MIDI](https://github.com/FortySevenEffects/arduino_midi_library) library
+
+The rest is not mandatory but depends of with feature you want to support.
+
+- AppleMIDI via WIFI
+  - ESP8266 ESP-01 1M WiFi module
+  - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
+  - [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
+
+- Infrared Remote Control
+  - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
+  - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
+  
+- Bluetooth Remote Control
+  - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 
 ## Pedalino™ Shield
 
@@ -132,8 +142,6 @@ Using a pedal with incompatible wiring can result in limited range, jumping or n
 Pedalino like some of the more sophisticated effects and controllers incorporate a calibration utility that can mitigate some of the issues with pot rotation. There is a software option that allows the user to match the device to a specific expression pedal. This involves moving the pedal between it’s maximum and minimum settings and the device measuring the result. It then sets it’s internal parameters so that it recognizes where the maximum and minimum settings are of that particular pedal. This can often resolve problems of limited range. It’s important to calibrate all expression pedals. If the pedal is ever replaced, even with the same model, calibration should be run again.
 
 ## Auto Sensing
-
-Pedalino cona
 
 Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
 
