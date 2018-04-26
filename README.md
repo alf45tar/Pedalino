@@ -54,7 +54,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - [MD_UISwitch](https://github.com/MajicDesigns/MD_UISwitch) library
 - [Arduino MIDI](https://github.com/FortySevenEffects/arduino_midi_library) library
 
-The rest is not mandatory but depends of with feature you want to support.
+The rest is not mandatory but it depends of which features you want to support.
 
 - USB MIDI class-compliant device
   - [MocoLUFA](https://github.com/kuwatay/mocolufa) firmware
