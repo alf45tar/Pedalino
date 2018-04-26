@@ -124,19 +124,10 @@ An expression pedal is more or less a pot with a 1/4" TRS jack plug.
 
 Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wiper. Amazingly, there are multiple different ways these can be wired, all achieving largely the same result, which means yet more variations for expression pedals. The most common expression pedal wiring is to connect the pot to a 1/4″ stereo (TRS) instrument jack as follows:
 
-Roland standard
-
-- CW —> Sleeve
-- Wiper —> Tip
-- CCW —> Ring
-
-An alternative is with the tip and the ring reversed as follows:
-
-Yamaha standard
-
-- CW —> Sleeve
-- Wiper —> Ring
-- CCW —> Tip
+Standard|Connector|Wiring|Example
+-----|-----|-----|-----
+Roland|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Tip<br>CCW —> Ring|[Roland EV-5](https://www.roland.com/global/products/ev-5/)
+Yamaha|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Ring<br>CCW —> Tip|[Technics SZ-E1](https://www.roland.com/global/products/ev-5/)
 
 Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements.
 
