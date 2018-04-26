@@ -126,8 +126,8 @@ Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wip
 
 Standard|Connector|Wiring|Example
 -----|-----|-----|-----
-Roland|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Tip<br>CCW —> Ring|[Roland EV-5](https://www.roland.com/global/products/ev-5/)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p)<br>Switch in "M-Audio" position
-Yamaha|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Ring<br>CCW —> Tip|[Yamaha FC7](https://usa.yamaha.com/products/music_production/accessories/fc7/index.html)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p)<br>Switch in "Other" postion<br>Technics SZ-E1/SZ-E2
+Roland|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Tip<br>CCW —> Ring|[Roland EV-5](https://www.roland.com/global/products/ev-5/)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) Switch in "M-Audio" position
+Yamaha|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Ring<br>CCW —> Tip|[Yamaha FC7](https://usa.yamaha.com/products/music_production/accessories/fc7/index.html)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) Switch in "Other" postion<br>Technics SZ-E1/SZ-E2
 
 Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements.
 
