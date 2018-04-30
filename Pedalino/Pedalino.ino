@@ -135,6 +135,7 @@ struct pedal {
 };
 
 struct interface {
+  byte                   midiIn;          // 0 = disable, 1 = enable
   byte                   midiOut;         // 0 = disable, 1 = enable
   byte                   midiThru;        // 0 = disable, 1 = enable
   byte                   midiRouting;     // 0 = disable, 1 = enable
@@ -260,7 +261,7 @@ void load_factory_default()
       banks[b][p] = {PED_CONTROL_CHANGE, b + 1, p + 1};
 
   for (byte p = 0; p < PEDALS; p++)
-    pedals[p] = {PED_MIDI, 1, PED_MOMENTARY1, PED_PRESS_1, 0, 127, 64, 0, 0, 50, 930, 0, 0, millis(), millis(), nullptr, nullptr, nullptr, nullptr, nullptr};
+    pedals[p] = {PED_MIDI, 1, PED_MOMENTARY1, PED_PRESS_1, 1, 127, 65, 0, 0, 50, 930, 0, 0, millis(), millis(), nullptr, nullptr, nullptr, nullptr, nullptr};
 
   //pedals[0].mode = PED_ANALOG;
   //pedals[1].mode = PED_ANALOG;
@@ -270,7 +271,7 @@ void load_factory_default()
   pedals[15].function = PED_MENU;
 
   for (byte i = 0; i < INTERFACES; i++)
-    interfaces[i] = {PED_ENABLE, PED_DISABLE, PED_DISABLE};
+    interfaces[i] = {PED_ENABLE, PED_ENABLE, PED_DISABLE, PED_ENABLE};
 }
 
 //
@@ -344,6 +345,7 @@ void autosensing_setup()
         else {
           // not connected
           pedals[p].mode = PED_MOMENTARY1;
+          pedals[p].invertPolarity = false;
 #ifdef DEBUG_PEDALINO
           Serial.println(" FLOATING PIN - NOT CONNECTED ");
 #endif
@@ -363,7 +365,7 @@ void autosensing_setup()
       else if (ring > 0) {
         // analog
         pedals[p].mode = PED_ANALOG;
-        pedals[p].invertPolarity = false;
+        pedals[p].invertPolarity = true;
         // inititalize continuos calibration
         pedals[p].expZero = ADC_RESOLUTION - 1;
         pedals[p].expMax = 0;
@@ -487,7 +489,6 @@ void controller_setup()
     }
     Serial.print("   Channel ");
     Serial.print(banks[currentBank][i].midiChannel);
-    Serial.println("");
 #endif
 
     switch (pedals[i].mode) {
@@ -504,9 +505,17 @@ void controller_setup()
           switch (p) {
             case 0:
               pedals[i].debouncer[0]->attach(PIN_D(i));
+#ifdef DEBUG_PEDALINO
+              Serial.print("   Pin D");
+              Serial.print(PIN_D(i));
+#endif
               break;
             case 1:
               pedals[i].debouncer[1]->attach(PIN_A(i));
+#ifdef DEBUG_PEDALINO
+              Serial.print(" A");
+              Serial.print(i);
+#endif
               break;
           }
           pedals[i].debouncer[p]->interval(50);
@@ -586,6 +595,9 @@ void controller_setup()
       case PED_JOG_WHEEL:
         break;
     }
+#ifdef DEBUG_PEDALINO
+    Serial.println("");
+#endif
   }
 }
 
@@ -716,9 +728,9 @@ void midi_refresh()
 #endif
                 b = (currentBank + 2) % BANKS;
                 if (value == LOW)
-                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, 127, banks[b][i].midiChannel);
+                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
                 else
-                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode,   0, banks[b][i].midiChannel);
+                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
                 pedals[i].pedalValue[0] = value;
                 pedals[i].lastUpdate[0] = millis();
                 pedals[i].pedalValue[1] = pedals[i].pedalValue[0];
@@ -742,9 +754,9 @@ void midi_refresh()
 #endif
                   b = currentBank;
                   if (value == LOW)
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, 127, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
                   else
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode,   0, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
                   pedals[i].pedalValue[0] = value;
                   pedals[i].lastUpdate[0] = millis();
                   lastUsedSwitch = i;
@@ -765,9 +777,9 @@ void midi_refresh()
 #endif
                   b = (currentBank + 1) % BANKS;
                   if (value == LOW)
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, 127, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
                   else
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode,   0, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
                   pedals[i].pedalValue[1] = value;
                   pedals[i].lastUpdate[1] = millis();
                   lastUsedSwitch = i;
@@ -781,6 +793,12 @@ void midi_refresh()
             case PED_PRESS_2:
             case PED_PRESS_2_L:
             case PED_PRESS_L:
+
+              pedals[i].pedalValue[0] = digitalRead(PIN_D(i));
+              //pedals[i].lastUpdate[0] = millis();
+              pedals[i].pedalValue[1] = digitalRead(PIN_A(i));
+              //pedals[i].lastUpdate[1] = millis();
+
               k1 = MD_UISwitch::KEY_NULL;
               k2 = MD_UISwitch::KEY_NULL;
               if (pedals[i].footSwitch[0] != nullptr) k1 = pedals[i].footSwitch[0]->read();
@@ -797,26 +815,20 @@ void midi_refresh()
                 switch (k) {
 
                   case MD_UISwitch::KEY_PRESS:
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_single, 127, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_single, 127, banks[b][i].midiChannel, false);
-                    pedals[i].pedalValue[0] = LOW;
-                    pedals[i].lastUpdate[0] = millis();
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
 
                   case MD_UISwitch::KEY_DPRESS:
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_double, 127, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_double, 127, banks[b][i].midiChannel, false);
-                    pedals[i].pedalValue[0] = LOW;
-                    pedals[i].lastUpdate[0] = millis();
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
 
                   case MD_UISwitch::KEY_LONGPRESS:
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_long, 127, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, pedals[i].value_long, 127, banks[b][i].midiChannel, false);
-                    pedals[i].pedalValue[0] = LOW;
-                    pedals[i].lastUpdate[0] = millis();
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_long, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_long, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
                 }
@@ -885,7 +897,6 @@ void midi_refresh()
     }
   }
 }
-
 
 //
 // Calibration for analog controllers
@@ -997,7 +1008,7 @@ char foot_char (byte footswitch)
   if (pedals[footswitch].function != PED_MIDI) return ' ';
   if (footswitch == lastUsedPedal ||
       pedals[footswitch].mode == PED_MOMENTARY1 && pedals[footswitch].pedalValue[0] == LOW ||
-      pedals[footswitch].mode == PED_MOMENTARY2 && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
+      (pedals[footswitch].mode == PED_MOMENTARY2 || pedals[footswitch].mode == PED_MOMENTARY3) && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
   return ' ';
 }
 
@@ -1045,6 +1056,8 @@ void update_eeprom() {
   }
 
   for (byte i = 0; i < INTERFACES; i++) {
+    EEPROM.put(offset, interfaces[i].midiIn);
+    offset += sizeof(byte);
     EEPROM.put(offset, interfaces[i].midiOut);
     offset += sizeof(byte);
     EEPROM.put(offset, interfaces[i].midiThru);
@@ -1122,6 +1135,8 @@ void read_eeprom() {
     }
 
     for (byte i = 0; i < INTERFACES; i++) {
+      EEPROM.get(offset, interfaces[i].midiIn);
+      offset += sizeof(byte);
       EEPROM.get(offset, interfaces[i].midiOut);
       offset += sizeof(byte);
       EEPROM.get(offset, interfaces[i].midiThru);
@@ -1182,14 +1197,15 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MAX            36
 #define II_RESPONSECURVE  37
 #define II_INTERFACE      38
-#define II_MIDI_OUT       39
-#define II_MIDI_THRU      40
-#define II_MIDI_ROUTING   41
-#define II_LEGACY_MIDI    42
-#define II_PROFILE_LOAD   43
-#define II_PROFILE_SAVE   44
-#define II_WIFI           45
-#define II_DEFAULT        46
+#define II_MIDI_IN        39
+#define II_MIDI_OUT       40
+#define II_MIDI_THRU      41
+#define II_MIDI_ROUTING   42
+#define II_LEGACY_MIDI    43
+#define II_PROFILE_LOAD   44
+#define II_PROFILE_SAVE   45
+#define II_WIFI           46
+#define II_DEFAULT        47
 
 // Global menu data and definitions
 
@@ -1200,8 +1216,8 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
   { M_ROOT,           SIGNATURE,         10, 13, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 34, 0 },
-  { M_PEDALSETUP,     "Pedals Setup",    40, 51, 0 },
-  { M_INTERFACESETUP, "Interface Setup", 60, 63, 0 },
+  { M_PEDALSETUP,     "Pedals Setup",    40, 52, 0 },
+  { M_INTERFACESETUP, "Interface Setup", 60, 64, 0 },
   { M_PROFILE,        "Profiles",        70, 71, 0 },
   { M_OPTIONS,        "Options",         80, 81, 0 },
 };
@@ -1238,9 +1254,10 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
   { 60, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 61, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
-  { 62, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
-  { 63, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
+  { 61, "MIDI IN",         MD_Menu::MNU_INPUT, II_MIDI_IN },
+  { 62, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  { 63, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
+  { 64, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
   // Profiles Setup
   { 70, "Load Profile",    MD_Menu::MNU_INPUT, II_INTERFACE },
   { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
@@ -1258,7 +1275,6 @@ const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
 const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
-const PROGMEM char listLegacyMIDI[]      = "   MIDI OUT   |   MIDI IN    |   MIDI THRU  ";
 const PROGMEM char listWiFiMode[] =        " Smart Config | Access Point ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
@@ -1286,10 +1302,10 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MAX,           ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
   { II_RESPONSECURVE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listResponseCurve },
   { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listInterface },
+  { II_MIDI_IN,       ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_OUT,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_THRU,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_ROUTING,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
-  { II_LEGACY_MIDI,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listLegacyMIDI },
   { II_PROFILE_LOAD,  "1-9:      "  , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 1,                  9, 0, 10, nullptr },
   { II_PROFILE_SAVE,  "1-9:      "  , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 1,                  9, 0, 10, nullptr },
   { II_WIFI,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listWiFiMode },
@@ -1411,6 +1427,11 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         currentInterface = vBuf.value;
 
       }
+      break;
+
+    case II_MIDI_IN:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiIn;
+      else interfaces[currentInterface].midiIn = vBuf.value;
       break;
 
     case II_MIDI_OUT:
@@ -1812,5 +1833,4 @@ void loop(void)
   //DIN_MIDI.read();
   //RTP_MIDI.read();
 }
-
 
