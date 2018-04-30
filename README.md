@@ -194,6 +194,7 @@ Uploading .hex file to Arduino it is very easy and straithforward with [Xloader]
 - [ ] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
 - [ ] Bluetooth MIDI
+- [ ] OSC
 
 # Copyright
 Copyright 2017-2018 alfa45star
