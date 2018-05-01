@@ -14,6 +14,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - USB MIDI class-compliant device
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - AppleMIDI (aka RTP-MIDI) via Wi-Fi
+- Open Sound Control (OSC) via Wi-Fi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - Legacy MIDI OUT and MIDI IN connector
 - Every MIDI port can route MIDI messages received from other interface
@@ -25,6 +26,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
 - Transform wired MIDI equipment into wireless MIDI equipment
 - Connect Windows PC to macOS and iOS devices via AppleMIDI
+- OSC to MIDI and vicecersa
 - Hands-free way to control your audio parameters during live performance
 - Dramatically expanded audio system parameter control via WIFI, USB or MIDI.
 
@@ -59,10 +61,15 @@ The rest is not mandatory but it depends of which features you want to support.
 - USB MIDI class-compliant device
   - [MocoLUFA](https://github.com/kuwatay/mocolufa) firmware
 
-- AppleMIDI via WIFI
+- WIFI
   - ESP8266 ESP-01 1M WiFi module
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
+  
+- AppleMIDI via WIFI
   - [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
+  
+- OSC via WIFI
+  - [CNMAT OSC for Arduino](https://github.com/CNMAT/OSC) library
 
 - Infrared Remote Control
   - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
