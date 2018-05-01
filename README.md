@@ -187,8 +187,7 @@ You can reset the last know access point via menu.
 
 ## Open Sound Control (OSC)
 
-Open Sound Control (OSC) is a protocol for communication among computers, sound synthesisers, and other multimedia
-devices that is lightweight and leverages current networking technologies.
+[Open Sound Control (OSC)](http://opensoundcontrol.org/introduction-osc) is an open, transport-independent, message-based protocol developed for communication among computers, sound synthesizers, and other multimedia devices.
 Although the OSC specification does not enforce any particular type of transport, OSC is nowadays mostly used over traditional
 networks known as IP (Internet Protocol).
 
@@ -208,14 +207,7 @@ Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC message
 
 OSC specification does not define any namespace. There is no de-facto standard too.
 
-Pedalino OSC namespace for incoming and outcoming messages is:
 
-MIDI Event|OSC address|OSC Parameters
------|-----|-----
-Note On|/pedalino/midi/noteOn|channel(int), note(int), velocity(int)
-Note Off|/pedalino/midi/noteOff|channel(int), note(int), velocity(int)
-Control Change|/pedalino/midi/controlChange|channel(int), number(int), value(int)
-Program Change|/pedalino/midi/programChange|channel(int), number(int)
 
 
 
@@ -224,6 +216,15 @@ Program Change|/pedalino/midi/programChange|channel(int), number(int)
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
 
 The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
+
+Pedalino OSC namespace for incoming and outcoming MIDI events is:
+
+MIDI Event|OSC Address|OSC Arguments
+-----|-----|-----
+Note On|/pedalino/midi/noteOn|channel(int), note(int), velocity(int)
+Note Off|/pedalino/midi/noteOff|channel(int), note(int), velocity(int)
+Control Change|/pedalino/midi/controlChange|channel(int), number(int), value(int)
+Program Change|/pedalino/midi/programChange|channel(int), number(int)
 
 
 ## Pre-compiled source into hex files
