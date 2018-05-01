@@ -185,6 +185,29 @@ Boot procedure
 
 You can reset the last know access point via menu.
 
+## Open Sound Control (OSC)
+
+### OSC namespace
+
+OSC does not define any pre-defined namespace by design. There is no de-facto standard too.
+
+Pedalino OSC namespace
+
+MIDI Event|OSC address|OSC Parameters
+-----|-----|-----
+Note On|/noteOn/int channel, int note, int velocity
+Note Off|/noteOff/int channel, int note, int velocity
+Control Change|/controlChange|int channel, int number, int value
+
+
+
+
+### OSC2MIDI Bridge
+
+Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
+The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) and viceversa.
+
+
 ## Pre-compiled source into hex files
 
 I know compile the source code requires a lot of dependancies. I decided to provide also the .hex file for your convenience.
