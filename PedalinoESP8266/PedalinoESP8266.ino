@@ -1,4 +1,4 @@
-// ESP8266 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI
+// ESP8266 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI <-> WiFi OSC
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -57,7 +57,9 @@ struct SerialMIDISettings : public midi::DefaultSettings
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
-//MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
+
+
+// WiFi OSC comunication
 
 WiFiUDP                 oscUDP;                  // A UDP instance to let us send and receive packets over UDP
 IPAddress               oscRemoteIp;             // remote IP of an external OSC device
@@ -504,7 +506,7 @@ void wifi_connect()
     Serial1.println("mDNS responder started");
 #endif
     MDNS.addService("apple-midi", "udp", 5004);
-    MDNS.addService("osc",        "udp", 8000);
+    MDNS.addService("osc",        "udp", oscLocalPort);
   }
 
   // Start firmawre update via HTTP (connect to http://pedalino/update)
@@ -519,11 +521,11 @@ void wifi_connect()
   Serial1.println("Connect to http://pedalino/update for firmware update");
 #endif
 
-  // Broadcast outcoming OSC messages to local WiFi network
+  // Broadcast OSC messages to local WiFi network
   oscRemoteIp = WiFi.localIP();
   oscRemoteIp[3] = 255;
 
-  // Start listen incoming OSC messages
+  // Set incoming OSC messages port
   oscUDP.begin(oscLocalPort);
 #ifdef PEDALINO_SERIAL_DEBUG
   Serial1.println("OSC server started");
@@ -664,9 +666,9 @@ void loop()
   if (size > 0) {
     while (size--) oscMsg.fill(oscUDP.read());
     if (!oscMsg.hasError()) {
-      oscMsg.dispatch("/noteOn",        OnOscNoteOn);
-      oscMsg.dispatch("/noteOff",       OnOscNoteOff);
-      oscMsg.dispatch("/controlChange", OnOscControlChange);
+      oscMsg.dispatch("/pedalino/midi/noteOn",        OnOscNoteOn);
+      oscMsg.dispatch("/pedalino/midi/noteOff",       OnOscNoteOff);
+      oscMsg.dispatch("/pedalino/midi/controlChange", OnOscControlChange);
     } else {
       oscError = oscMsg.getError();
 #ifdef PEDALINO_TELNET_DEBUG
