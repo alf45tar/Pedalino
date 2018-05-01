@@ -195,10 +195,10 @@ Pedalino OSC namespace
 
 MIDI Event|OSC address|OSC Parameters
 -----|-----|-----
-Note On|/noteOn/int channel, int note, int velocity
-Note Off|/noteOff/int channel, int note, int velocity
-Control Change|/controlChange|int channel, int number, int value
-
+Note On|/pedalino/midi/noteOn|int channel, int note, int velocity
+Note Off|/pedalino/midi/noteOff|int channel, int note, int velocity
+Control Change|/pedalino/midi/controlChange|int channel, int number, int value
+Program Change|/pedalino/midi/programChange|int channel, int number, int value
 
 
 
