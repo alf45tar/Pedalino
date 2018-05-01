@@ -15,15 +15,8 @@ env:
 install:
     - pip install -U platformio
     - platformio update
-    - platformio lib -g install 136
-                                423
-                                https://github.com/JoaoLopesF/RemoteDebug.git
-                                https://github.com/lathoub/Arduino-AppleMIDI-Library.git
-                                https://github.com/FortySevenEffects/arduino_midi_library.git
-                                https://github.com/thomasfredericks/Bounce2.git
+    - platformio lib -g install 62 136 222 423 1106 1266 1674 1954
                                 https://github.com/dxinteractive/ResponsiveAnalogRead.git
-                                https://github.com/MajicDesigns/MD_Menu.git
-                                https://github.com/MajicDesigns/MD_UISwitch.git
                                 https://github.com/z3t0/Arduino-IRremote.git
 
 script:
