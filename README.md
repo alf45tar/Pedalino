@@ -187,25 +187,41 @@ You can reset the last know access point via menu.
 
 ## Open Sound Control (OSC)
 
+Open Sound Control (OSC) is a protocol for communication among computers, sound synthesisers, and other multimedia
+devices that is lightweight and leverages current networking technologies.
+Although the OSC specification does not enforce any particular type of transport, OSC is nowadays mostly used over traditional
+networks known as IP (Internet Protocol). 
+The OSC protocol uses the IP network to carry messages from a source to a destination. Sources of OSC messages are
+usually called OSC Clients, and destinations OSC Servers.
+
+Pedalino is both able to receive (as a server), and send to several destinations (as multiple clients).
+
+UDP and TCP are network protocols used for communicating OSC messages between two devices. UDP is the most widely used at the moment.
+
+Pedalino supports UDP protocol only for transmitting and receiving OSC messages because TCP has more latency than UDP.
+
+Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC messages on UDP port 9000 on the same WiFi LAN segment it is connected.
+
+
 ### OSC namespace
 
 OSC does not define any pre-defined namespace by design. There is no de-facto standard too.
 
-Pedalino OSC namespace
+Pedalino OSC namespace for incoming and outcoming messages is.
 
 MIDI Event|OSC address|OSC Parameters
 -----|-----|-----
-Note On|/pedalino/midi/noteOn|int channel, int note, int velocity
-Note Off|/pedalino/midi/noteOff|int channel, int note, int velocity
-Control Change|/pedalino/midi/controlChange|int channel, int number, int value
-Program Change|/pedalino/midi/programChange|int channel, int number, int value
+Note On|/pedalino/midi/noteOn|channel(int), note(int), velocity(int)
+Note Off|/pedalino/midi/noteOff|channel(int), note(int), velocity(int)
+Control Change|/pedalino/midi/controlChange|channel(int), number(int), value(int)
+Program Change|/pedalino/midi/programChange|channel(int), number(int)
 
 
 
-### OSC2MIDI Bridge
+### OSC-to-MIDI and MIDI-to-OSC
 
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
-The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) and viceversa.
+The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device).
 
 
 ## Pre-compiled source into hex files
