@@ -190,7 +190,8 @@ You can reset the last know access point via menu.
 Open Sound Control (OSC) is a protocol for communication among computers, sound synthesisers, and other multimedia
 devices that is lightweight and leverages current networking technologies.
 Although the OSC specification does not enforce any particular type of transport, OSC is nowadays mostly used over traditional
-networks known as IP (Internet Protocol). 
+networks known as IP (Internet Protocol).
+
 The OSC protocol uses the IP network to carry messages from a source to a destination. Sources of OSC messages are
 usually called OSC Clients, and destinations OSC Servers.
 
@@ -205,9 +206,9 @@ Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC message
 
 ### OSC namespace
 
-OSC does not define any pre-defined namespace by design. There is no de-facto standard too.
+OSC specification does not define any namespace. There is no de-facto standard too.
 
-Pedalino OSC namespace for incoming and outcoming messages is.
+Pedalino OSC namespace for incoming and outcoming messages is:
 
 MIDI Event|OSC address|OSC Parameters
 -----|-----|-----
@@ -221,7 +222,8 @@ Program Change|/pedalino/midi/programChange|channel(int), number(int)
 ### OSC-to-MIDI and MIDI-to-OSC
 
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
-The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device).
+
+The bottom lines is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
 
 
 ## Pre-compiled source into hex files
