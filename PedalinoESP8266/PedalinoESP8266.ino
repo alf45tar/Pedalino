@@ -9,6 +9,9 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include <MIDI.h>
 #include <AppleMidi.h>
+#include <OSCMessage.h>
+#include <OSCBundle.h>
+#include <OSCData.h>
 
 #define PEDALINO_SERIAL_DEBUG
 #define PEDALINO_TELNET_DEBUG
@@ -56,17 +59,33 @@ struct SerialMIDISettings : public midi::DefaultSettings
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
 //MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
 
+WiFiUDP                 oscUDP;                  // A UDP instance to let us send and receive packets over UDP
+IPAddress               oscRemoteIp;             // remote IP of an external OSC device
+const unsigned int      oscRemotePort = 9000;    // remote port of an external OSC device
+const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
+OSCMessage              oscMsg;
+OSCErrorCode            oscError;
 
 // Forward messages received from serial MIDI interface to WiFI MIDI interface
 
 void handleNoteOn(byte channel, byte note, byte velocity)
 {
   AppleMIDI.noteOn(note, velocity, channel);
+
+  OSCMessage msg("/noteOn");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  msg.add((int32_t)channel).add((int32_t)note).add((int32_t)velocity).send(oscUDP).empty();
+  oscUDP.endPacket();
 }
 
 void handleNoteOff(byte channel, byte note, byte velocity)
 {
   AppleMIDI.noteOff(note, velocity, channel);
+
+  OSCMessage msg("/noteOff");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  msg.add((int32_t)channel).add((int32_t)note).add((int32_t)velocity).send(oscUDP).empty();
+  oscUDP.endPacket();
 }
 
 void handleAfterTouchPoly(byte channel, byte note, byte pressure)
@@ -77,6 +96,11 @@ void handleAfterTouchPoly(byte channel, byte note, byte pressure)
 void handleControlChange(byte channel, byte number, byte value)
 {
   AppleMIDI.controlChange(number, value, channel);
+
+  OSCMessage msg("/controlChange");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  msg.add((int32_t)channel).add((int32_t)number).add((int32_t)value).send(oscUDP).empty();
+  oscUDP.endPacket();
 }
 
 void handleProgramChange(byte channel, byte number)
@@ -278,6 +302,26 @@ void OnAppleMidiReceiveReset(void)
   MIDI.sendRealTime(midi::SystemReset);
 }
 
+
+// Forward messages received from WiFI OSC interface to serial MIDI interface
+
+void OnOscNoteOn(OSCMessage &msg)
+{
+  MIDI.sendNoteOn(msg.getInt(1), msg.getInt(2), msg.getInt(0));
+}
+
+void OnOscNoteOff(OSCMessage &msg)
+{
+  MIDI.sendNoteOff(msg.getInt(1), msg.getInt(2), msg.getInt(0));
+}
+
+void OnOscControlChange(OSCMessage &msg)
+{
+  MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
+}
+
+
+
 void onConnected(const WiFiEventStationModeConnected& evt)
 {
   BUILTIN_LED_ON();
@@ -460,6 +504,7 @@ void wifi_connect()
     Serial1.println("mDNS responder started");
 #endif
     MDNS.addService("apple-midi", "udp", 5004);
+    MDNS.addService("osc",        "udp", 8000);
   }
 
   // Start firmawre update via HTTP (connect to http://pedalino/update)
@@ -472,6 +517,18 @@ void wifi_connect()
 #ifdef PEDALINO_SERIAL_DEBUG
   Serial1.println("HTTP server started");
   Serial1.println("Connect to http://pedalino/update for firmware update");
+#endif
+
+  // Broadcast outcoming OSC messages to local WiFi network
+  oscRemoteIp = WiFi.localIP();
+  oscRemoteIp[3] = 255;
+
+  // Start listen incoming OSC messages
+  oscUDP.begin(oscLocalPort);
+#ifdef PEDALINO_SERIAL_DEBUG
+  Serial1.println("OSC server started");
+  Serial1.print("Local port: ");
+  Serial1.println(oscUDP.localPort());
 #endif
 }
 
@@ -591,15 +648,34 @@ void loop()
   // Listen to incoming messages from Arduino
 
 #ifdef PEDALINO_TELNET_DEBUG
-    if (MIDI.read()) {
-      DEBUG("Received MIDI message:   Type 0x%02x   Data1 0x%02x   Data2 0x%02x   Channel 0x%02x\n", MIDI.getType(), MIDI.getData1(), MIDI.getData2(), MIDI.getChannel());
-    }
+  if (MIDI.read()) {
+    DEBUG("Received MIDI message:   Type 0x%02x   Data1 0x%02x   Data2 0x%02x   Channel 0x%02x\n", MIDI.getType(), MIDI.getData1(), MIDI.getData2(), MIDI.getChannel());
+  }
 #else
   MIDI.read();
 #endif
 
-  // Listen to incoming messages from WiFi
+  // Listen to incoming AppleMIDI messages from WiFi
   AppleMIDI.run();
+
+  // Listen to incoming OSC messages from WiFi
+  int size = oscUDP.parsePacket();
+
+  if (size > 0) {
+    while (size--) oscMsg.fill(oscUDP.read());
+    if (!oscMsg.hasError()) {
+      oscMsg.dispatch("/noteOn",        OnOscNoteOn);
+      oscMsg.dispatch("/noteOff",       OnOscNoteOff);
+      oscMsg.dispatch("/controlChange", OnOscControlChange);
+    } else {
+      oscError = oscMsg.getError();
+#ifdef PEDALINO_TELNET_DEBUG
+      DEBUG("OSC error: ");
+      //DEBUG(oscError);
+      DEBUG("\n");
+#endif
+    }
+  }
 
   // Run HTTP Updater
   httpServer.handleClient();
