@@ -16,6 +16,7 @@ install:
     - pip install -U platformio
     - platformio update
     - platformio lib -g install 136
+                                423
                                 https://github.com/JoaoLopesF/RemoteDebug.git
                                 https://github.com/lathoub/Arduino-AppleMIDI-Library.git
                                 https://github.com/FortySevenEffects/arduino_midi_library.git
