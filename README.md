@@ -207,11 +207,11 @@ Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC message
 
 OSC specification does not define any namespace. There is no de-facto standard too.
 
-Pedal Type|Event/State|OSC Address|OSC Arguments
------|-----|-----|-----
-Momentary|Press<br>Release|/pedalino/<pedal>/momentary/press<br>/pedalino/<pedal>/momentary/release|
-Latch|Open<br>Close|/pedalino/<pedal>/latch/open<br>/pedalino/1/latch/close|
-Analog||/pedalino/<pedal>/analog/<value>|
+Pedal Type|Event/State|OSC Address|OSC Arguments|Note
+-----|-----|-----|-----|-----
+Momentary|Press<br>Release|/pedalino/#/momentary/press<br>/pedalino/<pedal>/momentary/release||# is the pedal number from 1 to 16
+Latch|Open<br>Close|/pedalino/#/latch/open<br>/pedalino/1/latch/close||# is the pedal number from 1 to 16
+Analog||/pedalino/#/analog/@||# is the pedal number from 1 to 16<br>@ is the pedal value from 0 to 127
 
 ### OSC-to-MIDI and MIDI-to-OSC
 
