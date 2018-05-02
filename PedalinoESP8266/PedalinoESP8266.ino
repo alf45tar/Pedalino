@@ -74,9 +74,9 @@ void handleNoteOn(byte channel, byte note, byte velocity)
 {
   AppleMIDI.noteOn(note, velocity, channel);
 
-  OSCMessage msg("/noteOn");
+  OSCMessage msg("/pedalino/midi/note");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
-  msg.add((int32_t)channel).add((int32_t)note).add((int32_t)velocity).send(oscUDP).empty();
+  msg.add((int32_t)note).add((int32_t)velocity).add((int32_t)channel).send(oscUDP).empty();
   oscUDP.endPacket();
 }
 
@@ -84,9 +84,9 @@ void handleNoteOff(byte channel, byte note, byte velocity)
 {
   AppleMIDI.noteOff(note, velocity, channel);
 
-  OSCMessage msg("/noteOff");
+  OSCMessage msg("/pedalino/midi/note");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
-  msg.add((int32_t)channel).add((int32_t)note).add((int32_t)velocity).send(oscUDP).empty();
+  msg.add((int32_t)note).add((int32_t)0).add((int32_t)channel).send(oscUDP).empty();
   oscUDP.endPacket();
 }
 
@@ -99,9 +99,11 @@ void handleControlChange(byte channel, byte number, byte value)
 {
   AppleMIDI.controlChange(number, value, channel);
 
-  OSCMessage msg("/controlChange");
+  String msg = "/pedalino/midi/cc/";
+  msg += number;
+  OSCMessage oscMsg(msg.c_str());
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
-  msg.add((int32_t)channel).add((int32_t)number).add((int32_t)value).send(oscUDP).empty();
+  oscMsg.add((float)(value / 127.0)).add((int32_t)channel).send(oscUDP).empty();
   oscUDP.endPacket();
 }
 
@@ -523,7 +525,9 @@ void wifi_connect()
 
   // Broadcast OSC messages to local WiFi network
   oscRemoteIp = WiFi.localIP();
-  oscRemoteIp[3] = 255;
+  IPAddress localMask = WiFi.subnetMask();
+  for (int i = 0; i < 4; i++)
+    oscRemoteIp[i] |= (localMask[i] ^ B11111111);
 
   // Set incoming OSC messages port
   oscUDP.begin(oscLocalPort);
