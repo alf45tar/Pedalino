@@ -209,7 +209,7 @@ OSC specification does not define any namespace. There is no de-facto standard t
 
 Pedal Type|Event/State|OSC Address|Note
 -----|-----|-----|-----
-Momentary|Press<br>Release|/pedalino/#/momentary/press<br>/pedalino/<pedal>/momentary/release|# is the pedal number from 1 to 16
+Momentary|Press<br>Release<br>Double press<br>Long press|/pedalino/#/momentary/press<br>/pedalino/#/momentary/release<br>/pedalino/#/momentary/doublepress<br>/pedalino/#/momentary/longpress|# is the pedal number from 1 to 16
 Latch|Open<br>Close|/pedalino/#/latch/open<br>/pedalino/#/latch/close|# is the pedal number from 1 to 16
 Analog||/pedalino/#/analog/@|# is the pedal number from 1 to 16<br>@ is the pedal value from 0 to 127
 
