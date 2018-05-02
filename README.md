@@ -222,7 +222,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 Pedalino OSC namespace for incoming and outcoming MIDI events is:
 
 MIDI Event|OSC Address|OSC Arguments
------|-----|-----
+-----|-----|-----|-----
 Note On|/pedalino/midi/noteOn|channel (int), note (int), velocity (int)
 Note Off|/pedalino/midi/noteOff|channel (int), note (int), velocity (int)
 Control Change|/pedalino/midi/controlChange|channel (int), number (int), value (int)
