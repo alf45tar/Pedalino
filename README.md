@@ -62,9 +62,7 @@ The rest is not mandatory but it depends of which features you want to support.
   - [MocoLUFA](https://github.com/kuwatay/mocolufa) firmware
   
 - MIDI IN interface
-  - 6N137 8-Pin DIP 10 Mbit/s Single-Channel High Speed Logic Gate Output Optocoupler
-  or
-  - 6N138 8-Pin DIP 100 Kbit/s Single-Channel High Speed Logic Gate Output Optocoupler
+  - 6N137 (or 6N138) Single-Channel High Speed Optocoupler
 
 - WIFI
   - ESP8266 ESP-01 1M WiFi module
