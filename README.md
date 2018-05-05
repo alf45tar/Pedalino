@@ -161,13 +161,9 @@ More information can be obtained in the following links:
 - [HIDUINO](https://github.com/ddiakopoulos/hiduino)
 - [MocoLUFA](https://github.com/kuwatay/mocolufa)
 
-## AppleMIDI
-
-Pedalino is a session listener over Wi-Fi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
-
 ## How to connect Pedalino to a WiFi network
 
-AppleMIDI requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
+AppleMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
 
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
 
@@ -186,6 +182,10 @@ Boot procedure
 - Reboot Pedalino to restart the procedure.
 
 You can reset the last know access point via menu.
+
+## AppleMIDI
+
+Pedalino is a session listener over Wi-Fi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
 
 ## Open Sound Control (OSC)
 
