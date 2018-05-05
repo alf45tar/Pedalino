@@ -82,11 +82,9 @@ The rest is not mandatory but it depends of which features you want to support.
 - Bluetooth Remote Control
   - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 
-## Pedalino™ Shield
+## Pedalino™ Breadboard Prototype
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_pcb.png)
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShieldOverview_bb.png)
 
 ## Pedal Wiring
 
