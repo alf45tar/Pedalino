@@ -214,9 +214,9 @@ Pedalino OSC namespace for incoming and outcoming MIDI events is:
 MIDI Event|OSC Address|OSC Arguments|Min|Max|Note
 -----|-----|-----|-----|-----|-----
 Note On|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|1<br>16|# is the MIDI note number 0..127
-Note Off|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|1<br>16|# is the MIDI note number 0..127
-Control Change|/pedalino/midi/cc/#|float value<br>int channel|0<br>1|1<br>16|# is the MIDI CC value 0..127
-Program Change|/pedalino/midi/pc/#|int number<br>int channel|0<br>1|127<br>16|# is the MIDI PC number 0..127
+Note Off|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|0<br>16|# is the MIDI note number 0..127
+Control Change|/pedalino/midi/cc/#|float value<br>int channel|0<br>1|1<br>16|# is the MIDI CC number 0..127
+Program Change|/pedalino/midi/pc/#|int channel|1|16|# is the MIDI PC number 0..127
 
 
 ### OSC-to-MIDI and MIDI-to-OSC
