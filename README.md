@@ -217,6 +217,7 @@ Note On|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|1<br>16|# is 
 Note Off|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|0<br>16|# is the MIDI note number 0..127
 Control Change|/pedalino/midi/cc/#|float value<br>int channel|0<br>1|1<br>16|# is the MIDI CC number 0..127
 Program Change|/pedalino/midi/pc/#|int channel|1|16|# is the MIDI PC number 0..127
+Pitch Bend|/pedalino/midi/pitchbend/#|float bend|0|1|# is the MIDI channel 1..16
 
 
 ### OSC-to-MIDI and MIDI-to-OSC
@@ -242,7 +243,6 @@ Uploading .hex file to Arduino it is very easy and straithforward with [Xloader]
 - [ ] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
 - [ ] Bluetooth MIDI
-- [ ] OSC
 
 # Copyright
 Copyright 2017-2018 alfa45star
