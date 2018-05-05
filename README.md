@@ -66,7 +66,7 @@ The rest is not mandatory but it depends of which features you want to support.
 
 - WIFI
   - ESP8266 ESP-01 1M WiFi module
-  - YL-46 AMS1117 3.3V Power Supply Module
+  - YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01 stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
   
 - AppleMIDI via WIFI
