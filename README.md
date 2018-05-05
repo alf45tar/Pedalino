@@ -1,4 +1,4 @@
-**Status:** Working but under active development
+**Status:** Working but under active development. Anything can be changed without advance notice.
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
