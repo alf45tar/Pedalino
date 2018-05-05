@@ -209,26 +209,21 @@ Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC message
 
 OSC specification does not define any namespace. There is no de-facto standard too.
 
-Pedal Type|Event/State|OSC Address|Note
------|-----|-----|-----
-Momentary|Press<br>Release<br>Double press<br>Long press|/pedalino/#/momentary/press<br>/pedalino/#/momentary/release<br>/pedalino/#/momentary/doublepress<br>/pedalino/#/momentary/longpress|# is the pedal number from 1 to 16
-Latch|Open<br>Close|/pedalino/#/latch/open<br>/pedalino/#/latch/close|# is the pedal number from 1 to 16
-Analog||/pedalino/#/analog/@|# is the pedal number from 1 to 16<br>@ is the pedal value from 0 to 127
+Pedalino OSC namespace for incoming and outcoming MIDI events is:
+
+MIDI Event|OSC Address|OSC Arguments|Note
+-----|-----|-----
+Note On|/pedalino/midi/note/#|velocity (float 0..1), channel (int 1..16)|# is the MIDI note number 0..127
+Note Off|/pedalino/midi/note/#|velocity (float 0), channel (int 1..16)|# is the MIDI note number 0..127
+Control Change|/pedalino/midi/cc/#|value (float 0..1), channel (int 1..16)|# is the MIDI CC value 0..127
+Program Change|/pedalino/midi/pc/#|number (float 0..1), channel (int 1..16)|# is the MIDI PC number 0..127
+
 
 ### OSC-to-MIDI and MIDI-to-OSC
 
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
 
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
-
-Pedalino OSC namespace for incoming and outcoming MIDI events is:
-
-MIDI Event|OSC Address|OSC Arguments
------|-----|-----
-Note On|/pedalino/midi/noteOn|channel (int), note (int), velocity (int)
-Note Off|/pedalino/midi/noteOff|channel (int), note (int), velocity (int)
-Control Change|/pedalino/midi/controlChange|channel (int), number (int), value (int)
-Program Change|/pedalino/midi/programChange|channel (int), number (int)
 
 
 ## Pre-compiled source into hex files
