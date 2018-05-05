@@ -62,7 +62,7 @@ The rest is not mandatory but it depends of which features you want to support.
   - [MocoLUFA](https://github.com/kuwatay/mocolufa) firmware
   
 - MIDI IN interface
-  - 6N137 (or 6N138) Single-Channel High Speed Optocoupler
+  - 6N137 Single-Channel High Speed Optocoupler (6N138 may works too)
 
 - WIFI
   - ESP8266 ESP-01 1M WiFi module
