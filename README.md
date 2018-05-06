@@ -18,6 +18,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - Legacy MIDI OUT and MIDI IN connector
 - Every MIDI port can route MIDI messages received from other interface
+- OSC to MIDI and vicecersa
 - Auto-sensing footswitches and expression pedals
 - Modular assembly of easy to find pieces of hardware and re-use of open source software libraries
 
@@ -25,10 +26,10 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Change preset to your favourite guitar rig
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
 - Transform wired MIDI equipment into wireless MIDI equipment
+- Transform legacy MIDI equipment to OSC control surface
 - Connect Windows PC to macOS and iOS devices via AppleMIDI
-- OSC to MIDI and vicecersa
 - Hands-free way to control your audio parameters during live performance
-- Dramatically expanded audio system parameter control via WIFI, USB or MIDI.
+- Dramatically expanded audio system parameter control via WIFI, USB, MIDI or OSC.
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
