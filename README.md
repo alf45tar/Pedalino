@@ -248,6 +248,7 @@ Many different procedures can be used and many tutorials are available on intern
 
 - [ControllerHub 8](https://ameliascompass.com/product/controllerhub-8/)
 - [Audifront MIDI Expression](https://www.audiofront.net/MIDIExpression.php)
+- [BomeBox](https://www.bome.com/products/bomebox)
 
 
 ## ToDo
