@@ -232,6 +232,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 
 I know compile the source code requires a lot of dependancies. I decided to provide also the .hex file for your convenience.
 Uploading .hex file to Arduino it is very easy and straithforward with [Xloader](http://xloader.russemotto.com/).
+Uploading .hex file to ESP01 is not so easy because it requires and USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage).
 
 ## Commercial alternatives
 
