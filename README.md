@@ -67,7 +67,7 @@ The rest is not mandatory but it depends of which features you want to support.
 
 - WIFI
   - [ESP8266 ESP-01S](https://en.wikipedia.org/wiki/ESP8266) 1M WiFi module
-  - YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01 stable operation)
+  - YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
   
 - AppleMIDI via WIFI
@@ -228,11 +228,20 @@ Pedalino is able to converts incoming OSC messages to MIDI events and outgoing M
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
 
 
-## Pre-compiled source into hex files
+## Firmware update
 
-I know compile the source code requires a lot of dependancies. I decided to provide also the .hex file for your convenience.
-Uploading .hex file to Arduino it is very easy and straithforward with [Xloader](http://xloader.russemotto.com/).
-Uploading .hex file to ESP01 is not so easy because it requires and USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage).
+Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashed with the right firmware before using Pedalino.
+
+Board|Microcontroller|Firmware|Flashing software|Flashing hardware
+-----|-----|-----|-----|-----
+Arduino Mega 2560|ATmega2560<br>ATmega 16u2|Pedalino<br>[MocoLUFA](https://github.com/kuwatay/mocolufa)|Arduino IDE<br>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
+ESP-01S|ESP8266|Pedalino|Arduino IDE|Arduino Mega
+
+Arduino board flash update is very easy and straithforward.
+
+ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). It is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to http://pedalino/update.
+
+Many different procedures can be used and many tutorials are available on internet including YouTube video. I suggest to use an Arduino Uno/Mega as USB to Serial adapter and Arduino IDE for uploading the firware. Remember that Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation. An external power source of 3.3V is required.
 
 ## Commercial alternatives
 
