@@ -237,7 +237,7 @@ Board|Microcontroller|Firmware|Flashing software|Flashing hardware
 Arduino Mega 2560|ATmega2560<br>ATmega 16u2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/Pedalino)<br>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)<br>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
 ESP-01S|ESP8266|[PedalinoESP8266](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP8266)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|Arduino Mega
 
-Arduino board flash update is very easy and straithforward.
+Arduino board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware. All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment).
 
 ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). I suggest to use an Arduino Uno/Mega as USB to Serial adapter and Arduino IDE for uploading the firmware. Remember that Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation. 3.3V can be obtained from 5V pin usibng a power supply module or with an external power source.
 It is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to http://pedalino/update.
