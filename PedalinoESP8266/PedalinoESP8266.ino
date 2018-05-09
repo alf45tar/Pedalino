@@ -13,8 +13,8 @@
 #include <OSCBundle.h>
 #include <OSCData.h>
 
-#define PEDALINO_SERIAL_DEBUG
-#define PEDALINO_TELNET_DEBUG
+//#define PEDALINO_SERIAL_DEBUG
+//#define PEDALINO_TELNET_DEBUG
 
 #ifdef PEDALINO_TELNET_DEBUG
 #include "RemoteDebug.h"          // Remote debug over telnet - not recommended for production, only for development    
@@ -62,43 +62,48 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
 // WiFi OSC comunication
 
 WiFiUDP                 oscUDP;                  // A UDP instance to let us send and receive packets over UDP
-IPAddress               oscRemoteIp;             // remote IP of an external OSC device
+IPAddress               oscRemoteIp;             // remote IP of an external OSC device or broadcast address
 const unsigned int      oscRemotePort = 9000;    // remote port of an external OSC device
 const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
 OSCMessage              oscMsg;
 OSCErrorCode            oscError;
 
-// Forward messages received from serial MIDI interface to WiFI MIDI interface
 
-void handleNoteOn(byte channel, byte note, byte velocity)
+
+// Send messages to WiFI OSC interface
+
+void OSCSendNoteOn(byte note, byte velocity, byte channel)
 {
-  AppleMIDI.noteOn(note, velocity, channel);
-
-  OSCMessage msg("/pedalino/midi/note");
+  String msg = "/pedalino/midi/note/";
+  msg += note;
+  OSCMessage oscMsg(msg.c_str());
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
-  msg.add((int32_t)note).add((int32_t)velocity).add((int32_t)channel).send(oscUDP).empty();
+  oscMsg.add((float)(velocity / 127.0)).add((int32_t)channel).send(oscUDP).empty();
   oscUDP.endPacket();
 }
 
-void handleNoteOff(byte channel, byte note, byte velocity)
+void OSCSendNoteOff(byte note, byte velocity, byte channel)
 {
-  AppleMIDI.noteOff(note, velocity, channel);
-
-  OSCMessage msg("/pedalino/midi/note");
+  String msg = "/pedalino/midi/note/";
+  msg += note;
+  OSCMessage oscMsg(msg.c_str());
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
-  msg.add((int32_t)note).add((int32_t)0).add((int32_t)channel).send(oscUDP).empty();
+  oscMsg.add((float)0).add((int32_t)channel).send(oscUDP).empty();
   oscUDP.endPacket();
 }
 
-void handleAfterTouchPoly(byte channel, byte note, byte pressure)
+void OSCSendAfterTouchPoly(byte note, byte pressure, byte channel)
 {
-  AppleMIDI.polyPressure(note, pressure, channel);
+  String msg = "/pedalino/midi/aftertouchpoly/";
+  msg += note;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((float)(pressure / 127.0)).add((int32_t)channel).send(oscUDP).empty();
+  oscUDP.endPacket();
 }
 
-void handleControlChange(byte channel, byte number, byte value)
+void OSCSendControlChange(byte number, byte value, byte channel)
 {
-  AppleMIDI.controlChange(number, value, channel);
-
   String msg = "/pedalino/midi/cc/";
   msg += number;
   OSCMessage oscMsg(msg.c_str());
@@ -107,95 +112,225 @@ void handleControlChange(byte channel, byte number, byte value)
   oscUDP.endPacket();
 }
 
+void OSCSendProgramChange(byte number, byte channel)
+{
+  String msg = "/pedalino/midi/pc/";
+  msg += number;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((int32_t)channel).send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendAfterTouch(byte pressure, byte channel)
+{
+  String msg = "/pedalino/midi/aftertouchchannel/";
+  msg += channel;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((float)(pressure / 127.0)).add((int32_t)channel).send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendPitchBend(int bend, byte channel)
+{
+  String msg = "/pedalino/midi/pitchbend/";
+  msg += channel;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((float)((bend + 8192) / 16383.0)).add((int32_t)channel).send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendSystemExclusive(const byte* array, unsigned size)
+{
+}
+
+void OSCSendTimeCodeQuarterFrame(byte data)
+{
+}
+
+void OSCSendSongPosition(unsigned int beats)
+{
+  String msg = "/pedalino/midi/songpostion/";
+  msg += beats;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((int32_t)beats).send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendSongSelect(byte songnumber)
+{
+  String msg = "/pedalino/midi/songselect/";
+  msg += songnumber;
+  OSCMessage oscMsg(msg.c_str());
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.add((int32_t)songnumber).send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendTuneRequest(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/tunerequest/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendClock(void)
+{
+}
+
+void OSCSendStart(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/start/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendContinue(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/continue/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendStop(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/stop/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendActiveSensing(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/activesensing/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+void OSCSendSystemReset(void)
+{
+  OSCMessage oscMsg("/pedalino/midi/reset/");
+  oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
+  oscMsg.send(oscUDP).empty();
+  oscUDP.endPacket();
+}
+
+
+// Forward messages received from serial MIDI interface to WiFI interface
+
+void handleNoteOn(byte channel, byte note, byte velocity)
+{
+  AppleMIDI.noteOn(note, velocity, channel);
+  OSCSendNoteOn(note, velocity, channel);
+}
+
+void handleNoteOff(byte channel, byte note, byte velocity)
+{
+  AppleMIDI.noteOff(note, velocity, channel);
+  OSCSendNoteOff(note, velocity, channel);
+}
+
+void handleAfterTouchPoly(byte channel, byte note, byte pressure)
+{
+  AppleMIDI.polyPressure(note, pressure, channel);
+  OSCSendAfterTouchPoly(note, pressure, channel);
+}
+
+void handleControlChange(byte channel, byte number, byte value)
+{
+  AppleMIDI.controlChange(number, value, channel);
+  OSCSendControlChange(number, value, channel);
+}
+
 void handleProgramChange(byte channel, byte number)
 {
   AppleMIDI.programChange(number, channel);
+  OSCSendProgramChange(number, channel);
 }
 
 void handleAfterTouchChannel(byte channel, byte pressure)
 {
   AppleMIDI.afterTouch(pressure, channel);
+  OSCSendAfterTouch(pressure, channel);
 }
 
 void handlePitchBend(byte channel, int bend)
 {
   AppleMIDI.pitchBend(bend, channel);
+  OSCSendPitchBend(bend, channel);
 }
 
 void handleSystemExclusive(byte* array, unsigned size)
 {
   AppleMIDI.sysEx(array, size);
-  /*
-    // SysEx starts with 0xF0 and ends with 0xF7
-    if (array[2] == 'S') {
-    // Reset currently used SSID / password stored in flash
-    WiFi.persistent(true);
-    switch (WiFi.getMode()) {
-      case WIFI_STA:
-        WiFi.disconnect();
-        break;
-      case WIFI_AP:
-        WiFi.softAPdisconnect();
-        break;
-    }
-    //ESP.restart();
-    WiFi.persistent(false);
-    wifi_connect();
-    }
-    if (array[2] == 'A') {
-    ap_mode_start();
-    }
-  */
+  OSCSendSystemExclusive(array, size);
 }
 
 void handleTimeCodeQuarterFrame(byte data)
 {
   AppleMIDI.timeCodeQuarterFrame(data);
+  OSCSendTimeCodeQuarterFrame(data);
 }
 
 void handleSongPosition(unsigned int beats)
 {
   AppleMIDI.songPosition(beats);
+  OSCSendSongPosition(beats);
 }
 
 void handleSongSelect(byte songnumber)
 {
   AppleMIDI.songSelect(songnumber);
+  OSCSendSongSelect(songnumber);
 }
 
 void handleTuneRequest(void)
 {
   AppleMIDI.tuneRequest();
+  OSCSendTuneRequest();
 }
 
 void handleClock(void)
 {
   AppleMIDI.clock();
+  OSCSendClock();
 }
 
 void handleStart(void)
 {
   AppleMIDI.start();
+  OSCSendStart();
 }
 
 void handleContinue(void)
 {
   AppleMIDI._continue();
+  OSCSendContinue();
 }
 
 void handleStop(void)
 {
   AppleMIDI.stop();
+  OSCSendStop();
 }
 
 void handleActiveSensing(void)
 {
   AppleMIDI.activeSensing();
+  OSCSendActiveSensing();
 }
 
 void handleSystemReset(void)
 {
   AppleMIDI.reset();
+  OSCSendSystemReset();
 }
 
 
@@ -220,90 +355,109 @@ void OnAppleMidiDisconnected(uint32_t ssrc)
 void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
 {
   MIDI.sendNoteOn(note, velocity, channel);
+  OSCSendNoteOn(note, velocity, channel);
 }
 
 void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 {
   MIDI.sendNoteOff(note, velocity, channel);
+  OSCSendNoteOff(note, velocity, channel);
 }
 
 void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   MIDI.sendPolyPressure(note, pressure, channel);
+  OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
 void OnAppleMidiReceiveControlChange(byte channel, byte number, byte value)
 {
   MIDI.sendControlChange(number, value, channel);
+  OSCSendControlChange(number, value, channel);
 }
 
 void OnAppleMidiReceiveProgramChange(byte channel, byte number)
 {
   MIDI.sendProgramChange(number, channel);
+  OSCSendProgramChange(number, channel);
 }
+
 void OnAppleMidiReceiveAfterTouchChannel(byte channel, byte pressure)
 {
   MIDI.sendAfterTouch(pressure, channel);
+  OSCSendAfterTouch(pressure, channel);
 }
 
 void OnAppleMidiReceivePitchBend(byte channel, int bend)
 {
   MIDI.sendPitchBend(bend, channel);
+  OSCSendPitchBend(bend, channel);
 }
 
 void OnAppleMidiReceiveSysEx(const byte * data, uint16_t size)
 {
   MIDI.sendSysEx(size, data);
+  OSCSendSystemExclusive(data, size);
 }
 
 void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)
 {
   MIDI.sendTimeCodeQuarterFrame(data);
+  OSCSendTimeCodeQuarterFrame(data);
 }
 
 void OnAppleMidiReceiveSongPosition(unsigned short beats)
 {
   MIDI.sendSongPosition(beats);
+  OSCSendSongPosition(beats);
 }
 
 void OnAppleMidiReceiveSongSelect(byte songnumber)
 {
   MIDI.sendSongSelect(songnumber);
+  OSCSendSongSelect(songnumber);
 }
 
 void OnAppleMidiReceiveTuneRequest(void)
 {
   MIDI.sendTuneRequest();
+  OSCSendTuneRequest();
 }
 
 void OnAppleMidiReceiveClock(void)
 {
   MIDI.sendRealTime(midi::Clock);
+  OSCSendClock();
 }
 
 void OnAppleMidiReceiveStart(void)
 {
   MIDI.sendRealTime(midi::Start);
+  OSCSendStart();
 }
 
 void OnAppleMidiReceiveContinue(void)
 {
   MIDI.sendRealTime(midi::Continue);
+  OSCSendContinue();
 }
 
 void OnAppleMidiReceiveStop(void)
 {
   MIDI.sendRealTime(midi::Stop);
+  OSCSendStop();
 }
 
 void OnAppleMidiReceiveActiveSensing(void)
 {
   MIDI.sendRealTime(midi::ActiveSensing);
+  OSCSendActiveSensing();
 }
 
 void OnAppleMidiReceiveReset(void)
 {
   MIDI.sendRealTime(midi::SystemReset);
+  OSCSendSystemReset();
 }
 
 
@@ -523,7 +677,7 @@ void wifi_connect()
   Serial1.println("Connect to http://pedalino/update for firmware update");
 #endif
 
-  // Broadcast OSC messages to local WiFi network
+  // Calculate the broadcast address of local WiFi to broadcast OSC messages
   oscRemoteIp = WiFi.localIP();
   IPAddress localMask = WiFi.subnetMask();
   for (int i = 0; i < 4; i++)
