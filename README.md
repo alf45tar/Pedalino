@@ -222,7 +222,7 @@ Pitch Bend|/pedalino/midi/pitchbend/#|float bend|0|1|# is the MIDI channel 1..16
 After Touch Poly|/pedalino/midi/aftertouchpoly/#|float pressure|0|1|# is the MIDI note number 0..127
 After Touch Chennel|/pedalino/midi/aftertouchchannel/#|float pressure|0|1|# is the MIDI channel 1..16
 Song Position Pointer|/pedalino/midi/songposition/#|int beats|0|16383|# is song position in beats (1/16 note)
-Song Select|/pedalino/midi/songselect/#|int number|0|...|# is song number 0..127
+Song Select|/pedalino/midi/songselect/#|int number|0|127|# is song number 0..127
 Tune Request|/pedalino/midi/tunerequest/||||
 Start|/pedalino/midi/start/||||
 Continue|/pedalino/midi/continue/||||
