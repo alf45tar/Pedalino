@@ -147,7 +147,7 @@ Pedalino like some of the more sophisticated effects and controllers incorporate
 
 ## Auto Sensing
 
-Most of them are plug-and-play because Pedalino will recognize via auto-senseing feature. 
+Most of them are plug-and-play because Pedalino will recognize via auto-sensing feature. 
 
 Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
@@ -221,19 +221,14 @@ Program Change|/pedalino/midi/pc/#|int channel|1|16|# is the MIDI PC number 0..1
 Pitch Bend|/pedalino/midi/pitchbend/#|float bend|0|1|# is the MIDI channel 1..16
 After Touch Poly|/pedalino/midi/aftertouchpoly/#|float pressure|0|1|# is the MIDI note number 0..127
 After Touch Chennel|/pedalino/midi/aftertouchchannel/#|float pressure|0|1|# is the MIDI channel 1..16
-Song Position|/pedalino/midi/songposition/#|int beats|0|...|# is song position in beats
-Song Select|/pedalino/midi/songselect/#|int number|0|...|# is song number
+Song Position Pointer|/pedalino/midi/songposition/#|int beats|0|16383|# is song position in beats (1/16 note)
+Song Select|/pedalino/midi/songselect/#|int number|0|...|# is song number 0..127
 Tune Request|/pedalino/midi/tunerequest/||||
 Start|/pedalino/midi/start/||||
 Continue|/pedalino/midi/continue/||||
 Stop|/pedalino/midi/stop/||||
+Active Sensing|/pedalino/midi/activesensing/||||
 Reset|/pedalino/midi/reset/||||
-
-
-
-
-
-
 
 
 ### OSC-to-MIDI and MIDI-to-OSC
