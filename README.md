@@ -219,6 +219,21 @@ Note Off|/pedalino/midi/note/#|float velocity<br>int channel|0<br>1|0<br>16|# is
 Control Change|/pedalino/midi/cc/#|float value<br>int channel|0<br>1|1<br>16|# is the MIDI CC number 0..127
 Program Change|/pedalino/midi/pc/#|int channel|1|16|# is the MIDI PC number 0..127
 Pitch Bend|/pedalino/midi/pitchbend/#|float bend|0|1|# is the MIDI channel 1..16
+After Touch Poly|/pedalino/midi/aftertouchpoly/#|float pressure|0|1|# is the MIDI note number 0..127
+After Touch Chennel|/pedalino/midi/aftertouchchannel/#|float pressure|0|1|# is the MIDI channel 1..16
+Song Position|/pedalino/midi/songposition/#|int beats|0|...|# is song position in beats
+Song Select|/pedalino/midi/songselect/#|int number|0|...|# is song number
+Tune Request|/pedalino/midi/tunerequest/||||
+Start|/pedalino/midi/start/||||
+Continue|/pedalino/midi/continue/||||
+Stop|/pedalino/midi/stop/||||
+Reset|/pedalino/midi/reset/||||
+
+
+
+
+
+
 
 
 ### OSC-to-MIDI and MIDI-to-OSC
