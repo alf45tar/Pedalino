@@ -398,34 +398,56 @@ void midi_routing_start()
 
 void midi_routing()
 {
-  if (USB_MIDI.read())
-  {
-    // Thru on A has already pushed the input message to out A.
-    // Forward the message to out B as well.
-    RTP_MIDI.send(USB_MIDI.getType(),
-                  USB_MIDI.getData1(),
-                  USB_MIDI.getData2(),
-                  USB_MIDI.getChannel());
-    if (currentLegacyMIDIPort == PED_LEGACY_MIDI_OUT)
-      DIN_MIDI.send(USB_MIDI.getType(),
-                    USB_MIDI.getData1(),
-                    USB_MIDI.getData2(),
-                    USB_MIDI.getChannel());
+  if (interfaces[PED_USBMIDI].midiIn) {
+    if (USB_MIDI.read())
+    {
+      // Thru on A has already pushed the input message to out A.
+      // Forward the message to out B as well.
+      if (interfaces[PED_LEGACYMIDI].midiRouting)
+        DIN_MIDI.send(USB_MIDI.getType(),
+                      USB_MIDI.getData1(),
+                      USB_MIDI.getData2(),
+                      USB_MIDI.getChannel());
+      if (interfaces[PED_APPLEMIDI].midiRouting)
+        RTP_MIDI.send(USB_MIDI.getType(),
+                      USB_MIDI.getData1(),
+                      USB_MIDI.getData2(),
+                      USB_MIDI.getChannel());
+    }
   }
-
-  if (RTP_MIDI.read())
-  {
-    // Thru on B has already pushed the input message to out B.
-    // Forward the message to out A as well.
-    USB_MIDI.send(RTP_MIDI.getType(),
-                  RTP_MIDI.getData1(),
-                  RTP_MIDI.getData2(),
-                  RTP_MIDI.getChannel());
-    if (currentLegacyMIDIPort == PED_LEGACY_MIDI_OUT)
-      DIN_MIDI.send(RTP_MIDI.getType(),
-                    RTP_MIDI.getData1(),
-                    RTP_MIDI.getData2(),
-                    RTP_MIDI.getChannel());
+  if (interfaces[PED_LEGACYMIDI].midiIn) {
+    if (DIN_MIDI.read())
+    {
+      // Thru on A has already pushed the input message to out A.
+      // Forward the message to out B as well.
+      if (interfaces[PED_USBMIDI].midiRouting)
+        USB_MIDI.send(DIN_MIDI.getType(),
+                      DIN_MIDI.getData1(),
+                      DIN_MIDI.getData2(),
+                      DIN_MIDI.getChannel());
+      if (interfaces[PED_APPLEMIDI].midiRouting)
+        RTP_MIDI.send(DIN_MIDI.getType(),
+                      DIN_MIDI.getData1(),
+                      DIN_MIDI.getData2(),
+                      DIN_MIDI.getChannel());
+    }
+  }
+  if (interfaces[PED_APPLEMIDI].midiIn) {
+    if (RTP_MIDI.read())
+    {
+      // Thru on B has already pushed the input message to out B.
+      // Forward the message to out A as well.
+      if (interfaces[PED_USBMIDI].midiRouting)
+        USB_MIDI.send(RTP_MIDI.getType(),
+                      RTP_MIDI.getData1(),
+                      RTP_MIDI.getData2(),
+                      RTP_MIDI.getChannel());
+      if (interfaces[PED_LEGACYMIDI].midiRouting)
+        DIN_MIDI.send(RTP_MIDI.getType(),
+                      RTP_MIDI.getData1(),
+                      RTP_MIDI.getData2(),
+                      RTP_MIDI.getChannel());
+    }
   }
 }
 
