@@ -163,6 +163,11 @@ More information can be obtained in the following links:
 
 ### mocoLUFA dual boot
 
+mocoLUFA firmware is booting in USB MIDI mode by default.
+
+Arduino-Serial mode is required to upload a new sketch into main ArduinoATmega2560 microcontroller.
+
+To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Reset is required to swicth the firmware mode.
 
 ### mocoLUFA high speed mode
 
