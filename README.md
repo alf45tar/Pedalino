@@ -154,17 +154,19 @@ Auto-sensing will also enable automatic calibration. After each power on cycle m
 
 ## USB MIDI
 
-A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. HIDUINO or mocoLUFA can be used.
-I suggest a dual mode firmware like mocoLUFA because is supporting both USB-MIDI and Arduino-Serial.
+A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1.25 Mbps or 1.250.000 bps). HIDUINO can works with minimal changes.
 
 More information can be obtained in the following links:
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
-- [HIDUINO](https://github.com/ddiakopoulos/hiduino)
 - [MocoLUFA](https://github.com/kuwatay/mocolufa)
+- [HIDUINO](https://github.com/ddiakopoulos/hiduino)
 
-### Undocumented High-Speed mode of mocoLUFA
+### mocoLUFA dual boot
 
-mocoLUFA default speed is 31.250 bps as any serial MIDI but an undocumented high speed mode is in the code. A jumper in this position enable the 1.25 Mbps USB MIDI speed. Pedalino USB MIDI is working at 1.25 Mbps.
+
+### mocoLUFA high speed mode
+
+mocoLUFA default speed is 31.250 bps as any serial MIDI but an undocumented high speed mode is in the code. A jumper in this position enable the 1.25 Mbps (1.250.000 bps) USB MIDI speed. Pedalino USB MIDI works at 1.25 Mbps.
 
 ![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/Arduino_MEGA_2560-Rev3-mocoLUFA-HighSpeed-Jumper.svg)
 
