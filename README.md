@@ -162,6 +162,13 @@ More information can be obtained in the following links:
 - [HIDUINO](https://github.com/ddiakopoulos/hiduino)
 - [MocoLUFA](https://github.com/kuwatay/mocolufa)
 
+### Undocumented High-Speed mode of mocoLUFA
+
+mocoLUFA default speed is 31.250 bps as any serial MIDI but an undocumented high speed mode is in the code. A jumper in this position enable the 1.25 Mbps USB MIDI speed. Pedalino USB MIDI is working at 1.25 Mbps.
+
+![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/Arduino_MEGA_2560-Rev3-mocoLUFA-HighSpeed-Jumper.svg)
+
+
 ## How to connect Pedalino to a WiFi network
 
 AppleMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
