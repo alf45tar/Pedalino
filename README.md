@@ -173,7 +173,7 @@ To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICS
 
 ### mocoLUFA high speed mode
 
-mocoLUFA default speed is 31.250 bps as any serial MIDI but an undocumented high speed mode is in the code. A jumper betwen PIN 1 (MISO) and PIN 3 (SCK) on ICSP connector for ATmega16U2 enable the 1.25 Mbps speed. Pedalino USB MIDI works at 1.25 Mbps (1.250.000 bps).
+mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in the code. A jumper betwen PIN 1 (MISO) and PIN 3 (SCK) on ICSP connector for ATmega16U2 enable the 1.25 Mbps speed. Pedalino USB MIDI works at 1.25 Mbps (1.250.000 bps).
 
 ![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/mocoLUFA-HighSpeed-Jumper.svg)
 
