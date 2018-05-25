@@ -3,7 +3,7 @@
 #include <MD_UISwitch.h>
 #include <ResponsiveAnalogRead.h>
 #include <MD_Menu.h>
-#include <uClock.h>
+//#include <uClock.h>
 #include "ControlChange.h"
 #include "NoteNumbers.h"
 
@@ -22,7 +22,7 @@
 #include "Pedalino.h"
 #include "Config.h"
 #include "MIDIRouting.h"
-#include "MIDIClock.h"
+//#include "MIDIClock.h"
 #include "Controller.h"
 #include "Display.h"
 
