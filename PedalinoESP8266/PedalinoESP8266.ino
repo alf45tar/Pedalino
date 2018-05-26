@@ -716,6 +716,7 @@ void midi_connect()
 
   // Initiate serial MIDI communications, listen to all channels
   MIDI.begin(MIDI_CHANNEL_OMNI);
+  MIDI.turnThruOff();
 
   // Create a session and wait for a remote host to connect to us
   AppleMIDI.begin("Pedalino(TM)");
