@@ -403,28 +403,51 @@ void midi_routing()
     {
       // Thru on A has already pushed the input message to out A.
       // Forward the message to out B as well.
+#ifdef DEBUG_PEDALINO
+      Serial.print(" MIDI IN USB -> STATUS ");
+      Serial.print(USB_MIDI.getType());
+      Serial.print(" DATA1 ");
+      Serial.print(USB_MIDI.getData1());
+      Serial.print(" DATA2 ");
+      Serial.print(USB_MIDI.getData2());
+      Serial.print(" CHANNEL ");
+      Serial.println(USB_MIDI.getChannel());
+#endif
       if (interfaces[PED_LEGACYMIDI].midiRouting)
-        DIN_MIDI.send(USB_MIDI.getType(),
-                      USB_MIDI.getData1(),
-                      USB_MIDI.getData2(),
-                      USB_MIDI.getChannel());
+      DIN_MIDI.send(USB_MIDI.getType(),
+                    USB_MIDI.getData1(),
+                    USB_MIDI.getData2(),
+                    USB_MIDI.getChannel());
       if (interfaces[PED_APPLEMIDI].midiRouting)
         RTP_MIDI.send(USB_MIDI.getType(),
                       USB_MIDI.getData1(),
                       USB_MIDI.getData2(),
                       USB_MIDI.getChannel());
-    }
-  }
-  if (interfaces[PED_LEGACYMIDI].midiIn) {
+      }
+}
+if (interfaces[PED_LEGACYMIDI].midiIn) {
     if (DIN_MIDI.read())
     {
       // Thru on A has already pushed the input message to out A.
       // Forward the message to out B as well.
       if (interfaces[PED_USBMIDI].midiRouting)
+#ifdef DEBUG_PEDALINO
+      {
+        Serial.print(" MIDI IN DIN -> STATUS ");
+        Serial.print(DIN_MIDI.getType());
+        Serial.print(" DATA1 ");
+        Serial.print(DIN_MIDI.getData1());
+        Serial.print(" DATA2 ");
+        Serial.print(DIN_MIDI.getData2());
+        Serial.print(" CHANNEL ");
+        Serial.println(DIN_MIDI.getChannel());
+      }
+#else
         USB_MIDI.send(DIN_MIDI.getType(),
                       DIN_MIDI.getData1(),
                       DIN_MIDI.getData2(),
                       DIN_MIDI.getChannel());
+#endif
       if (interfaces[PED_APPLEMIDI].midiRouting)
         RTP_MIDI.send(DIN_MIDI.getType(),
                       DIN_MIDI.getData1(),
@@ -438,10 +461,23 @@ void midi_routing()
       // Thru on B has already pushed the input message to out B.
       // Forward the message to out A as well.
       if (interfaces[PED_USBMIDI].midiRouting)
+#ifdef DEBUG_PEDALINO
+      {
+        Serial.print(" MIDI IN RTP -> STATUS ");
+        Serial.print(RTP_MIDI.getType());
+        Serial.print(" DATA1 ");
+        Serial.print(RTP_MIDI.getData1());
+        Serial.print(" DATA2 ");
+        Serial.print(RTP_MIDI.getData2());
+        Serial.print(" CHANNEL ");
+        Serial.println(RTP_MIDI.getChannel());
+      }
+#else
         USB_MIDI.send(RTP_MIDI.getType(),
                       RTP_MIDI.getData1(),
                       RTP_MIDI.getData2(),
                       RTP_MIDI.getChannel());
+#endif
       if (interfaces[PED_LEGACYMIDI].midiRouting)
         DIN_MIDI.send(RTP_MIDI.getType(),
                       RTP_MIDI.getData1(),

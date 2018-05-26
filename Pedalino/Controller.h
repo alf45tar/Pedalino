@@ -11,7 +11,7 @@ void autosensing_setup()
   Bounce debouncer;
 
   return;
-  
+
 #ifdef DEBUG_PEDALINO
   Serial.println("Pedal autosensing...");
 #endif
@@ -368,9 +368,10 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
         Serial.print("     Velocity ");
         Serial.print(value);
         Serial.print("     Channel ");
-        Serial.println(channel);
-#endif
+        Serial.print(channel);
+#else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(code, value, channel);
+#endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOn(code, value, channel);
       }
@@ -381,9 +382,10 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
         Serial.print("     Velocity ");
         Serial.print(value);
         Serial.print("     Channel ");
-        Serial.println(channel);
-#endif
+        Serial.print(channel);
+#else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(code, value, channel);
+#endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(code, value, channel);
       }
@@ -398,9 +400,10 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
         Serial.print("     Value ");
         Serial.print(value);
         Serial.print("     Channel ");
-        Serial.println(channel);
-#endif
+        Serial.print(channel);
+#else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(code, value, channel);
+#endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendControlChange(code, value, channel);
       }
@@ -413,9 +416,10 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
         Serial.print("     PROGRAM CHANGE     Program ");
         Serial.print(code);
         Serial.print("     Channel ");
-        Serial.println(channel);
-#endif
+        Serial.print(channel);
+#else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(code, channel);
+#endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(code, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendProgramChange(code, channel);
       }
@@ -429,9 +433,10 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
         Serial.print("     PITCH BEND     Value ");
         Serial.print(bend);
         Serial.print("     Channel ");
-        Serial.println(channel);
-#endif
+        Serial.print(channel);
+#else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, channel);
+#endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendPitchBend(bend, channel);
       }

@@ -146,7 +146,7 @@ bool   selectBank             = true;
 
 struct USBSerialMIDISettings : public midi::DefaultSettings
 {
-  static const long BaudRate = 1250000;
+  static const long BaudRate = 1000000;
 };
 
 struct RTPSerialMIDISettings : public midi::DefaultSettings
