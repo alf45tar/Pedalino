@@ -154,7 +154,7 @@ Auto-sensing will also enable automatic calibration. After each power on cycle m
 
 ## USB MIDI
 
-A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1.25 Mbps). HIDUINO can works with minimal changes.
+A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1 Mbps). HIDUINO can works with minimal changes.
 
 More information can be obtained in the following links:
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
