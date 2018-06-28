@@ -201,9 +201,8 @@ void controller_setup()
       case PED_MOMENTARY1:  Serial.print("MOMENTARY1"); break;
       case PED_MOMENTARY2:  Serial.print("MOMENTARY2"); break;
       case PED_MOMENTARY3:  Serial.print("MOMENTARY3"); break;
-      case PED_LATCH:       Serial.print("LATCH     "); break;
+      case PED_LATCH1:      Serial.print("LATCH1    "); break;
       case PED_LATCH2:      Serial.print("LATCH2    "); break;
-      case PED_LATCH3:      Serial.print("LATCH3    "); break;
       case PED_ANALOG:      Serial.print("ANALOG    "); break;
       case PED_JOG_WHEEL:   Serial.print("JOG_WHEEL "); break;
     }
@@ -249,14 +248,22 @@ void controller_setup()
       case PED_MOMENTARY1:
       case PED_MOMENTARY2:
       case PED_MOMENTARY3:
+      case PED_LATCH1:
+      case PED_LATCH2:
+
         unsigned int input;
         unsigned int value;
         for (byte p = 0; p < 2; p++) {
           if (pedals[i].mode == PED_MOMENTARY1 && p == 1) continue;
+          if (pedals[i].mode == PED_LATCH1     && p == 1) continue;
 
           pedals[i].debouncer[p] = new Bounce();
           switch (p) {
             case 0:
+              // Setup the button with an internal pull-up
+              pinMode(PIN_D(i), INPUT_PULLUP);
+
+              // After setting up the button, setup the Bounce instance
               pedals[i].debouncer[0]->attach(PIN_D(i));
 #ifdef DEBUG_PEDALINO
               Serial.print("   Pin D");
@@ -264,6 +271,10 @@ void controller_setup()
 #endif
               break;
             case 1:
+              // Setup the button with an internal pull-up
+              pinMode(PIN_A(i), INPUT_PULLUP);
+
+              // After setting up the button, setup the Bounce instance
               pedals[i].debouncer[1]->attach(PIN_A(i));
 #ifdef DEBUG_PEDALINO
               Serial.print(" A");
@@ -279,56 +290,56 @@ void controller_setup()
           pedals[i].pedalValue[p] = value;
           pedals[i].lastUpdate[p] = millis();
 
-          switch (p) {
-            case 0:
-              pedals[i].footSwitch[0] = new MD_UISwitch_Digital(PIN_D(i), pedals[i].invertPolarity ? HIGH : LOW);
-              break;
-            case 1:
-              pedals[i].footSwitch[1] = new MD_UISwitch_Digital(PIN_A(i), pedals[i].invertPolarity ? HIGH : LOW);
-              break;
-          }
-          pedals[i].footSwitch[p]->begin();
-          pedals[i].footSwitch[p]->setDebounceTime(50);
-          if (pedals[i].function == PED_MIDI) {
-            switch (pedals[i].pressMode) {
-              case PED_PRESS_1:
-                pedals[i].footSwitch[p]->enableDoublePress(false);
-                pedals[i].footSwitch[p]->enableLongPress(false);
+          if (pedals[i].mode == PED_MOMENTARY1 || pedals[i].mode == PED_MOMENTARY2 || pedals[i].mode == PED_MOMENTARY3)
+          {
+            switch (p) {
+              case 0:
+                pedals[i].footSwitch[0] = new MD_UISwitch_Digital(PIN_D(i), pedals[i].invertPolarity ? HIGH : LOW);
                 break;
-              case PED_PRESS_2:
-              case PED_PRESS_1_2:
-                pedals[i].footSwitch[p]->enableDoublePress(true);
-                pedals[i].footSwitch[p]->enableLongPress(false);
-                break;
-              case PED_PRESS_L:
-              case PED_PRESS_1_L:
-                pedals[i].footSwitch[p]->enableDoublePress(false);
-                pedals[i].footSwitch[p]->enableLongPress(true);
-                break;
-              case PED_PRESS_1_2_L:
-              case PED_PRESS_2_L:
-                pedals[i].footSwitch[p]->enableDoublePress(true);
-                pedals[i].footSwitch[p]->enableLongPress(true);
-                break;
-                pedals[i].footSwitch[p]->enableDoublePress(true);
-                pedals[i].footSwitch[p]->enableLongPress(true);
+              case 1:
+                pedals[i].footSwitch[1] = new MD_UISwitch_Digital(PIN_A(i), pedals[i].invertPolarity ? HIGH : LOW);
                 break;
             }
-            pedals[i].footSwitch[p]->setDoublePressTime(300);
-            pedals[i].footSwitch[p]->setLongPressTime(500);
-            pedals[i].footSwitch[p]->enableRepeat(false);
-          }
-          else
-          {
-            pedals[i].footSwitch[p]->setDoublePressTime(300);
-            pedals[i].footSwitch[p]->setLongPressTime(500);
-            pedals[i].footSwitch[p]->setRepeatTime(500);
-            pedals[i].footSwitch[p]->enableRepeatResult(true);
+            pedals[i].footSwitch[p]->begin();
+            pedals[i].footSwitch[p]->setDebounceTime(50);
+            if (pedals[i].function == PED_MIDI) {
+              switch (pedals[i].pressMode) {
+                case PED_PRESS_1:
+                  pedals[i].footSwitch[p]->enableDoublePress(false);
+                  pedals[i].footSwitch[p]->enableLongPress(false);
+                  break;
+                case PED_PRESS_2:
+                case PED_PRESS_1_2:
+                  pedals[i].footSwitch[p]->enableDoublePress(true);
+                  pedals[i].footSwitch[p]->enableLongPress(false);
+                  break;
+                case PED_PRESS_L:
+                case PED_PRESS_1_L:
+                  pedals[i].footSwitch[p]->enableDoublePress(false);
+                  pedals[i].footSwitch[p]->enableLongPress(true);
+                  break;
+                case PED_PRESS_1_2_L:
+                case PED_PRESS_2_L:
+                  pedals[i].footSwitch[p]->enableDoublePress(true);
+                  pedals[i].footSwitch[p]->enableLongPress(true);
+                  break;
+                  pedals[i].footSwitch[p]->enableDoublePress(true);
+                  pedals[i].footSwitch[p]->enableLongPress(true);
+                  break;
+              }
+              pedals[i].footSwitch[p]->setDoublePressTime(300);
+              pedals[i].footSwitch[p]->setLongPressTime(500);
+              pedals[i].footSwitch[p]->enableRepeat(false);
+            }
+            else
+            {
+              pedals[i].footSwitch[p]->setDoublePressTime(300);
+              pedals[i].footSwitch[p]->setLongPressTime(500);
+              pedals[i].footSwitch[p]->setRepeatTime(500);
+              pedals[i].footSwitch[p]->enableRepeatResult(true);
+            }
           }
         }
-        break;
-
-      case PED_LATCH:
         break;
 
       case PED_ANALOG:
@@ -462,6 +473,8 @@ void midi_refresh()
         case PED_MOMENTARY1:
         case PED_MOMENTARY2:
         case PED_MOMENTARY3:
+        case PED_LATCH1:
+        case PED_LATCH2:
 
           switch (pedals[i].pressMode) {
 
@@ -485,10 +498,10 @@ void midi_refresh()
                 Serial.print(value);
 #endif
                 b = (currentBank + 2) % BANKS;
-                if (value == LOW)
+                if (value == LOW)                                                         // LOW = pressed, HIGH = released
                   midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                else
-                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
+                else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
+                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
                 pedals[i].pedalValue[0] = value;
                 pedals[i].lastUpdate[0] = millis();
                 pedals[i].pedalValue[1] = pedals[i].pedalValue[0];
@@ -511,10 +524,10 @@ void midi_refresh()
                   Serial.print(value);
 #endif
                   b = currentBank;
-                  if (value == LOW)
+                  if (value == LOW)                                                       // LOW = pressed, HIGH = released
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                  else
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
+                  else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
                   pedals[i].pedalValue[0] = value;
                   pedals[i].lastUpdate[0] = millis();
                   lastUsedSwitch = i;
@@ -534,10 +547,10 @@ void midi_refresh()
                   Serial.print(value);
 #endif
                   b = (currentBank + 1) % BANKS;
-                  if (value == LOW)
+                  if (value == LOW)                                                       // LOW = pressed, HIGH = released
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                  else
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
+                  else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
                   pedals[i].pedalValue[1] = value;
                   pedals[i].lastUpdate[1] = millis();
                   lastUsedSwitch = i;
@@ -551,6 +564,8 @@ void midi_refresh()
             case PED_PRESS_2:
             case PED_PRESS_2_L:
             case PED_PRESS_L:
+
+              if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2) break;
 
               pedals[i].pedalValue[0] = digitalRead(PIN_D(i));
               //pedals[i].lastUpdate[0] = millis();

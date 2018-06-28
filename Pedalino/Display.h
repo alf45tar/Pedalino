@@ -78,9 +78,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 34, "Set MIDI Note",   MD_Menu::MNU_INPUT, II_MIDINOTE },
   // Pedals Setup
   { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
-  { 41, "Set Function",    MD_Menu::MNU_INPUT, II_FUNCTION },
-  { 42, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
-  { 43, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
+  { 41, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
+  { 42, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
+  { 43, "Set Function",    MD_Menu::MNU_INPUT, II_FUNCTION },
   { 44, "Set Press Mode",  MD_Menu::MNU_INPUT, II_PRESS_MODE },
   { 45, "Set Polarity",    MD_Menu::MNU_INPUT, II_POLARITY },
   { 46, "Calibrate",       MD_Menu::MNU_INPUT, II_CALIBRATE },
@@ -91,7 +91,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
   { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
-  { 60, "MIDI Interface",  MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 60, "Select Interf.",  MD_Menu::MNU_INPUT, II_INTERFACE },
   { 61, "MIDI IN",         MD_Menu::MNU_INPUT, II_MIDI_IN },
   { 62, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
   { 63, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
@@ -107,8 +107,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 
 // Input Items ---------
 const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
-const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Start    |     Stop     |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
-const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   |    Latch 3   ";
+const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |  Start/Pause |     Stop     |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
+const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   ";
 const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
@@ -414,9 +414,13 @@ char foot_char (byte footswitch)
 {
   footswitch = constrain(footswitch, 0, PEDALS - 1);
   if (pedals[footswitch].function != PED_MIDI) return ' ';
-  if (footswitch == lastUsedPedal ||
-      pedals[footswitch].mode == PED_MOMENTARY1 && pedals[footswitch].pedalValue[0] == LOW ||
-      (pedals[footswitch].mode == PED_MOMENTARY2 || pedals[footswitch].mode == PED_MOMENTARY3) && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
+  if ((footswitch == lastUsedPedal) ||
+
+      (pedals[footswitch].mode == PED_MOMENTARY1 || pedals[footswitch].mode == PED_LATCH1)
+      && pedals[footswitch].pedalValue[0] == LOW ||
+
+      (pedals[footswitch].mode == PED_MOMENTARY2 || pedals[footswitch].mode == PED_MOMENTARY3 || pedals[footswitch].mode == PED_LATCH2)
+      && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
   return ' ';
 }
 
@@ -498,10 +502,19 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
             case PED_MIDI:
               break;
             case PED_BANK_PLUS:
-              currentBank++;
+              if (currentBank < BANKS - 1) currentBank++;
               break;
             case PED_BANK_MINUS:
-              currentBank--;
+              if (currentBank > 0) currentBank--;
+              break;
+            case PED_START:
+              uClock.start();
+              break;
+            case PED_STOP:
+              uClock.stop();
+              break;
+            case PED_TAP:
+
               break;
             case PED_MENU:
               return MD_Menu::NAV_INC;

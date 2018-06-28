@@ -22,13 +22,12 @@
 #define PED_PITCH_BEND      3
 
 #define PED_MOMENTARY1      0
-#define PED_LATCH           1
+#define PED_LATCH1          1
 #define PED_ANALOG          2
 #define PED_JOG_WHEEL       3
 #define PED_MOMENTARY2      4
 #define PED_MOMENTARY3      5
 #define PED_LATCH2          6
-#define PED_LATCH3          7
 
 #define PED_PRESS_1         0
 #define PED_PRESS_2         1

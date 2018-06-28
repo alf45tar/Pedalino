@@ -3,26 +3,25 @@
 #include <MD_UISwitch.h>
 #include <ResponsiveAnalogRead.h>
 #include <MD_Menu.h>
-//#include <uClock.h>
+#include <uClock.h>
 #include "ControlChange.h"
 #include "NoteNumbers.h"
 
 // Bounce 2 library
 // https://github.com/thomasfredericks/Bounce2/wiki
 //
-// "LOCK-OUT" debounce method
-#define BOUNCE_LOCK_OUT
-// "BOUNCE_WITH_PROMPT_DETECTION" debounce method
+// debounce method
+//#define BOUNCE_LOCK_OUT
 //#define BOUNCE_WITH_PROMPT_DETECTION
 
 #include <Bounce2.h>
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #include "Pedalino.h"
 #include "Config.h"
 #include "MIDIRouting.h"
-//#include "MIDIClock.h"
+#include "MIDIClock.h"
 #include "Controller.h"
 #include "Display.h"
 
@@ -47,7 +46,7 @@ void setup(void)
 
   autosensing_setup();
   controller_setup();
-  //midi_clock_setup();
+  midi_clock_setup();
 
   irrecv.enableIRIn();                        // Start the IR receiver
   irrecv.blink13(true);

@@ -25,6 +25,8 @@ void onClockStop()
 
 void midi_clock_setup()
 {
+  return;
+  
   // Inits the clock
   uClock.init();
   // Set the callback function for the clock output to send MIDI Sync message.
@@ -34,5 +36,5 @@ void midi_clock_setup()
   uClock.setOnClockStopOutput(onClockStop);
   // Set the clock BPM
   uClock.setTempo(100);
-  uClock.start();
+  //uClock.start();
 }

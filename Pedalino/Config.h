@@ -1,5 +1,7 @@
 #include "Pedalino.h"
 
+#define EEPROM_VERSION    0     // Increment each time you change the eeprom structure
+
 //
 //  Load factory deafult value for banks, pedals and interfaces
 //
@@ -7,20 +9,40 @@ void load_factory_default()
 {
   for (byte b = 0; b < BANKS; b++)
     for (byte p = 0; p < PEDALS; p++)
-      banks[b][p] = {PED_CONTROL_CHANGE, b + 1, p + 1};
+      banks[b][p] = {PED_CONTROL_CHANGE,    // MIDI message
+                     b + 1,                 // MIDI channel
+                     p + 1};                // MIDI code
 
   for (byte p = 0; p < PEDALS; p++)
-    pedals[p] = {PED_MIDI, 1, PED_MOMENTARY1, PED_PRESS_1, 1, 127, 65, 0, 0, 50, 930, 0, 0, millis(), millis(), nullptr, nullptr, nullptr, nullptr, nullptr};
+    pedals[p] = {PED_MIDI,                  // function
+                 1,                         // autosensing disabled
+                 PED_MOMENTARY1,            // mode
+                 PED_PRESS_1,               // press mode
+                 1,                         // singles press
+                 127,                       // double press
+                 65,                        // long press
+                 0,                         // invert polarity disabled
+                 0,                         // map function
+                 50,                        // expression pedal zero
+                 930,                       // expression pedal max
+                 0,                         // last state of switch 1
+                 0,                         // last state of switch 2
+                 millis(),                  // last time switch 1 status changed
+                 millis(),                  // last time switch 2 status changed
+                 nullptr, nullptr, nullptr, nullptr, nullptr};
 
-  //pedals[0].mode = PED_ANALOG;
-  //pedals[1].mode = PED_ANALOG;
-  //pedals[2].mode = PED_ANALOG;
+  pedals[0].mode = PED_ANALOG;
+  pedals[1].mode = PED_ANALOG;
   pedals[13].function = PED_ESCAPE;
   pedals[14].function = PED_PREVIOUS;
   pedals[15].function = PED_MENU;
 
   for (byte i = 0; i < INTERFACES; i++)
-    interfaces[i] = {PED_ENABLE, PED_ENABLE, PED_DISABLE, PED_ENABLE, PED_DISABLE};
+    interfaces[i] = {PED_ENABLE,            // MIDI IN
+                     PED_ENABLE,            // MIDI OUT
+                     PED_DISABLE,           // MIDI THRU
+                     PED_ENABLE,            // MIDI routing
+                     PED_DISABLE};          // MIDI clock
 }
 
 
@@ -37,6 +59,8 @@ void update_eeprom() {
 
   EEPROM.put(offset, SIGNATURE);
   offset += sizeof(SIGNATURE);
+  EEPROM.put(offset, EEPROM_VERSION);
+  offset += sizeof(byte);
 
   for (byte b = 0; b < BANKS; b++)
     for (byte p = 0; p < PEDALS; p++) {
@@ -102,18 +126,23 @@ void read_eeprom() {
 
   int offset = 0;
   char signature[LCD_COLS + 1];
+  byte saved_version;
 
   load_factory_default();
 
   EEPROM.get(offset, signature);
   offset += sizeof(SIGNATURE);
+  EEPROM.get(offset, saved_version);
+  offset += sizeof(byte);
 
 #ifdef DEBUG_PEDALINO
   Serial.print("EEPROM signature: ");
   Serial.println(signature);
+  Serial.print("EEPROM version: ");
+  Serial.println(saved_version);
 #endif
 
-  if (strcmp(signature, SIGNATURE) == 0) {
+  if ((strcmp(signature, SIGNATURE) == 0) && (saved_version == EEPROM_VERSION)) {
 
 #ifdef DEBUG_PEDALINO
     Serial.print("Reading EEPROM ... ");
