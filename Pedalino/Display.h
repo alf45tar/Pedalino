@@ -508,10 +508,10 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
               if (currentBank > 0) currentBank--;
               break;
             case PED_START:
-              uClock.start();
+              //uClock.start();
               break;
             case PED_STOP:
-              uClock.stop();
+              //uClock.stop();
               break;
             case PED_TAP:
 
