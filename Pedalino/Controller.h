@@ -439,7 +439,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
     case PED_PITCH_BEND:
 
       if (on_off) {
-        int bend = value << 4;       // make it a 14-bit number (pad with 4 zeros)
+        int bend = map(value, 0, 127, - 8192, 8191);
 #ifdef DEBUG_PEDALINO
         Serial.print("     PITCH BEND     Value ");
         Serial.print(bend);
@@ -499,9 +499,16 @@ void midi_refresh()
 #endif
                 b = (currentBank + 2) % BANKS;
                 if (value == LOW)                                                         // LOW = pressed, HIGH = released
-                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
-                  midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
+                  midi_send(banks[b][i].midiMessage,
+                            banks[b][i].midiCode,
+                            pedals[i].value_single,
+                            banks[b][i].midiChannel);
+                else
+                  midi_send(banks[b][i].midiMessage,
+                            banks[b][i].midiCode,
+                            pedals[i].value_double,
+                            banks[b][i].midiChannel,
+                            pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                 pedals[i].pedalValue[0] = value;
                 pedals[i].lastUpdate[0] = millis();
                 pedals[i].pedalValue[1] = pedals[i].pedalValue[0];
@@ -524,10 +531,17 @@ void midi_refresh()
                   Serial.print(value);
 #endif
                   b = currentBank;
-                  if (value == LOW)                                                       // LOW = pressed, HIGH = released
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                  else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
+                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                    midi_send(banks[b][i].midiMessage,
+                              banks[b][i].midiCode,
+                              pedals[i].value_single,
+                              banks[b][i].midiChannel);
+                  else
+                    midi_send(banks[b][i].midiMessage,
+                              banks[b][i].midiCode,
+                              pedals[i].value_double,
+                              banks[b][i].midiChannel,
+                              pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                   pedals[i].pedalValue[0] = value;
                   pedals[i].lastUpdate[0] = millis();
                   lastUsedSwitch = i;
@@ -547,10 +561,17 @@ void midi_refresh()
                   Serial.print(value);
 #endif
                   b = (currentBank + 1) % BANKS;
-                  if (value == LOW)                                                       // LOW = pressed, HIGH = released
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                  else if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2)
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
+                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                    midi_send(banks[b][i].midiMessage,
+                              banks[b][i].midiCode,
+                              pedals[i].value_single,
+                              banks[b][i].midiChannel);
+                  else
+                    midi_send(banks[b][i].midiMessage,
+                              banks[b][i].midiCode,
+                              pedals[i].value_double,
+                              banks[b][i].midiChannel,
+                              pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                   pedals[i].pedalValue[1] = value;
                   pedals[i].lastUpdate[1] = millis();
                   lastUsedSwitch = i;
@@ -639,8 +660,8 @@ void midi_refresh()
             pedals[i].expZero = min(pedals[i].expZero, round(1.1 * input));
             pedals[i].expMax  = max(pedals[i].expMax,  round(0.9 * input));
           }
-          if (pedals[i].invertPolarity) input = ADC_RESOLUTION - 1 - input;     // invert the scale
           value = map_analog(i, input);                             // apply the digital map function to the value
+          if (pedals[i].invertPolarity) input = ADC_RESOLUTION - 1 - input;   // invert the scale
           value = value >> 3;                                       // map from 10-bit value [0, 1023] to the 7-bit MIDI value [0, 127]
           pedals[i].analogPedal->update(value);                     // update the responsive analog average
           if (pedals[i].analogPedal->hasChanged())                  // if the value changed since last time

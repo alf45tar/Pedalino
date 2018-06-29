@@ -476,62 +476,92 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   bool                  repeat;
   byte                  numberPressed = 127;
 
-  MD_UISwitch::keyResult_t k;
+  MD_UISwitch::keyResult_t k1;
+  MD_UISwitch::keyResult_t k2;
+  byte                     k;
 
   for (byte i = 0; i < PEDALS; i++) {
     if (pedals[i].function == PED_MIDI) continue;
-    for (byte p = 0; p < 2; p++) {
-      if (pedals[i].footSwitch[p] == nullptr) continue;
-      k = pedals[i].footSwitch[p]->read();
-      switch (k) {
-        case MD_UISwitch::KEY_NULL:
-          pedals[i].footSwitch[p]->setDoublePressTime(300);
-          pedals[i].footSwitch[p]->setLongPressTime(500);
-          pedals[i].footSwitch[p]->setRepeatTime(500);
-          pedals[i].footSwitch[p]->enableDoublePress(true);
-          pedals[i].footSwitch[p]->enableLongPress(true);
-          break;
-        case MD_UISwitch::KEY_RPTPRESS:
-          pedals[i].footSwitch[p]->setDoublePressTime(0);
-          pedals[i].footSwitch[p]->setLongPressTime(0);
-          pedals[i].footSwitch[p]->setRepeatTime(10);
-          pedals[i].footSwitch[p]->enableDoublePress(false);
-          pedals[i].footSwitch[p]->enableLongPress(false);
-        case MD_UISwitch::KEY_PRESS:
-          switch (pedals[i].function) {
-            case PED_MIDI:
-              break;
-            case PED_BANK_PLUS:
+    k = 0;
+    k1 = MD_UISwitch::KEY_NULL;
+    k2 = MD_UISwitch::KEY_NULL;
+    if (pedals[i].footSwitch[0] != nullptr) k1 = pedals[i].footSwitch[0]->read();
+    if (pedals[i].footSwitch[1] != nullptr) k2 = pedals[i].footSwitch[1]->read();
+    if ((k1 == MD_UISwitch::KEY_PRESS || k1 == MD_UISwitch::KEY_DPRESS || k1 == MD_UISwitch::KEY_LONGPRESS) && k2 == MD_UISwitch::KEY_NULL) k = 1;
+    if ((k2 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_DPRESS || k2 == MD_UISwitch::KEY_LONGPRESS) && k1 == MD_UISwitch::KEY_NULL) k = 2;
+    if ((k1 == MD_UISwitch::KEY_PRESS || k1 == MD_UISwitch::KEY_DPRESS || k1 == MD_UISwitch::KEY_LONGPRESS) &&
+        (k2 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_DPRESS || k2 == MD_UISwitch::KEY_LONGPRESS)) k = 3;
+    if (k > 0 && (k1 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_PRESS)) {
+      switch (pedals[i].function) {
+
+        case PED_BANK_PLUS:
+          switch (k) {
+            case 1:
               if (currentBank < BANKS - 1) currentBank++;
               break;
-            case PED_BANK_MINUS:
+            case 2:
               if (currentBank > 0) currentBank--;
               break;
-            case PED_START:
-              //uClock.start();
-              break;
-            case PED_STOP:
-              //uClock.stop();
-              break;
-            case PED_TAP:
-
-              break;
-            case PED_MENU:
-              return MD_Menu::NAV_INC;
-              break;
-            case PED_CONFIRM:
-              return MD_Menu::NAV_SEL;
-              break;
-            case PED_ESCAPE:
-              return MD_Menu::NAV_ESC;
-              break;
-            case PED_NEXT:
-              return MD_Menu::NAV_INC;
-              break;
-            case PED_PREVIOUS:
-              return MD_Menu::NAV_DEC;
+            case 3:
               break;
           }
+          break;
+
+        case PED_BANK_MINUS:
+          switch (k) {
+            case 1:
+              if (currentBank > 0) currentBank--;
+              break;
+            case 2:
+              if (currentBank < BANKS - 1) currentBank++;
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+        case PED_START:
+          //uClock.start();
+          break;
+        case PED_STOP:
+          //uClock.stop();
+          break;
+        case PED_TAP:
+          break;
+
+        case PED_MENU:
+          return MD_Menu::NAV_INC;
+          break;
+        case PED_CONFIRM:
+          return MD_Menu::NAV_SEL;
+          break;
+        case PED_ESCAPE:
+          return MD_Menu::NAV_ESC;
+          break;
+        case PED_NEXT:
+          return MD_Menu::NAV_INC;
+          break;
+        case PED_PREVIOUS:
+          return MD_Menu::NAV_DEC;
+          break;
+      }
+    }
+
+    if (pedals[i].footSwitch[0] != nullptr)
+      switch (k1) {
+        case MD_UISwitch::KEY_NULL:
+          pedals[i].footSwitch[0]->setDoublePressTime(300);
+          pedals[i].footSwitch[0]->setLongPressTime(500);
+          pedals[i].footSwitch[0]->setRepeatTime(500);
+          pedals[i].footSwitch[0]->enableDoublePress(true);
+          pedals[i].footSwitch[0]->enableLongPress(true);
+          break;
+        case MD_UISwitch::KEY_RPTPRESS:
+          pedals[i].footSwitch[0]->setDoublePressTime(0);
+          pedals[i].footSwitch[0]->setLongPressTime(0);
+          pedals[i].footSwitch[0]->setRepeatTime(10);
+          pedals[i].footSwitch[0]->enableDoublePress(false);
+          pedals[i].footSwitch[0]->enableLongPress(false);
           break;
         case MD_UISwitch::KEY_DPRESS:
           if (pedals[i].function == PED_MENU) return MD_Menu::NAV_SEL;
@@ -539,11 +569,33 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case MD_UISwitch::KEY_LONGPRESS:
           if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
           break;
-        default:
+      }
+
+    if (pedals[i].footSwitch[1] != nullptr)
+      switch (k2) {
+        case MD_UISwitch::KEY_NULL:
+          pedals[i].footSwitch[1]->setDoublePressTime(300);
+          pedals[i].footSwitch[1]->setLongPressTime(500);
+          pedals[i].footSwitch[1]->setRepeatTime(500);
+          pedals[i].footSwitch[1]->enableDoublePress(true);
+          pedals[i].footSwitch[1]->enableLongPress(true);
+          break;
+        case MD_UISwitch::KEY_RPTPRESS:
+          pedals[i].footSwitch[1]->setDoublePressTime(0);
+          pedals[i].footSwitch[1]->setLongPressTime(0);
+          pedals[i].footSwitch[1]->setRepeatTime(10);
+          pedals[i].footSwitch[1]->enableDoublePress(false);
+          pedals[i].footSwitch[1]->enableLongPress(false);
+          break;
+        case MD_UISwitch::KEY_DPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_SEL;
+          break;
+        case MD_UISwitch::KEY_LONGPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
           break;
       }
-    }
-    if (k != MD_UISwitch::KEY_NULL) {
+
+    if (k1 != MD_UISwitch::KEY_NULL) {
       switch (pedals[i].footSwitch[0]->getKey()) {
         case 'L':
           return MD_Menu::NAV_INC;

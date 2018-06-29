@@ -1,6 +1,6 @@
 #include "Pedalino.h"
 
-#define EEPROM_VERSION    0     // Increment each time you change the eeprom structure
+#define EEPROM_VERSION    4     // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -9,9 +9,36 @@ void load_factory_default()
 {
   for (byte b = 0; b < BANKS; b++)
     for (byte p = 0; p < PEDALS; p++)
-      banks[b][p] = {PED_CONTROL_CHANGE,    // MIDI message
-                     b + 1,                 // MIDI channel
-                     p + 1};                // MIDI code
+      switch (b % 4)
+      {
+        case 0:
+          banks[b][p] = { PED_PROGRAM_CHANGE,    // MIDI message
+                          b / 4 + 1,             // MIDI channel
+                          b / 4 * 16 + p         // MIDI code
+                      };
+          break;
+
+        case 1:
+          banks[b][p] = { PED_CONTROL_CHANGE,    // MIDI message
+                          b / 4 + 1,             // MIDI channel
+                          b / 4 * 16 + p         // MIDI code
+                      };
+          break;
+
+        case 2:
+          banks[b][p] = { PED_NOTE_ON_OFF,       // MIDI message
+                          b / 4 + 1,             // MIDI channel
+                          b / 4 * 16 + p + 24    // MIDI code
+                      };
+          break;
+
+        case 3:
+          banks[b][p] = { PED_PITCH_BEND,        // MIDI message
+                          b / 4 + 1,             // MIDI channel
+                          b / 4 * 16 + p         // MIDI code
+                      };
+          break;
+      }
 
   for (byte p = 0; p < PEDALS; p++)
     pedals[p] = {PED_MIDI,                  // function
@@ -29,20 +56,21 @@ void load_factory_default()
                  0,                         // last state of switch 2
                  millis(),                  // last time switch 1 status changed
                  millis(),                  // last time switch 2 status changed
-                 nullptr, nullptr, nullptr, nullptr, nullptr};
+                 nullptr, nullptr, nullptr, nullptr, nullptr
+                };
 
-  pedals[0].mode = PED_ANALOG;
-  pedals[1].mode = PED_ANALOG;
-  pedals[13].function = PED_ESCAPE;
-  pedals[14].function = PED_PREVIOUS;
-  pedals[15].function = PED_MENU;
+  pedals[11].function = PED_BANK_PLUS;
+  pedals[11].mode     = PED_MOMENTARY2;
+  pedals[12].function = PED_MENU;
+  pedals[12].mode     = PED_MOMENTARY3;
 
   for (byte i = 0; i < INTERFACES; i++)
     interfaces[i] = {PED_ENABLE,            // MIDI IN
                      PED_ENABLE,            // MIDI OUT
                      PED_DISABLE,           // MIDI THRU
                      PED_ENABLE,            // MIDI routing
-                     PED_DISABLE};          // MIDI clock
+                     PED_DISABLE
+                    };          // MIDI clock
 }
 
 
