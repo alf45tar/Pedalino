@@ -200,9 +200,9 @@ Boot procedure
 
 You can reset the last know access point via menu.
 
-## AppleMIDI
+## Apple MIDI Network aka AppleMIDI aka RTP-MIDI aka Wireless MIDI
 
-Pedalino is a session listener over Wi-Fi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), or an embedded RTP-MIDI device.
+Pedalino is a session listener over Wi-Fi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), an embedded RTP-MIDI device or an app on your iOS device (I am using [MIDI Network](http://audioapps.nl/app/MIDINetwork))
 
 ## Open Sound Control (OSC)
 
