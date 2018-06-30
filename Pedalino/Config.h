@@ -1,6 +1,6 @@
 #include "Pedalino.h"
 
-#define EEPROM_VERSION    4     // Increment each time you change the eeprom structure
+#define EEPROM_VERSION    5     // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -14,28 +14,40 @@ void load_factory_default()
         case 0:
           banks[b][p] = { PED_PROGRAM_CHANGE,    // MIDI message
                           b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p         // MIDI code
+                          b / 4 * 16 + p,        // MIDI code
+                          127,
+                          0,
+                          65
                       };
           break;
 
         case 1:
           banks[b][p] = { PED_CONTROL_CHANGE,    // MIDI message
                           b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p         // MIDI code
+                          b / 4 * 16 + p,        // MIDI code
+                          127,
+                          0,
+                          65
                       };
           break;
 
         case 2:
           banks[b][p] = { PED_NOTE_ON_OFF,       // MIDI message
                           b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p + 24    // MIDI code
+                          b / 4 * 16 + p + 24,   // MIDI code
+                          127,
+                          0,
+                          65
                       };
           break;
 
         case 3:
           banks[b][p] = { PED_PITCH_BEND,        // MIDI message
                           b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p         // MIDI code
+                          b / 4 * 16 + p,        // MIDI code
+                          127,
+                          0,
+                          65
                       };
           break;
       }
@@ -44,7 +56,7 @@ void load_factory_default()
     pedals[p] = {PED_MIDI,                  // function
                  1,                         // autosensing disabled
                  PED_MOMENTARY1,            // mode
-                 PED_PRESS_1,               // press mode
+                 PED_PRESS_1_2_L,           // press mode
                  1,                         // singles press
                  127,                       // double press
                  65,                        // long press
@@ -97,6 +109,12 @@ void update_eeprom() {
       EEPROM.put(offset, banks[b][p].midiChannel);
       offset += sizeof(byte);
       EEPROM.put(offset, banks[b][p].midiCode);
+      offset += sizeof(byte);
+      EEPROM.put(offset, banks[b][p].midiValue1);
+      offset += sizeof(byte);
+      EEPROM.put(offset, banks[b][p].midiValue2);
+      offset += sizeof(byte);
+      EEPROM.put(offset, banks[b][p].midiValue3);
       offset += sizeof(byte);
     }
 
@@ -183,6 +201,12 @@ void read_eeprom() {
         EEPROM.get(offset, banks[b][p].midiChannel);
         offset += sizeof(byte);
         EEPROM.get(offset, banks[b][p].midiCode);
+        offset += sizeof(byte);
+        EEPROM.get(offset, banks[b][p].midiValue1);
+        offset += sizeof(byte);
+        EEPROM.get(offset, banks[b][p].midiValue2);
+        offset += sizeof(byte);
+        EEPROM.get(offset, banks[b][p].midiValue3);
         offset += sizeof(byte);
       }
 

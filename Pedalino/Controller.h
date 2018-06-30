@@ -500,12 +500,12 @@ void midi_refresh()
                 if (value == LOW)                                                         // LOW = pressed, HIGH = released
                   midi_send(banks[b][i].midiMessage,
                             banks[b][i].midiCode,
-                            pedals[i].value_single,
+                            banks[b][i].midiValue1,
                             banks[b][i].midiChannel);
                 else
                   midi_send(banks[b][i].midiMessage,
                             banks[b][i].midiCode,
-                            pedals[i].value_double,
+                            banks[b][i].midiValue2,
                             banks[b][i].midiChannel,
                             pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                 pedals[i].pedalValue[0] = value;
@@ -533,12 +533,12 @@ void midi_refresh()
                   if (value == LOW)                                                         // LOW = pressed, HIGH = released
                     midi_send(banks[b][i].midiMessage,
                               banks[b][i].midiCode,
-                              pedals[i].value_single,
+                              banks[b][i].midiValue1,
                               banks[b][i].midiChannel);
                   else
                     midi_send(banks[b][i].midiMessage,
                               banks[b][i].midiCode,
-                              pedals[i].value_double,
+                              banks[b][i].midiValue2,
                               banks[b][i].midiChannel,
                               pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                   pedals[i].pedalValue[0] = value;
@@ -563,12 +563,12 @@ void midi_refresh()
                   if (value == LOW)                                                         // LOW = pressed, HIGH = released
                     midi_send(banks[b][i].midiMessage,
                               banks[b][i].midiCode,
-                              pedals[i].value_single,
+                              banks[b][i].midiValue1,
                               banks[b][i].midiChannel);
                   else
                     midi_send(banks[b][i].midiMessage,
                               banks[b][i].midiCode,
-                              pedals[i].value_double,
+                              banks[b][i].midiValue2,
                               banks[b][i].midiChannel,
                               pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
                   pedals[i].pedalValue[1] = value;
@@ -608,20 +608,41 @@ void midi_refresh()
                 switch (k) {
 
                   case MD_UISwitch::KEY_PRESS:
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_single, banks[b][i].midiChannel, false);
+#ifdef DEBUG_PEDALINO
+                    Serial.println("");
+                    Serial.print("Pedal ");
+                    if (i < 9) Serial.print(" ");
+                    Serial.print(i + 1);
+                    Serial.print("   SINGLE PRESS ");
+#endif
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
 
                   case MD_UISwitch::KEY_DPRESS:
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_double, banks[b][i].midiChannel, false);
+#ifdef DEBUG_PEDALINO
+                    Serial.println("");
+                    Serial.print("Pedal ");
+                    if (i < 9) Serial.print(" ");
+                    Serial.print(i + 1);
+                    Serial.print("   DOUBLE PRESS ");
+#endif
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
 
                   case MD_UISwitch::KEY_LONGPRESS:
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_long, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, pedals[i].value_long, banks[b][i].midiChannel, false);
+#ifdef DEBUG_PEDALINO
+                    Serial.println("");
+                    Serial.print("Pedal ");
+                    if (i < 9) Serial.print(" ");
+                    Serial.print(i + 1);
+                    Serial.print("   LONG   PRESS ");
+#endif
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel);
+                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel, false);
                     lastUsedSwitch = i;
                     break;
                 }

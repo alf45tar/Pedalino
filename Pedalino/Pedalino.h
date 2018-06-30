@@ -80,6 +80,9 @@ struct bank {
                                              3 = Pitch Bend */
   byte                   midiChannel;     /* MIDI channel 1-16 */
   byte                   midiCode;        /* Program Change, Control Code, Note or Pitch Bend value to send */
+  byte                   midiValue1;      /* Single click */
+  byte                   midiValue2;      /* Double click */
+  byte                   midiValue3;      /* Long click */
 };
 
 struct pedal {

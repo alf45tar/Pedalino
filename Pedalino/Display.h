@@ -21,29 +21,32 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MIDIMESSAGE    23
 #define II_MIDICODE       24
 #define II_MIDINOTE       25
-#define II_FUNCTION       26
-#define II_AUTOSENSING    27
-#define II_MODE           28
-#define II_PRESS_MODE     29
-#define II_VALUE_SINGLE   30
-#define II_VALUE_DOUBLE   31
-#define II_VALUE_LONG     32
-#define II_POLARITY       33
-#define II_CALIBRATE      34
-#define II_ZERO           35
-#define II_MAX            36
-#define II_RESPONSECURVE  37
-#define II_INTERFACE      38
-#define II_MIDI_IN        39
-#define II_MIDI_OUT       40
-#define II_MIDI_THRU      41
-#define II_MIDI_ROUTING   42
-#define II_MIDI_CLOCK     43
-#define II_LEGACY_MIDI    44
-#define II_PROFILE_LOAD   45
-#define II_PROFILE_SAVE   46
-#define II_WIFI           47
-#define II_DEFAULT        48
+#define II_MIDIVALUE1     26
+#define II_MIDIVALUE2     27
+#define II_MIDIVALUE3     28
+#define II_FUNCTION       29
+#define II_AUTOSENSING    30
+#define II_MODE           31
+#define II_PRESS_MODE     32
+#define II_VALUE_SINGLE   33
+#define II_VALUE_DOUBLE   34
+#define II_VALUE_LONG     35
+#define II_POLARITY       36
+#define II_CALIBRATE      37
+#define II_ZERO           38
+#define II_MAX            39
+#define II_RESPONSECURVE  40
+#define II_INTERFACE      41
+#define II_MIDI_IN        42
+#define II_MIDI_OUT       43
+#define II_MIDI_THRU      44
+#define II_MIDI_ROUTING   45
+#define II_MIDI_CLOCK     46
+#define II_LEGACY_MIDI    47
+#define II_PROFILE_LOAD   48
+#define II_PROFILE_SAVE   49
+#define II_WIFI           50
+#define II_DEFAULT        51
 
 // Global menu data and definitions
 
@@ -53,7 +56,7 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
   { M_ROOT,           SIGNATURE,         10, 13, 0 },
-  { M_BANKSETUP,      "Banks Setup",     20, 34, 0 },
+  { M_BANKSETUP,      "Banks Setup",     20, 37, 0 },
   { M_PEDALSETUP,     "Pedals Setup",    40, 52, 0 },
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
   { M_PROFILE,        "Profiles",        70, 71, 0 },
@@ -76,6 +79,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 32, "SetMIDIMessage",  MD_Menu::MNU_INPUT, II_MIDIMESSAGE },
   { 33, "Set MIDI Code",   MD_Menu::MNU_INPUT, II_MIDICODE },
   { 34, "Set MIDI Note",   MD_Menu::MNU_INPUT, II_MIDINOTE },
+  { 35, "Set Value 1",     MD_Menu::MNU_INPUT, II_MIDIVALUE1 },
+  { 36, "Set Value 2",     MD_Menu::MNU_INPUT, II_MIDIVALUE2 },
+  { 37, "Set Value 3",     MD_Menu::MNU_INPUT, II_MIDIVALUE3 },
   // Pedals Setup
   { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
   { 41, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
@@ -87,9 +93,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 47, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
   { 48, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 49, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
-  { 50, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
-  { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
-  { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
+//  { 50, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
+//  { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
+//  { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
   { 60, "Select Interf.",  MD_Menu::MNU_INPUT, II_INTERFACE },
   { 61, "MIDI IN",         MD_Menu::MNU_INPUT, II_MIDI_IN },
@@ -128,6 +134,9 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDIMESSAGE,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiMessage },
   { II_MIDICODE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiControlChange },
   { II_MIDINOTE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiNoteNumbers },
+  { II_MIDIVALUE1,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE2,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE3,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
   { II_FUNCTION,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalFunction },
   { II_AUTOSENSING,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalMode },
@@ -190,6 +199,21 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_MIDINOTE:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiCode;
       else banks[currentBank][currentPedal].midiCode = vBuf.value;
+      break;
+
+    case II_MIDIVALUE1:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue1;
+      else banks[currentBank][currentPedal].midiValue1 = vBuf.value;
+      break;
+
+    case II_MIDIVALUE2:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue2;
+      else banks[currentBank][currentPedal].midiValue2 = vBuf.value;
+      break;
+
+    case II_MIDIVALUE3:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue3;
+      else banks[currentBank][currentPedal].midiValue3 = vBuf.value;
       break;
 
     case II_FUNCTION:
@@ -530,7 +554,14 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
           break;
 
         case PED_MENU:
-          return MD_Menu::NAV_INC;
+          switch (k) {
+            case 1:
+              return MD_Menu::NAV_INC;
+            case 2:
+              return MD_Menu::NAV_DEC;
+            case 3:
+              return MD_Menu::NAV_ESC;
+          }
           break;
         case PED_CONFIRM:
           return MD_Menu::NAV_SEL;
