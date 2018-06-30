@@ -154,7 +154,6 @@ struct RTPSerialMIDISettings : public midi::DefaultSettings
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISettings);
-//MIDI_CREATE_INSTANCE(HardwareSerial, Serial,  USB_MIDI);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
 
@@ -193,7 +192,7 @@ boolean       powersaver = false;
 #include <IRremote.h>
 
 #define RECV_PIN       2     // connect Y to this PIN, G to GND, R to 5V
-#define RECV_LED_PIN  35
+#define RECV_LED_PIN   3
 
 #define IR_ON_OFF   0xFFEA15
 #define IR_OK       0xFF48B7

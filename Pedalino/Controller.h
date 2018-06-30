@@ -177,7 +177,6 @@ void controller_setup()
 
   // Build new MIDI controllers setup
   for (byte i = 0; i < PEDALS; i++) {
-
 #ifdef DEBUG_PEDALINO
     Serial.print("Pedal ");
     if (i < 9) Serial.print(" ");
