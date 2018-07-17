@@ -91,7 +91,10 @@ The rest is not mandatory but it depends of which features you want to support.
 
 ## Pedalino™ Breadboard Prototype
 
+### OPTION 1 - WiFi only
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoShield_bb.png)
+
+### OPTION 2 - WiFi and Bluetooth
 
 ## Pedal Wiring
 
