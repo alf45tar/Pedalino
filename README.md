@@ -11,13 +11,15 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Battery operated
 - No cable required
 - Any number of pedals of any type in any order
-- USB MIDI class-compliant device
+- 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN)
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
-- AppleMIDI (aka RTP-MIDI) via Wi-Fi
+- USB MIDI class-compliant device
+- Bluetooth LE MIDI (iOS compatible)
+- Network MIDI (aka AppleMIDI or RTP-MIDI) via Wi-Fi
 - Open Sound Control (OSC) via Wi-Fi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
-- Legacy MIDI OUT and MIDI IN connector
-- Every MIDI port can route MIDI messages received from other interface
+- Legacy DIN MIDI OUT and MIDI IN connector
+- MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
 - OSC to MIDI and vicecersa
 - Auto-sensing footswitches and expression pedals
 - Modular assembly of easy to find pieces of hardware and re-use of open source software libraries
@@ -65,10 +67,14 @@ The rest is not mandatory but it depends of which features you want to support.
 - MIDI IN interface
   - 6N137 Single-Channel High Speed Optocoupler (6N138 may works too)
 
-- WIFI
+- WIFI only (OPTION 1)
   - [ESP8266 ESP-01S](https://en.wikipedia.org/wiki/ESP8266) 1M WiFi module
   - YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
+  
+- WIFI and Bluetooth (OPTION 2)
+  - [DOIT ESP32 DevKit V1](https://github.com/SmartArduino/SZDOITWiKi/wiki/ESP8266---ESP32) 4M dual-mode Wi-Fi and Bluetooth module
+  - [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32)
   
 - AppleMIDI via WIFI
   - [AppleMIDI for Arduino](https://github.com/lathoub/Arduino-AppleMIDI-Library) library
@@ -76,7 +82,7 @@ The rest is not mandatory but it depends of which features you want to support.
 - OSC via WIFI
   - [CNMAT OSC for Arduino](https://github.com/CNMAT/OSC) library
 
-- Infrared Remote Control
+- Infrared Remote Controlhttps://github.com/espressif/arduino-esp32
   - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
   - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
   
@@ -277,13 +283,13 @@ Many different procedures can be used and many tutorials are available on intern
 - [ControllerHub 8](https://ameliascompass.com/product/controllerhub-8/)
 - [Audifront MIDI Expression](https://www.audiofront.net/MIDIExpression.php)
 - [BomeBox](https://www.bome.com/products/bomebox)
+- [iRig BlueBoard](http://www.ikmultimedia.com/products/irigblueboard)
 
 
 ## ToDo
 
 - [ ] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
-- [ ] Bluetooth MIDI
 
 # Copyright
 Copyright 2017-2018 alfa45star
