@@ -96,6 +96,8 @@ The rest is not mandatory but it depends of which features you want to support.
 
 ### OPTION 2 - WiFi and Bluetooth
 
+...to be completed...
+
 ## Pedal Wiring
 
 Pedalino is designed to work with the majority of expression pedals on the market, but there are a few popular pedal types which are incompatible and need to use adapters in order to work with Pedalino.
