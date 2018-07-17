@@ -22,11 +22,14 @@
 #define MIDI_SERVICE_UUID        "03b80e5a-ede8-4b33-a751-6ce34ec4c700"
 #define MIDI_CHARACTERISTIC_UUID "7772e5db-3868-4112-a1a9-f2669d106bf3"
 
-BLEServer           *pServer;
-BLEService          *pService;
-BLECharacteristic   *pCharacteristic;
-BLESecurity         *pSecurity;
-bool                bleMidiConnected = false;
+BLEServer             *pServer;
+BLEService            *pService;
+BLECharacteristic     *pCharacteristic;
+BLESecurity           *pSecurity;
+bool                  bleMidiConnected = false;
+unsigned long         msOffset = 0;
+#define MAX_TIMESTAMP 0x01FFF         //13 bits, 8192 dec
+
 #endif
 
 #include <WiFiClient.h>
@@ -115,6 +118,214 @@ const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC
 OSCMessage              oscMsg;
 OSCErrorCode            oscError;
 
+
+//This function is called to check if MIDI data has come in through the serial port.  If found, it builds a characteristic buffer and sends it over BLE.
+// https://learn.sparkfun.com/tutorials/midi-ble-tutorial
+
+void BLEmidiTimestamp (uint8_t *first6bit, uint8_t *second7bit)
+{
+  unsigned long currentMillis = millis();
+  if (currentMillis < 5000) {
+    if (msOffset > 5000) {
+      //it's been 49 days! millis rolled.
+      while (msOffset > 5000) {
+        //roll msOffset - this should preserve current ~8 second count.
+        msOffset += MAX_TIMESTAMP;
+      }
+    }
+  }
+  //if the offset is more than 2^13 ms away, move it up in 2^13 ms intervals
+  while (currentMillis >= (unsigned long)(msOffset + MAX_TIMESTAMP)) {
+    msOffset += MAX_TIMESTAMP;
+  }
+  unsigned long currentTimeStamp = currentMillis - msOffset;
+  *first6bit = ((currentTimeStamp >> 7) & 0x3F) | 0x80;       // 6 bits plus MSB
+  *second7bit = (currentTimeStamp & 0x7F) | 0x80;             // 7 bits plus MSB
+}
+
+void BLEmidiSend()
+{
+  uint8_t midiPacket[5];
+
+  BLEmidiTimestamp(&midiPacket[0], &midiPacket[1]);
+
+  uint8_t statusByte = ((uint8_t)MIDI.getType() | ((MIDI.getChannel() - 1) & 0x0f));
+  switch (MIDI.getType())
+  {
+    //2 Byte Channel Messages
+    case midi::NoteOff :
+    case midi::NoteOn :
+    case midi::AfterTouchPoly :
+    case midi::ControlChange :
+    case midi::PitchBend :
+      midiPacket[2] = statusByte;
+      midiPacket[3] = MIDI.getData1();
+      midiPacket[4] = MIDI.getData2();
+      pCharacteristic->setValue(midiPacket, 5);
+      pCharacteristic->notify();
+      break;
+    //1 Byte Channel Messages
+    case midi::ProgramChange :
+    case midi::AfterTouchChannel :
+      midiPacket[2] = statusByte;
+      midiPacket[3] = MIDI.getData1();
+      pCharacteristic->setValue(midiPacket, 4);
+      pCharacteristic->notify();
+      break;
+    //System Common Messages
+    case midi::TimeCodeQuarterFrame :
+      midiPacket[2] = 0xF1;
+      midiPacket[3] = MIDI.getData1();
+      pCharacteristic->setValue(midiPacket, 4);
+      pCharacteristic->notify();
+      break;
+    case midi::SongPosition :
+      midiPacket[2] = 0xF2;
+      midiPacket[3] = MIDI.getData1();
+      midiPacket[4] = MIDI.getData2();
+      pCharacteristic->setValue(midiPacket, 5);
+      pCharacteristic->notify();
+      break;
+    case midi::SongSelect :
+      midiPacket[2] = 0xF3;
+      midiPacket[3] = MIDI.getData1();
+      pCharacteristic->setValue(midiPacket, 4);
+      pCharacteristic->notify();
+      break;
+    case midi::TuneRequest :
+      midiPacket[2] = 0xF6;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    //Real-time Messages
+    case midi::Clock :
+      midiPacket[2] = 0xF8;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    case midi::Start :
+      midiPacket[2] = 0xFA;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    case midi::Continue :
+      midiPacket[2] = 0xFB;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    case midi::Stop :
+      midiPacket[2] = 0xFC;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    case midi::ActiveSensing :
+      midiPacket[2] = 0xFE;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    case midi::SystemReset :
+      midiPacket[2] = 0xFF;
+      pCharacteristic->setValue(midiPacket, 3);
+      pCharacteristic->notify();
+      break;
+    //SysEx
+    case midi::SystemExclusive :
+      //              {
+      //                  // Sysex is special.
+      //                  // could contain very long data...
+      //                  // the data bytes form the length of the message,
+      //                  // with data contained in array member
+      //                  uint16_t length;
+      //                  const uint8_t  * data_p;
+      //
+      //                  Serial.print("SysEx, chan: ");
+      //                  Serial.print(MIDI.getChannel());
+      //                  length = MIDI.getSysExArrayLength();
+      //
+      //                  Serial.print(" Data: 0x");
+      //                  data_p = MIDI.getSysExArray();
+      //                  for (uint16_t idx = 0; idx < length; idx++)
+      //                  {
+      //                      Serial.print(data_p[idx], HEX);
+      //                      Serial.print(" 0x");
+      //                  }
+      //                  Serial.println();
+      //              }
+      break;
+    case midi::InvalidType :
+    default:
+      break;
+  }
+}
+
+//This function decodes the BLE characteristics and calls MIDI.send
+//if the packet contains sendable MIDI data.
+void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize)
+{
+  midi::Channel   channel;
+  midi::MidiType  command;
+
+  //Pointers used to search through payload.
+  uint8_t lPtr = 0;
+  uint8_t rPtr = 0;
+  //lastStatus used to capture runningStatus
+  uint8_t lastStatus;
+  //Decode first packet -- SHALL be "Full MIDI message"
+  lPtr = 2; //Start at first MIDI status -- SHALL be "MIDI status"
+  //While statement contains incrementing pointers and breaks when buffer size exceeded.
+  while (1) {
+    lastStatus = buffer[lPtr];
+    if ( (buffer[lPtr] < 0x80) ) {
+      //Status message not present, bail
+      return;
+    }
+    command = MIDI.getTypeFromStatusByte(lastStatus);
+    channel = MIDI.getChannelFromStatusByte(lastStatus);
+    //Point to next non-data byte
+    rPtr = lPtr;
+    while ( (buffer[rPtr + 1] < 0x80) && (rPtr < (bufferSize - 1)) ) {
+      rPtr++;
+    }
+    //look at l and r pointers and decode by size.
+    if ( rPtr - lPtr < 1 ) {
+      //Time code or system
+      MIDI.send(command, 0, 0, channel);
+    } else if ( rPtr - lPtr < 2 ) {
+      MIDI.send(command, buffer[lPtr + 1], 0, channel);
+    } else if ( rPtr - lPtr < 3 ) {
+      MIDI.send(command, buffer[lPtr + 1], buffer[lPtr + 2], channel);
+    } else {
+      //Too much data
+      //If not System Common or System Real-Time, send it as running status
+      switch ( buffer[lPtr] & 0xF0 )
+      {
+        case 0x80:
+        case 0x90:
+        case 0xA0:
+        case 0xB0:
+        case 0xE0:
+          for (int i = lPtr; i < rPtr; i = i + 2) {
+            MIDI.send(command, buffer[i + 1], buffer[i + 2], channel);
+          }
+          break;
+        case 0xC0:
+        case 0xD0:
+          for (int i = lPtr; i < rPtr; i = i + 1) {
+            MIDI.send(command, buffer[i + 1], 0, channel);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    //Point to next status
+    lPtr = rPtr + 2;
+    if (lPtr >= bufferSize) {
+      //end of packet
+      return;
+    }
+  }
+}
 
 
 // Send messages to WiFI OSC interface
@@ -274,108 +485,126 @@ void OSCSendSystemReset(void)
 
 void handleNoteOn(byte channel, byte note, byte velocity)
 {
+  BLEmidiSend();
   AppleMIDI.noteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
 
 void handleNoteOff(byte channel, byte note, byte velocity)
 {
+  BLEmidiSend();
   AppleMIDI.noteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
 
 void handleAfterTouchPoly(byte channel, byte note, byte pressure)
 {
+  BLEmidiSend();
   AppleMIDI.polyPressure(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
 void handleControlChange(byte channel, byte number, byte value)
 {
+  BLEmidiSend();
   AppleMIDI.controlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
 
 void handleProgramChange(byte channel, byte number)
 {
+  BLEmidiSend();
   AppleMIDI.programChange(number, channel);
   OSCSendProgramChange(number, channel);
 }
 
 void handleAfterTouchChannel(byte channel, byte pressure)
 {
+  BLEmidiSend();
   AppleMIDI.afterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
 
 void handlePitchBend(byte channel, int bend)
 {
+  BLEmidiSend();
   AppleMIDI.pitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
 
 void handleSystemExclusive(byte* array, unsigned size)
 {
+  BLEmidiSend();
   AppleMIDI.sysEx(array, size);
   OSCSendSystemExclusive(array, size);
 }
 
 void handleTimeCodeQuarterFrame(byte data)
 {
+  BLEmidiSend();
   AppleMIDI.timeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
 
 void handleSongPosition(unsigned int beats)
 {
+  BLEmidiSend();
   AppleMIDI.songPosition(beats);
   OSCSendSongPosition(beats);
 }
 
 void handleSongSelect(byte songnumber)
 {
+  BLEmidiSend();
   AppleMIDI.songSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
 
 void handleTuneRequest(void)
 {
+  BLEmidiSend();
   AppleMIDI.tuneRequest();
   OSCSendTuneRequest();
 }
 
 void handleClock(void)
 {
+  BLEmidiSend();
   AppleMIDI.clock();
   OSCSendClock();
 }
 
 void handleStart(void)
 {
+  BLEmidiSend();
   AppleMIDI.start();
   OSCSendStart();
 }
 
 void handleContinue(void)
 {
+  BLEmidiSend();
   AppleMIDI._continue();
   OSCSendContinue();
 }
 
 void handleStop(void)
 {
+  BLEmidiSend();
   AppleMIDI.stop();
   OSCSendStop();
 }
 
 void handleActiveSensing(void)
 {
+  BLEmidiSend();
   AppleMIDI.activeSensing();
   OSCSendActiveSensing();
 }
 
 void handleSystemReset(void)
 {
+  BLEmidiSend();
   AppleMIDI.reset();
   OSCSendSystemReset();
 }
@@ -723,10 +952,29 @@ void wifi_connect()
 class BLECallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       bleMidiConnected = true;
+#ifdef PEDALINO_SERIAL_DEBUG
+      SERIALDEBUG.println("BLE client connected");
+#endif
     };
 
     void onDisconnect(BLEServer* pServer) {
       bleMidiConnected = false;
+#ifdef PEDALINO_SERIAL_DEBUG
+      SERIALDEBUG.println("BLE client disconnected");
+#endif
+    }
+
+    void onWrite(BLECharacteristic *pCharacteristic) {
+
+      std::string rxValue = pCharacteristic->getValue();
+
+      if (rxValue.length() > 0) {
+        BLEmidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
+#ifdef PEDALINO_SERIAL_DEBUG
+        SERIALDEBUG.print("BLE in:");
+        SERIALDEBUG.println(rxValue.c_str());
+#endif
+      }
     }
 };
 
@@ -768,6 +1016,10 @@ void ble_connect ()
 
   pServer->getAdvertising()->addServiceUUID(MIDI_SERVICE_UUID);
   pServer->getAdvertising()->start();
+
+#ifdef PEDALINO_SERIAL_DEBUG
+  SERIALDEBUG.println("BLE MIDI advertising started");
+#endif
 
 #endif
 }
