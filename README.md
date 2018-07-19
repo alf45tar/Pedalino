@@ -9,18 +9,16 @@ Smart wireless MIDI foot controller for guitarists and more.
 - High customizable
 - Multi purpose
 - Battery operated
-- No cable required
-- Any number of pedals of any type in any order
-- 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN)
+- 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN MIDI IN and MIDI OUT connectors)
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - USB MIDI class-compliant device
 - Bluetooth LE MIDI (iOS compatible)
 - Network MIDI (aka AppleMIDI or RTP-MIDI) via Wi-Fi
 - Open Sound Control (OSC) via Wi-Fi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
-- Legacy DIN MIDI OUT and MIDI IN connector
 - MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
 - OSC to MIDI and vicecersa
+- Any number of pedals of any type in any order
 - Auto-sensing footswitches and expression pedals
 - Modular assembly of easy to find pieces of hardware and re-use of open source software libraries
 
@@ -29,15 +27,15 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
 - Transform wired MIDI equipment into wireless MIDI equipment
 - Transform legacy MIDI equipment to OSC control surface
-- Connect Windows PC to macOS and iOS devices via AppleMIDI
+- Connect Windows PC to macOS and iOS devices via AppleMIDI or Bluetooth LE
 - Hands-free way to control your audio parameters during live performance
-- Dramatically expanded audio system parameter control via WIFI, USB, MIDI or OSC.
+- Dramatically expanded audio system parameter control via WIFI, Bluetooth, USB, MIDI or OSC.
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
-- MIDI output via USB MIDI, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
+- MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
@@ -46,7 +44,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform a linear expression pedal into log expression pedal and vice versa
 - Configuration via IR/Bluetooth remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
-- Firmware update via HTTP (http://pedalino/update)
+- Firmware update via HTTP (http://pedalino.local/update)
 
 ## Bill of materials
 
