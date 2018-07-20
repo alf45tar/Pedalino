@@ -1,3 +1,5 @@
+I know. You are thinking: "yet another midi controller with Arduino". Pedalino™ is somenthing new from any previous DIY projects and even better commercial alternatives.
+
 **Status:** Working but under active development. Anything can be changed without advance notice.
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
