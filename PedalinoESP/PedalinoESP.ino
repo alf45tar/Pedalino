@@ -40,11 +40,11 @@ RemoteDebug Debug;
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
 
-#define BUILTIN_LED       LED_BUILTIN  // onboard LED, used as status indicator
+#define LINK_LED       LED_BUILTIN  // onboard LED, used as status indicator
 
 #if defined(ARDUINO_ARCH_ESP8266) && defined(PEDALINO_SERIAL_DEBUG)
 #define SERIALDEBUG       Serial1
-#define BUILTIN_LED       0  // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
+#define LINK_LED       0  // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(PEDALINO_SERIAL_DEBUG)
@@ -60,13 +60,13 @@ RemoteDebug Debug;
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
-#define BUILTIN_LED_OFF() digitalWrite(BUILTIN_LED, HIGH)
-#define BUILTIN_LED_ON()  digitalWrite(BUILTIN_LED, LOW)
+#define BUILTIN_LED_OFF() digitalWrite(LINK_LED, HIGH)
+#define BUILTIN_LED_ON()  digitalWrite(LINK_LED, LOW)
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-#define BUILTIN_LED_OFF() digitalWrite(BUILTIN_LED, LOW)
-#define BUILTIN_LED_ON()  digitalWrite(BUILTIN_LED, HIGH)
+#define BUILTIN_LED_OFF() digitalWrite(LINK_LED, LOW)
+#define BUILTIN_LED_ON()  digitalWrite(LINK_LED, HIGH)
 #endif
 
 const char host[]     = "pedalino";
@@ -1071,7 +1071,7 @@ void midi_connect()
 
 void setup()
 {
-  pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(LINK_LED, OUTPUT);
 
 #ifdef PEDALINO_SERIAL_DEBUG
   SERIALDEBUG.begin(115200);
