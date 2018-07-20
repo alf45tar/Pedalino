@@ -133,7 +133,7 @@ OSCErrorCode            oscError;
 
 void BLEmidiReceive(uint8_t *, uint8_t);
 
-class BLECallbacks: public BLEServerCallbacks {
+class BLESCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       bleMidiConnected = true;
       DPRINTLN("BLE client connected");
@@ -143,15 +143,13 @@ class BLECallbacks: public BLEServerCallbacks {
       bleMidiConnected = false;
       DPRINTLN("BLE client disconnected");
     }
+};
 
+class BLECCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-
       std::string rxValue = pCharacteristic->getValue();
-
       if (rxValue.length() > 0) {
         BLEmidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
-        DPRINT("BLE in:");
-        DPRINTLN(rxValue.c_str());
       }
     }
 };
@@ -162,7 +160,7 @@ void BLEmidiStart ()
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new BLECallbacks());
+  pServer->setCallbacks(new BLESCallbacks());
   BLEDevice::setEncryptionLevel((esp_ble_sec_act_t)ESP_LE_AUTH_REQ_SC_BOND);
 
   // Create the BLE Service
@@ -176,6 +174,7 @@ void BLEmidiStart ()
                       BLECharacteristic::PROPERTY_WRITE_NR
                     );
   pCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+  pCharacteristic->setCallbacks(new BLECCallbacks());
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
   // Create a BLE Descriptor
@@ -195,10 +194,7 @@ void BLEmidiStart ()
   DPRINTLN("BLE MIDI advertising started");
 }
 
-//This function is called to check if MIDI data has come in through the serial port.  If found, it builds a characteristic buffer and sends it over BLE.
-// https://learn.sparkfun.com/tutorials/midi-ble-tutorial
-
-void BLEmidiTimestamp (uint8_t *first6bit, uint8_t *second7bit)
+void BLEmidiTimestamp (uint8_t *a, uint8_t *b)
 {
   unsigned long currentMillis = millis();
   if (currentMillis < 5000) {
@@ -215,9 +211,12 @@ void BLEmidiTimestamp (uint8_t *first6bit, uint8_t *second7bit)
     msOffset += MAX_TIMESTAMP;
   }
   unsigned long currentTimeStamp = currentMillis - msOffset;
-  *first6bit = ((currentTimeStamp >> 7) & 0x3F) | 0x80;       // 6 bits plus MSB
-  *second7bit = (currentTimeStamp & 0x7F) | 0x80;             // 7 bits plus MSB
+  *a = ((currentTimeStamp >> 7) & 0x3F) | 0x80;     // 6 bits plus MSB
+  *b = (currentTimeStamp & 0x7F) | 0x80;            // 7 bits plus MSB
 }
+
+// Check if MIDI data has come in through the serial port.  If found, it builds a characteristic buffer and sends it over BLE.
+// https://learn.sparkfun.com/tutorials/midi-ble-tutorial
 
 void BLEmidiSend()
 {
