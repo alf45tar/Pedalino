@@ -68,12 +68,12 @@ The rest is not mandatory but it depends of which features you want to support.
 - MIDI IN interface
   - 6N137 Single-Channel High Speed Optocoupler (6N138 may works too)
 
-- WIFI only (OPTION 1)
+- WIFI only (OPTION 1) - Any ESP8266/ESP12 board with a serial interface available
   - [ESP8266 ESP-01S](https://en.wikipedia.org/wiki/ESP8266) 1M WiFi module
   - YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
   
-- WIFI and Bluetooth (OPTION 2)
+- WIFI and Bluetooth (OPTION 2) - Any ESP32 board with a serial interface available
   - [DOIT ESP32 DevKit V1](https://github.com/SmartArduino/SZDOITWiKi/wiki/ESP8266---ESP32) 4M dual-mode Wi-Fi and Bluetooth module
   - [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32)
   
