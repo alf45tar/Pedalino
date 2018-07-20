@@ -11,6 +11,8 @@ cache:
 env:
     - PLATFORMIO_CI_SRC=Pedalino PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560 --project-option='lib_ignore=RobotIRremote'"
     - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
+    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp12e"
+    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp32dev"
     - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp32doit-devkit-v1"
 
 install:
