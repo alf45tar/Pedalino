@@ -276,7 +276,7 @@ Arduino Mega 2560|ATmega2560<br>ATmega16U2|[Pedalino](https://github.com/alf45ta
 Option 1<br>ESP-01S|ESP8266|[PedalinoESP8266](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP8266)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|Arduino Mega
 Option 2<br>DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|None
 
-Arduino and ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware via USB. All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment).
+Arduino and ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment).. All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too.
 
 Instructions for installing an USB class-compliant MIDI firmware for the ATmega16U2 can be found [here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller).
 
