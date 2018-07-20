@@ -1,5 +1,7 @@
 // ESP8266/ESP32 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI <-> Bluetooth LE MIDI <-> WiFi OSC
 
+#include <Arduino.h>
+
 #ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -22,7 +24,6 @@
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 
-#include <HardwareSerial.h>
 #include <MIDI.h>
 #include <AppleMidi.h>
 #include <OSCMessage.h>
