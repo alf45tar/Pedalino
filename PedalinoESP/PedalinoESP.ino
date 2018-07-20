@@ -1,4 +1,4 @@
-// ESP8266/ESP32 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI <-> WiFi OSC <-> Bluetooth LE MIDI
+// ESP8266/ESP32 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI <-> Bluetooth LE MIDI <-> WiFi OSC
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
@@ -13,23 +13,10 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <Update.h>
-
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-
-#define MIDI_SERVICE_UUID        "03b80e5a-ede8-4b33-a751-6ce34ec4c700"
-#define MIDI_CHARACTERISTIC_UUID "7772e5db-3868-4112-a1a9-f2669d106bf3"
-
-BLEServer             *pServer;
-BLEService            *pService;
-BLECharacteristic     *pCharacteristic;
-BLESecurity           *pSecurity;
-bool                  bleMidiConnected = false;
-unsigned long         msOffset = 0;
-#define MAX_TIMESTAMP 0x01FFF         //13 bits, 8192 dec
-
 #endif
 
 #include <WiFiClient.h>
@@ -41,8 +28,7 @@ unsigned long         msOffset = 0;
 #include <OSCBundle.h>
 #include <OSCData.h>
 
-
-#define PEDALINO_SERIAL_DEBUG
+//#define PEDALINO_SERIAL_DEBUG
 //#define PEDALINO_TELNET_DEBUG
 
 #ifdef PEDALINO_TELNET_DEBUG
@@ -62,6 +48,14 @@ RemoteDebug Debug;
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(PEDALINO_SERIAL_DEBUG)
 #define SERIALDEBUG       Serial
+#endif
+
+#ifdef PEDALINO_SERIAL_DEBUG
+#define DPRINT(...)       SERIALDEBUG.printf(__VA_ARGS__)    //DPRINT is a macro, debug print
+#define DPRINTLN(...)     SERIALDEBUG.println(__VA_ARGS__)   //DPRINTLN is a macro, debug print with new line
+#else
+#define DPRINT(...)     //now defines a blank line
+#define DPRINTLN(...)   //now defines a blank line
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -85,6 +79,22 @@ ESP8266HTTPUpdateServer httpUpdater;
 WebServer               httpServer(80);
 HTTPUpload              httpUpdater;
 #endif
+
+// Bluetooth LE MIDI interface
+
+#ifdef ARDUINO_ARCH_ESP32
+
+#define MIDI_SERVICE_UUID        "03b80e5a-ede8-4b33-a751-6ce34ec4c700"
+#define MIDI_CHARACTERISTIC_UUID "7772e5db-3868-4112-a1a9-f2669d106bf3"
+
+BLEServer             *pServer;
+BLEService            *pService;
+BLECharacteristic     *pCharacteristic;
+BLESecurity           *pSecurity;
+unsigned long         msOffset = 0;
+#define MAX_TIMESTAMP 0x01FFF         //13 bits, 8192 dec
+#endif
+bool                  bleMidiConnected = false;
 
 // WiFi MIDI interface to comunicate with AppleMIDI/RTP-MDI devices
 
@@ -118,6 +128,72 @@ const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC
 OSCMessage              oscMsg;
 OSCErrorCode            oscError;
 
+
+#ifdef ARDUINO_ARCH_ESP32
+
+void BLEmidiReceive(uint8_t *, uint8_t);
+
+class BLECallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      bleMidiConnected = true;
+      DPRINTLN("BLE client connected");
+    };
+
+    void onDisconnect(BLEServer* pServer) {
+      bleMidiConnected = false;
+      DPRINTLN("BLE client disconnected");
+    }
+
+    void onWrite(BLECharacteristic *pCharacteristic) {
+
+      std::string rxValue = pCharacteristic->getValue();
+
+      if (rxValue.length() > 0) {
+        BLEmidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
+        DPRINT("BLE in:");
+        DPRINTLN(rxValue.c_str());
+      }
+    }
+};
+
+void BLEmidiStart ()
+{
+  BLEDevice::init("Pedal");
+
+  // Create the BLE Server
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new BLECallbacks());
+  BLEDevice::setEncryptionLevel((esp_ble_sec_act_t)ESP_LE_AUTH_REQ_SC_BOND);
+
+  // Create the BLE Service
+  pService = pServer->createService(BLEUUID(MIDI_SERVICE_UUID));
+
+  // Create a BLE Characteristic
+  pCharacteristic = pService->createCharacteristic(
+                      BLEUUID(MIDI_CHARACTERISTIC_UUID),
+                      BLECharacteristic::PROPERTY_READ   |
+                      BLECharacteristic::PROPERTY_NOTIFY |
+                      BLECharacteristic::PROPERTY_WRITE_NR
+                    );
+  pCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+
+  // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
+  // Create a BLE Descriptor
+  pCharacteristic->addDescriptor(new BLE2902());
+
+  // Start the service
+  pService->start();
+
+  // Start advertising
+  pSecurity = new BLESecurity();
+  pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_BOND);
+  pSecurity->setCapability(ESP_IO_CAP_NONE);
+  pSecurity->setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
+
+  pServer->getAdvertising()->addServiceUUID(MIDI_SERVICE_UUID);
+  pServer->getAdvertising()->start();
+  DPRINTLN("BLE MIDI advertising started");
+}
 
 //This function is called to check if MIDI data has come in through the serial port.  If found, it builds a characteristic buffer and sends it over BLE.
 // https://learn.sparkfun.com/tutorials/midi-ble-tutorial
@@ -258,8 +334,8 @@ void BLEmidiSend()
   }
 }
 
-//This function decodes the BLE characteristics and calls MIDI.send
-//if the packet contains sendable MIDI data.
+// Decodes the BLE characteristics and calls MIDI.send if the packet contains sendable MIDI data
+
 void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize)
 {
   midi::Channel   channel;
@@ -326,6 +402,11 @@ void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize)
     }
   }
 }
+#else
+void BLEmidiStart() {}
+void BLEmidiSend() {}
+void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize) {}
+#endif
 
 
 // Send messages to WiFI OSC interface
@@ -760,6 +841,8 @@ void ap_mode_start()
 
   WiFi.mode(WIFI_AP);
   boolean result = WiFi.softAP("Pedalino");
+  DPRINTLN("AP mode started");
+  DPRINTLN("Connect to 'Pedalino' wireless with no password");
 }
 
 void ap_mode_stop()
@@ -785,29 +868,22 @@ bool smart_config()
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
 
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("");
-  SERIALDEBUG.print("SmartConfig started");
-#endif
+  DPRINT("SmartConfig started");
 
   for (int i = 0; i < SMART_CONFIG_TIMEOUT && !WiFi.smartConfigDone(); i++) {
     status_blink();
     delay(950);
-#ifdef PEDALINO_SERIAL_DEBUG
-    SERIALDEBUG.print(".");
-#endif
+    DPRINT(".");
   }
 
-#ifdef PEDALINO_SERIAL_DEBUG
   if (WiFi.smartConfigDone())
   {
-    SERIALDEBUG.println("[SUCCESS]");
-    SERIALDEBUG.printf("SSID        : %s\n", WiFi.SSID().c_str());
-    SERIALDEBUG.printf("Password    : %s\n", WiFi.psk().c_str());
+    DPRINT("[SUCCESS]\n");
+    DPRINT("SSID        : %s\n", WiFi.SSID().c_str());
+    DPRINT("Password    : %s\n", WiFi.psk().c_str());
   }
   else
-    SERIALDEBUG.println("[TIMEOUT]");
-#endif
+    DPRINTLN("[TIMEOUT]");
 
   if (WiFi.smartConfigDone())
   {
@@ -825,13 +901,9 @@ bool auto_reconnect()
 {
   // Return 'true' if connected to the (last used) access point within WIFI_CONNECT_TIMEOUT seconds
 
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("");
-  SERIALDEBUG.printf("Last used AP\n");
-  SERIALDEBUG.printf("SSID        : %s\n", WiFi.SSID().c_str());
-  SERIALDEBUG.printf("Password    : %s\n", WiFi.psk().c_str());
-  SERIALDEBUG.printf("Connecting");
-#endif
+  DPRINT("Connecting to last used AP\n");
+  DPRINT("SSID        : %s\n", WiFi.SSID().c_str());
+  DPRINT("Password    : %s\n", WiFi.psk().c_str());
 
   WiFi.mode(WIFI_STA);
   for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
@@ -839,19 +911,15 @@ bool auto_reconnect()
     delay(100);
     status_blink();
     delay(300);
-#ifdef PEDALINO_SERIAL_DEBUG
-    SERIALDEBUG.print(".");
-#endif
+    DPRINT(".");
   }
 
   WiFi.status() == WL_CONNECTED ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
 
-#ifdef PEDALINO_SERIAL_DEBUG
   if (WiFi.status() == WL_CONNECTED)
-    SERIALDEBUG.println("[SUCCESS]");
+    DPRINTLN("[SUCCESS]");
   else
-    SERIALDEBUG.println("[TIMEOUT]");
-#endif
+    DPRINTLN("[TIMEOUT]");
 
   return WiFi.status() == WL_CONNECTED;
 }
@@ -875,45 +943,40 @@ void wifi_connect()
     WiFi.setHostname(host);
 #endif
 
-
-#ifdef PEDALINO_SERIAL_DEBUG
-    SERIALDEBUG.println("");
+#if PEDALINO_DEBUG_SERIAL
+    DPRINTLN("");
     WiFi.printDiag(SERIALDEBUG);
-    SERIALDEBUG.println("");
+    DPRINTLN("");
+#endif
 
     uint8_t macAddr[6];
     WiFi.macAddress(macAddr);
-    SERIALDEBUG.printf("BSSID       : %s\n", WiFi.BSSIDstr().c_str());
-    SERIALDEBUG.printf("RSSI        : %d dBm\n", WiFi.RSSI());
+    DPRINT("BSSID       : %s\n", WiFi.BSSIDstr().c_str());
+    DPRINT("RSSI        : %d dBm\n", WiFi.RSSI());
 #ifdef ARDUINO_ARCH_ESP8266
-    SERIALDEBUG.printf("Hostname    : %s\n", WiFi.hostname().c_str());
+    DPRINT("Hostname    : %s\n", WiFi.hostname().c_str());
 #endif
 #ifdef ARDUINO_ARCH_ESP32
-    SERIALDEBUG.printf("Hostname    : %s\n", WiFi.getHostname());
+    DPRINT("Hostname    : %s\n", WiFi.getHostname());
 #endif
-    SERIALDEBUG.printf("STA         : %02X:%02X:%02X:%02X:%02X:%02X\n", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
-    SERIALDEBUG.printf("IP address  : %s\n", WiFi.localIP().toString().c_str());
-    SERIALDEBUG.printf("Subnet mask : %s\n", WiFi.subnetMask().toString().c_str());
-    SERIALDEBUG.printf("Gataway IP  : %s\n", WiFi.gatewayIP().toString().c_str());
-    SERIALDEBUG.printf("DNS 1       : %s\n", WiFi.dnsIP(0).toString().c_str());
-    SERIALDEBUG.printf("DNS 2       : %s\n", WiFi.dnsIP(1).toString().c_str());
-    SERIALDEBUG.println("");
-#endif
+    DPRINT("STA         : %02X:%02X:%02X:%02X:%02X:%02X\n", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+    DPRINT("IP address  : %s\n", WiFi.localIP().toString().c_str());
+    DPRINT("Subnet mask : %s\n", WiFi.subnetMask().toString().c_str());
+    DPRINT("Gataway IP  : %s\n", WiFi.gatewayIP().toString().c_str());
+    DPRINT("DNS 1       : %s\n", WiFi.dnsIP(0).toString().c_str());
+    DPRINT("DNS 2       : %s\n", WiFi.dnsIP(1).toString().c_str());
+    DPRINTLN("");
   }
 
 #ifdef ARDUINO_ARCH_ESP8266
   // Start LLMNR (Link-Local Multicast Name Resolution) responder
   LLMNR.begin(host);
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("LLMNR responder started");
-#endif
+  DPRINTLN("LLMNR responder started");
 #endif
 
   // Start mDNS (Multicast DNS) responder (ping pedalino.local)
   if (MDNS.begin(host)) {
-#ifdef PEDALINO_SERIAL_DEBUG
-    SERIALDEBUG.println("mDNS responder started");
-#endif
+    DPRINTLN("mDNS responder started");
     MDNS.addService("apple-midi", "udp", 5004);
     MDNS.addService("osc",        "udp", oscLocalPort);
   }
@@ -927,10 +990,8 @@ void wifi_connect()
 #ifdef PEDALINO_TELNET_DEBUG
   MDNS.addService("telnet", "tcp", 23);
 #endif
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("HTTP server started");
-  SERIALDEBUG.println("Connect to http://pedalino.local/update for firmware update");
-#endif
+  DPRINTLN("HTTP server started");
+  DPRINTLN("Connect to http://pedalino.local/update for firmware update");
 
   // Calculate the broadcast address of local WiFi to broadcast OSC messages
   oscRemoteIp = WiFi.localIP();
@@ -940,89 +1001,13 @@ void wifi_connect()
 
   // Set incoming OSC messages port
   oscUDP.begin(oscLocalPort);
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("OSC server started");
+  DPRINTLN("OSC server started");
 #ifdef ARDUINO_ARCH_ESP8266
-  SERIALDEBUG.print("Local port: ");
-  SERIALDEBUG.println(oscUDP.localPort());
-#endif
-#endif
-}
-
-class BLECallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) {
-      bleMidiConnected = true;
-#ifdef PEDALINO_SERIAL_DEBUG
-      SERIALDEBUG.println("BLE client connected");
-#endif
-    };
-
-    void onDisconnect(BLEServer* pServer) {
-      bleMidiConnected = false;
-#ifdef PEDALINO_SERIAL_DEBUG
-      SERIALDEBUG.println("BLE client disconnected");
-#endif
-    }
-
-    void onWrite(BLECharacteristic *pCharacteristic) {
-
-      std::string rxValue = pCharacteristic->getValue();
-
-      if (rxValue.length() > 0) {
-        BLEmidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
-#ifdef PEDALINO_SERIAL_DEBUG
-        SERIALDEBUG.print("BLE in:");
-        SERIALDEBUG.println(rxValue.c_str());
-#endif
-      }
-    }
-};
-
-void ble_connect ()
-{
-#ifdef ARDUINO_ARCH_ESP32
-
-  BLEDevice::init("Pedal");
-
-  // Create the BLE Server
-  pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new BLECallbacks());
-  BLEDevice::setEncryptionLevel((esp_ble_sec_act_t)ESP_LE_AUTH_REQ_SC_BOND);
-
-  // Create the BLE Service
-  pService = pServer->createService(BLEUUID(MIDI_SERVICE_UUID));
-
-  // Create a BLE Characteristic
-  pCharacteristic = pService->createCharacteristic(
-                      BLEUUID(MIDI_CHARACTERISTIC_UUID),
-                      BLECharacteristic::PROPERTY_READ   |
-                      BLECharacteristic::PROPERTY_NOTIFY |
-                      BLECharacteristic::PROPERTY_WRITE_NR
-                    );
-  pCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-
-  // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
-  // Create a BLE Descriptor
-  pCharacteristic->addDescriptor(new BLE2902());
-
-  // Start the service
-  pService->start();
-
-  // Start advertising
-  pSecurity = new BLESecurity();
-  pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_BOND);
-  pSecurity->setCapability(ESP_IO_CAP_NONE);
-  pSecurity->setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
-
-  pServer->getAdvertising()->addServiceUUID(MIDI_SERVICE_UUID);
-  pServer->getAdvertising()->start();
-
-#ifdef PEDALINO_SERIAL_DEBUG
-  SERIALDEBUG.println("BLE MIDI advertising started");
-#endif
-
+  DPRINT("Local port: ");
+  DPRINTLN(oscUDP.localPort());
 #endif
 }
+
 
 void midi_connect()
 {
@@ -1091,12 +1076,13 @@ void setup()
 #ifdef PEDALINO_SERIAL_DEBUG
   SERIALDEBUG.begin(115200);
   SERIALDEBUG.setDebugOutput(true);
-  SERIALDEBUG.println("");
-  SERIALDEBUG.println("");
-  SERIALDEBUG.println("*** Pedalino(TM) ***");
 #endif
+  DPRINTLN("");
+  DPRINTLN("****************************");
+  DPRINTLN("***     Pedalino(TM)     ***");
+  DPRINTLN("****************************");
 
-  ble_connect();
+  BLEmidiStart();
 
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
