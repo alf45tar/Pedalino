@@ -22,6 +22,7 @@
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 
+#include <Serial.h>
 #include <MIDI.h>
 #include <AppleMidi.h>
 #include <OSCMessage.h>
