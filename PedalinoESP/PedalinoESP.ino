@@ -834,6 +834,13 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
+void status_blink()
+{
+  BUILTIN_LED_ON();
+  delay(50);
+  BUILTIN_LED_OFF();
+}
+
 void ap_mode_start()
 {
   BUILTIN_LED_OFF();
@@ -1059,13 +1066,6 @@ void midi_connect()
   AppleMIDI.OnReceiveStop(OnAppleMidiReceiveStop);
   AppleMIDI.OnReceiveActiveSensing(OnAppleMidiReceiveActiveSensing);
   AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
-}
-
-void status_blink()
-{
-  BUILTIN_LED_ON();
-  delay(50);
-  BUILTIN_LED_OFF();
 }
 
 void setup()
