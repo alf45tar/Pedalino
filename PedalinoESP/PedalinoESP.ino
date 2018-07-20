@@ -41,6 +41,10 @@ RemoteDebug Debug;
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
 
+#ifndef LED_BUILTIN
+#define LED_BUILTIN    2
+#endif
+
 #define LINK_LED       LED_BUILTIN  // onboard LED, used as status indicator
 
 #if defined(ARDUINO_ARCH_ESP8266) && defined(PEDALINO_SERIAL_DEBUG)
