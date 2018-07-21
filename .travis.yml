@@ -23,7 +23,7 @@ install:
                                 https://github.com/z3t0/Arduino-IRremote.git
 
 script:
-    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire,HardwareSerial"
+    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS
 
 deploy-no:
   provider: pages
