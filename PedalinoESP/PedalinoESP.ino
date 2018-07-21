@@ -1,7 +1,6 @@
 // ESP8266/ESP32 MIDI Gateway between Serial MIDI <-> WiFi AppleMIDI <-> Bluetooth LE MIDI <-> WiFi OSC
 
 #include <Arduino.h>
-#include <HardwareSerial.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
@@ -112,9 +111,11 @@ unsigned long lastOn             = 0;
 
 // Serial MIDI interface to comunicate with Arduino
 
+#define SERIALMIDI_BAUD_RATE  115200
+
 struct SerialMIDISettings : public midi::DefaultSettings
 {
-  static const long BaudRate = 115200;
+  static const long BaudRate = SERIALMIDI_BAUD_RATE;
 };
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -122,7 +123,10 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial2, MIDI, SerialMIDISettings);
+#define SERIALMIDI_RX         16
+#define SERIALMIDI_TX         17
+HardwareSerial                SerialMIDI(2);
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SerialMIDI, MIDI, SerialMIDISettings);
 #endif
 
 
@@ -1077,8 +1081,6 @@ void midi_connect()
 
 void setup()
 {
-  pinMode(LINK_LED, OUTPUT);
-
 #ifdef PEDALINO_SERIAL_DEBUG
   SERIALDEBUG.begin(115200);
   SERIALDEBUG.setDebugOutput(true);
@@ -1087,6 +1089,12 @@ void setup()
   DPRINTLN("****************************");
   DPRINTLN("***     Pedalino(TM)     ***");
   DPRINTLN("****************************");
+
+  pinMode(LINK_LED, OUTPUT);
+  
+#ifdef ARDUINO_ARCH_ESP32
+  SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
+#endif
 
   BLEmidiStart();
 
