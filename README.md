@@ -276,7 +276,7 @@ Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashe
 Board|Microcontroller|Firmware|Flashing software|Flashing hardware
 -----|-----|-----|-----|-----
 Arduino Mega 2560|ATmega2560<br>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/Pedalino)<br>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)<br>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
-Option 1<br>ESP-01S|ESP8266|[PedalinoESP8266](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP8266)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|Arduino Mega
+Option 1<br>ESP-01S|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|Arduino Mega
 Option 2<br>DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|None
 
 Arduino and ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment).. All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too.
