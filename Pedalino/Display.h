@@ -45,8 +45,10 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_LEGACY_MIDI    47
 #define II_PROFILE_LOAD   48
 #define II_PROFILE_SAVE   49
-#define II_WIFI           50
-#define II_DEFAULT        51
+#define II_BACKLIGHT      50
+#define II_CONTRAST       51
+#define II_WIFI           52
+#define II_DEFAULT        53
 
 // Global menu data and definitions
 
@@ -55,12 +57,12 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { M_ROOT,           SIGNATURE,         10, 13, 0 },
+  { M_ROOT,           SIGNATURE,         10, 14, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 37, 0 },
   { M_PEDALSETUP,     "Pedals Setup",    40, 52, 0 },
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
   { M_PROFILE,        "Profiles",        70, 71, 0 },
-  { M_OPTIONS,        "Options",         80, 81, 0 },
+  { M_OPTIONS,        "Options",         80, 83, 0 }
 };
 
 // Menu Items ----------
@@ -93,9 +95,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 47, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
   { 48, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
   { 49, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
-//  { 50, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
-//  { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
-//  { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
+  //  { 50, "Single Press",    MD_Menu::MNU_INPUT, II_VALUE_SINGLE },
+  //  { 51, "Double Press",    MD_Menu::MNU_INPUT, II_VALUE_DOUBLE },
+  //  { 52, "Long Press",      MD_Menu::MNU_INPUT, II_VALUE_LONG },
   // Interface Setup
   { 60, "Select Interf.",  MD_Menu::MNU_INPUT, II_INTERFACE },
   { 61, "MIDI IN",         MD_Menu::MNU_INPUT, II_MIDI_IN },
@@ -107,8 +109,10 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 70, "Load Profile",    MD_Menu::MNU_INPUT, II_INTERFACE },
   { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
   // Options
-  { 80, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
-  { 81, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 80, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
+  { 81, "LCD Contrast",    MD_Menu::MNU_INPUT, II_CONTRAST },
+  { 82, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
+  { 83, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -155,8 +159,10 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDI_THRU,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_ROUTING,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_CLOCK,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
-  { II_PROFILE_LOAD,  "1-9:      "  , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 1,                  9, 0, 10, nullptr },
-  { II_PROFILE_SAVE,  "1-9:      "  , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 1,                  9, 0, 10, nullptr },
+  { II_PROFILE_LOAD,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
+  { II_PROFILE_SAVE,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
+  { II_BACKLIGHT,     ">1-10:      " , MD_Menu::INP_INT,  mnuValueRqst,  2, 1, 0,                 10, 0, 10, nullptr },
+  { II_CONTRAST,      ">0-255:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                255, 0, 10, nullptr },
   { II_WIFI,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listWiFiMode },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
@@ -326,6 +332,23 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_LEGACY_MIDI:
       if (bGet) vBuf.value = currentLegacyMIDIPort;
       else currentLegacyMIDIPort = vBuf.value;
+      break;
+
+    case II_BACKLIGHT:
+      if (bGet) vBuf.value = backlight/25;
+      else {
+        backlight = vBuf.value*25;
+        //lcd.setBacklight(backlight);
+        analogWrite(LCD_BACKLIGHT, backlight);
+      }
+      break;
+
+    case II_CONTRAST:
+      if (bGet) vBuf.value = contrast;
+      else {
+        contrast = vBuf.value;
+        analogWrite(LCD_CONTRAST, contrast);
+      }
       break;
 
     case II_WIFI:

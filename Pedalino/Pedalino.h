@@ -1,6 +1,17 @@
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
 
+#include <EEPROM.h>                     // https://www.arduino.cc/en/Reference/EEPROM
+#include <MIDI.h>                       // https://github.com/FortySevenEffects/arduino_midi_library
+#include <MD_Menu.h>                    // https://github.com/MajicDesigns/MD_Menu
+#include <MD_UISwitch.h>                // https://github.com/MajicDesigns/MD_UISwitch
+#include <ResponsiveAnalogRead.h>       // https://github.com/dxinteractive/ResponsiveAnalogRead
+
+#define DEBOUNCE_INTERVAL 20
+#define BOUNCE_LOCK_OUT                 // This method is a lot more responsive, but does not cancel noise.
+//#define BOUNCE_WITH_PROMPT_DETECTION  // Report accurate switch time normally with no delay. Use when accurate switch transition timing is important.
+#include <Bounce2.h>                    // https://github.com/thomasfredericks/Bounce2
+
 #define SIGNATURE "Pedalino(TM)"
 
 #define BANKS             10
@@ -179,16 +190,20 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 // LCD pin definitions
 
-#define  LCD_RS         46
-#define  LCD_ENA        44
+#define  LCD_BACKLIGHT  44    // PWM works only on 2-13, 44, 45, 46
+#define  LCD_CONTRAST   46    // PWM works only on 2-13, 44, 45, 46
+#define  LCD_RS         48
+#define  LCD_ENA        50
 #define  LCD_D4         42
 #define  LCD_D5         40
 #define  LCD_D6         38
 #define  LCD_D7         36
-#define  LCD_BACKLIGHT  34
+
 
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean       powersaver = false;
+byte          backlight  = 150;
+byte          contrast   = 100;
 
 // IR Remote receiver
 
@@ -241,5 +256,14 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
+#ifdef DEBUG_PEDALINO
+#define SERIALDEBUG       Serial
+#define DPRINT(...)       SERIALDEBUG.print(__VA_ARGS__)      //DPRINT is a macro, debug print
+#define DPRINTLN(...)     SERIALDEBUG.println(__VA_ARGS__)    //DPRINTLN is a macro, debug print with new line
+#else
+#define DPRINT(...)     //now defines a blank line
+#define DPRINTLN(...)   //now defines a blank line
 #endif
+
+#endif // _PEDALINO_H
 

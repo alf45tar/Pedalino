@@ -1,4 +1,3 @@
-#include "Pedalino.h"
 
 #define EEPROM_VERSION    5     // Increment each time you change the eeprom structure
 
@@ -81,8 +80,8 @@ void load_factory_default()
                      PED_ENABLE,            // MIDI OUT
                      PED_DISABLE,           // MIDI THRU
                      PED_ENABLE,            // MIDI routing
-                     PED_DISABLE
-                    };          // MIDI clock
+                     PED_DISABLE            // MIDI clock
+                    };
 }
 
 
@@ -93,9 +92,7 @@ void update_eeprom() {
 
   int offset = 0;
 
-#ifdef DEBUG_PEDALINO
-  Serial.print("Updating EEPROM ... ");
-#endif
+  DPRINT("Updating EEPROM ... ");
 
   EEPROM.put(offset, SIGNATURE);
   offset += sizeof(SIGNATURE);
@@ -159,10 +156,7 @@ void update_eeprom() {
   EEPROM.put(offset, currentWiFiMode);
   offset += sizeof(byte);
 
-#ifdef DEBUG_PEDALINO
-  Serial.println("end.");
-#endif
-
+  DPRINTLN("end.");
 }
 
 //
@@ -181,18 +175,14 @@ void read_eeprom() {
   EEPROM.get(offset, saved_version);
   offset += sizeof(byte);
 
-#ifdef DEBUG_PEDALINO
-  Serial.print("EEPROM signature: ");
-  Serial.println(signature);
-  Serial.print("EEPROM version: ");
-  Serial.println(saved_version);
-#endif
+  DPRINT("EEPROM signature: ");
+  DPRINTLN(signature);
+  DPRINT("EEPROM version: ");
+  DPRINTLN(saved_version);
 
   if ((strcmp(signature, SIGNATURE) == 0) && (saved_version == EEPROM_VERSION)) {
 
-#ifdef DEBUG_PEDALINO
-    Serial.print("Reading EEPROM ... ");
-#endif
+    DPRINT("Reading EEPROM ... ");
 
     for (byte b = 0; b < BANKS; b++)
       for (byte p = 0; p < PEDALS; p++) {
@@ -251,10 +241,7 @@ void read_eeprom() {
     EEPROM.get(offset, currentWiFiMode);
     offset += sizeof(byte);
 
-#ifdef DEBUG_PEDALINO
-    Serial.println("end.");
-#endif
-
+    DPRINTLN("end.");
   }
 }
 
