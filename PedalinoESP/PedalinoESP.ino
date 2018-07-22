@@ -558,27 +558,27 @@ void BLESendSystemReset(void)
   BLESendRealTimeMessage(midi::SystemReset);
 }
 #else
-void BLEmidiStart() {}
-void BLEmidiSend() {}
-void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize) {}
-void BLESendNoteOn(byte note, byte velocity, byte channel) {}
-void BLESendNoteOff(byte note, byte velocity, byte channel) {}
-void BLESendAfterTouchPoly(byte note, byte pressure, byte channel) {}
-void BLESendControlChange(byte number, byte value, byte channel) {}
-void BLESendProgramChange(byte number, byte channel) {}
-void BLESendAfterTouch(byte pressure, byte channel) {}
-void BLESendPitchBend(int bend, byte channel) {}
-void BLESendSystemExclusive(const byte* array, unsigned size) {}
-void BLESendTimeCodeQuarterFrame(byte data) {}
-void BLESendSongPosition(unsigned int beats) {}
-void BLESendSongSelect(byte songnumber) {}
-void BLESendTuneRequest(void) {}
-void BLESendClock(void) {}
-void BLESendStart(void) {}
-void BLESendContinue(void) {}
-void BLESendStop(void) {}
-void BLESendActiveSensing(void) {}
-void BLESendSystemReset(void) {}
+#define BLEmidiStart(...)
+#define BLEmidiSend(...)
+#define BLEmidiReceive(...)
+#define BLESendNoteOn(...)
+#define BLESendNoteOff(...)
+#define BLESendAfterTouchPoly(...)
+#define BLESendControlChange(...)
+#define BLESendProgramChange(...)
+#define BLESendAfterTouch(...)
+#define BLESendPitchBend(...)
+#define BLESendSystemExclusive(...)
+#define BLESendTimeCodeQuarterFrame(...)
+#define BLESendSongPosition(...)
+#define BLESendSongSelect(...)
+#define BLESendTuneRequest(...)
+#define BLESendClock(...)
+#define BLESendStart(...)
+#define BLESendContinue(...)
+#define BLESendStop(...) {}
+#define BLESendActiveSensing(...)
+#define BLESendSystemReset(...)
 #endif
 
 
