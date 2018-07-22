@@ -561,6 +561,24 @@ void BLESendSystemReset(void)
 void BLEmidiStart() {}
 void BLEmidiSend() {}
 void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize) {}
+void BLESendNoteOn(byte note, byte velocity, byte channel) {}
+void BLESendNoteOff(byte note, byte velocity, byte channel) {}
+void BLESendAfterTouchPoly(byte note, byte pressure, byte channel) {}
+void BLESendControlChange(byte number, byte value, byte channel) {}
+void BLESendProgramChange(byte number, byte channel) {}
+void BLESendAfterTouch(byte pressure, byte channel) {}
+void BLESendPitchBend(int bend, byte channel) {}
+void BLESendSystemExclusive(const byte* array, unsigned size) {}
+void BLESendTimeCodeQuarterFrame(byte data) {}
+void BLESendSongPosition(unsigned int beats) {}
+void BLESendSongSelect(byte songnumber) {}
+void BLESendTuneRequest(void) {}
+void BLESendClock(void) {}
+void BLESendStart(void) {}
+void BLESendContinue(void) {}
+void BLESendStop(void) {}
+void BLESendActiveSensing(void) {}
+void BLESendSystemReset(void) {}
 #endif
 
 
@@ -1248,6 +1266,7 @@ void setup()
   SERIALDEBUG.begin(115200);
   SERIALDEBUG.setDebugOutput(true);
 #endif
+
   DPRINTLN("");
   DPRINTLN("****************************");
   DPRINTLN("***     Pedalino(TM)     ***");
@@ -1268,6 +1287,7 @@ void setup()
 #ifdef PEDALINO_SERIAL_DEBUG
   SERIALDEBUG.flush();
 #endif
+
 #ifdef PEDALINO_TELNET_DEBUG
   // Initialize the telnet server of RemoteDebug
   Debug.begin(host);              // Initiaze the telnet server
