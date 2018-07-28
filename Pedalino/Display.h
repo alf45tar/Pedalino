@@ -1,6 +1,8 @@
 const bool      AUTO_START = true;    // auto start the menu, manual detect and start if false
 const uint16_t  MENU_TIMEOUT = 5000;  // in milliseconds
 
+#define LINE1PERSISTENCE   1500;
+
 // Function prototypes for Navigation/Display
 bool display(MD_Menu::userDisplayAction_t, char* = nullptr);
 MD_Menu::userNavAction_t navigation(uint16_t &incDelta);
@@ -110,7 +112,6 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
   // Options
   { 80, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
-  { 81, "LCD Contrast",    MD_Menu::MNU_INPUT, II_CONTRAST },
   { 82, "WiFi Mode",       MD_Menu::MNU_INPUT, II_WIFI },
   { 83, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
@@ -138,16 +139,16 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDIMESSAGE,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiMessage },
   { II_MIDICODE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiControlChange },
   { II_MIDINOTE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiNoteNumbers },
-  { II_MIDIVALUE1,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
-  { II_MIDIVALUE2,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
-  { II_MIDIVALUE3,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE1,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE2,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE3,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
   { II_FUNCTION,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalFunction },
   { II_AUTOSENSING,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalMode },
   { II_PRESS_MODE,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalPressMode },
-  { II_VALUE_SINGLE,  "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
-  { II_VALUE_DOUBLE,  "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
-  { II_VALUE_LONG,    "0-127:     " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_SINGLE,  ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_DOUBLE,  ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_LONG,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
   { II_POLARITY,      "Invert:    " , MD_Menu::INP_LIST,  mnuValueRqst,  3, 0, 0,                  0, 0,  0, listPolarity },
   { II_CALIBRATE,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_ZERO,          ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
@@ -161,8 +162,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDI_CLOCK,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_PROFILE_LOAD,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
   { II_PROFILE_SAVE,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
-  { II_BACKLIGHT,     ">1-10:      " , MD_Menu::INP_INT,  mnuValueRqst,  2, 1, 0,                 10, 0, 10, nullptr },
-  { II_CONTRAST,      ">0-255:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                255, 0, 10, nullptr },
+  { II_BACKLIGHT,     ">1-10:      ", MD_Menu::INP_INT,  mnuValueRqst,  2, 1, 0,                 10, 0, 10, nullptr },
   { II_WIFI,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listWiFiMode },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
@@ -335,19 +335,11 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       break;
 
     case II_BACKLIGHT:
-      if (bGet) vBuf.value = backlight/25;
+      if (bGet) vBuf.value = backlight / 25;
       else {
-        backlight = vBuf.value*25;
+        backlight = vBuf.value * 25;
         //lcd.setBacklight(backlight);
         analogWrite(LCD_BACKLIGHT, backlight);
-      }
-      break;
-
-    case II_CONTRAST:
-      if (bGet) vBuf.value = contrast;
-      else {
-        contrast = vBuf.value;
-        analogWrite(LCD_CONTRAST, contrast);
       }
       break;
 
@@ -457,6 +449,19 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
 }
 
 
+byte m1, m2, m3, m4;
+unsigned long endMillis2;
+
+void screen_info(byte b1, byte b2, byte b3, byte b4)
+{
+  m1 = b1;
+  m2 = b2;
+  m3 = b3;
+  m4 = b4;
+  endMillis2 = millis() + LINE1PERSISTENCE;
+}
+
+
 char foot_char (byte footswitch)
 {
   footswitch = constrain(footswitch, 0, PEDALS - 1);
@@ -480,15 +485,40 @@ void screen_update(bool force = false) {
   if (!powersaver) {
     char buf[LCD_COLS + 1];
     // Line 1
-    memset(buf, 0, sizeof(buf));
-    for (byte i = 0; i < PEDALS; i++) {
-      buf[i] = foot_char(i);
-    }
-    if (force || strcmp(screen1, buf) != 0) {
-      memset(screen1, 0, LCD_COLS + 1);
+    if (millis() < endMillis2) {
+      memset(buf, 0, sizeof(buf));
+      switch (m1) {
+        case midi::NoteOn:
+        case midi::NoteOff:
+          sprintf(&buf[strlen(buf)], "Note%3d/%3d Ch%2d", m2, m3, m4);
+          break;
+        case midi::ControlChange:
+          sprintf(&buf[strlen(buf)], "CC %3d/%3d Ch %2d", m2, m3, m4);
+          break;
+        case midi::ProgramChange:
+          sprintf(&buf[strlen(buf)], "PC %3d     Ch %2d", m2, m4);
+          break;
+        case midi::PitchBend:
+          sprintf(&buf[strlen(buf)], "PiBend %3d Ch %2d", m2, m4);
+          break;
+      }
       strncpy(screen1, buf, LCD_COLS);
+      lcd.noCursor();
       lcd.setCursor(0, 0);
       lcd.print(buf);
+    }
+    else {
+      memset(buf, 0, sizeof(buf));
+      for (byte i = 0; i < PEDALS; i++) {
+        //buf[i] = foot_char(i);
+        buf[i] = ' ';
+      }
+      if (force || strcmp(screen1, buf) != 0) {
+        memset(screen1, 0, LCD_COLS + 1);
+        strncpy(screen1, buf, LCD_COLS);
+        lcd.setCursor(0, 0);
+        lcd.print(buf);
+      }
     }
     // Line 2
     memset(buf, 0, sizeof(buf));
@@ -498,7 +528,7 @@ void screen_update(bool force = false) {
       strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
       strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
     }
-    if (force || strcmp(screen2, buf) != 0) {
+    if (force || strcmp(screen2, buf) != 0) {     // do not update if not changed
       memset(screen2, 0, LCD_COLS + 1);
       strncpy(screen2, buf, LCD_COLS);
       lcd.setCursor(0, 1);
@@ -762,11 +792,9 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
     }
     else {
       pedals[numberPressed - 1].pedalValue[0] = LOW;
-      //pedals[numberPressed - 1].midiController->push();
       screen_update();
       delay(200);
       pedals[numberPressed - 1].pedalValue[0] = HIGH;
-      //pedals[numberPressed - 1].midiController->release();
     }
   }
 

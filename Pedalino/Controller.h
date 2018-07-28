@@ -1,3 +1,6 @@
+
+void screen_info(byte, byte, byte, byte);
+
 //
 //  Autosensing setup
 //
@@ -356,6 +359,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOn(code, value, channel);
+        screen_info(midi::NoteOn, code, value, channel);
       }
       else {
 #ifdef DEBUG_PEDALINO
@@ -370,6 +374,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(code, value, channel);
+        screen_info(midi::NoteOff, code, value, channel);
       }
       break;
 
@@ -388,6 +393,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(code, value, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendControlChange(code, value, channel);
+        screen_info(midi::ControlChange, code, value, channel);
       }
       break;
 
@@ -404,6 +410,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(code, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendProgramChange(code, channel);
+        screen_info(midi::ProgramChange, code, 0, channel);
       }
       break;
 
@@ -421,6 +428,7 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #endif
         if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, channel);
         if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendPitchBend(bend, channel);
+        screen_info(midi::PitchBend, bend, 0, channel);
       }
       break;
   }

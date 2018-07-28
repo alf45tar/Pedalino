@@ -34,8 +34,6 @@ void setup(void)
 
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
-  pinMode(LCD_CONTRAST, OUTPUT);
-  analogWrite(LCD_CONTRAST, contrast);
 
   irrecv.enableIRIn();                        // Start the IR receiver
   irrecv.blink13(true);
