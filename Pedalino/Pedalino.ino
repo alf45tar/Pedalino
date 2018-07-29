@@ -1,12 +1,11 @@
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #include "Pedalino.h"
 #include "Config.h"
 #include "MIDIRouting.h"
 #include "Controller.h"
-#include "ControlChange.h"
-#include "NoteNumbers.h"
 #include "Display.h"
+#include "Menu.h"
 
 // Standard setup() and loop()
 

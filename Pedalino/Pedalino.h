@@ -76,10 +76,6 @@
 #define PED_LEGACY_MIDI_IN    1
 #define PED_LEGACY_MIDI_THRU  2
 
-
-#define PED_STA             0   // wifi client station with smart config
-#define PED_AP              1   // wifi access point
-
 #define MIDI_RESOLUTION         128       // MIDI 7-bit CC resolution
 #define ADC_RESOLUTION         1024       // 10-bit ADC converter resolution
 #define CALIBRATION_DURATION   8000       // milliseconds
@@ -118,9 +114,6 @@ struct pedal {
                                              4 = single and long click
                                              5 = single, double and long click
                                              6 = double and long click */
-  byte                   value_single;
-  byte                   value_double;
-  byte                   value_long;
   byte                   invertPolarity;
   byte                   mapFunction;
   int                    expZero;
@@ -148,8 +141,6 @@ byte   currentProfile         = 0;
 byte   currentBank            = 0;
 byte   currentPedal           = 0;
 byte   currentInterface       = PED_USBMIDI;
-byte   currentLegacyMIDIPort  = PED_LEGACY_MIDI_OUT;
-byte   currentWiFiMode        = PED_AP;
 byte   lastUsedSwitch         = 0xFF;
 byte   lastUsedPedal          = 0xFF;
 bool   selectBank             = true;
@@ -203,7 +194,6 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean       powersaver = false;
 byte          backlight  = 150;
-byte          contrast   = 100;
 
 // IR Remote receiver
 
@@ -212,27 +202,50 @@ byte          contrast   = 100;
 #define RECV_PIN       2     // connect Y to this PIN, G to GND, R to 5V
 #define RECV_LED_PIN   3
 
-#define IR_ON_OFF   0xFFEA15
-#define IR_OK       0xFF48B7
-#define IR_ESC      0xFFE817
-#define IR_LEFT     0xFF7887
-#define IR_RIGHT    0xFF6897
-#define IR_UP       0xFF708F
-#define IR_DOWN     0xFF28D7
-#define IR_SWITCH   0xFFBA45
-#define IR_KEY_1    0xFFDA25
-#define IR_KEY_2    0xFFF20D
-#define IR_KEY_3    0xFFCA35
-#define IR_KEY_4    0xFF5AA5
-#define IR_KEY_5    0xFFF00F
-#define IR_KEY_6    0xFF7A85
-#define IR_KEY_7    0xFF6A95
-#define IR_KEY_8    0xFF728D
-#define IR_KEY_9    0xFF4AB5
-#define IR_KEY_0    0xFFAA55
+#define IR_ON_OFF   0xFFA25D
+#define IR_OK       0xFF02FD
+#define IR_ESC      0xFFE21D
+#define IR_LEFT     0xFFC23D
+#define IR_RIGHT    0xFF22DD
+#define IR_UP       0xFFA857
+#define IR_DOWN     0xFF629D
+#define IR_SWITCH   0xFFB04F
+#define IR_KEY_1    0xFF30CF
+#define IR_KEY_2    0xFF18E7
+#define IR_KEY_3    0xFF7A85
+#define IR_KEY_4    0xFF10EF
+#define IR_KEY_5    0xFF38C7
+#define IR_KEY_6    0xFF5AA5
+#define IR_KEY_7    0xFF42BD
+#define IR_KEY_8    0xFF4AB5
+#define IR_KEY_9    0xFF52AD
+#define IR_KEY_0    0xFF6897
+
+enum IRCODES {IRC_ON_OFF = 0,
+              IRC_OK,
+              IRC_ESC,
+              IRC_LEFT,
+              IRC_RIGHT,
+              IRC_UP,
+              IRC_DOWN,
+              IRC_SWITCH,
+              IRC_KEY_1,
+              IRC_KEY_2,
+              IRC_KEY_3,
+              IRC_KEY_4,
+              IRC_KEY_5,
+              IRC_KEY_6,
+              IRC_KEY_7,
+              IRC_KEY_8,
+              IRC_KEY_9,
+              IRC_KEY_0,
+              IR_CUSTOM_CODES};
+
+#define REPEAT_TO_SKIP  4     // Number of REPEAT codes to skip before start repeat
 
 IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
 decode_results  results;
+unsigned long   ircustomcode[IR_CUSTOM_CODES];
 
 // BLE receiver
 

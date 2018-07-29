@@ -1,5 +1,5 @@
 
-#define EEPROM_VERSION    5     // Increment each time you change the eeprom structure
+#define EEPROM_VERSION    8     // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -55,10 +55,7 @@ void load_factory_default()
     pedals[p] = {PED_MIDI,                  // function
                  1,                         // autosensing disabled
                  PED_MOMENTARY1,            // mode
-                 PED_PRESS_1_2_L,           // press mode
-                 1,                         // singles press
-                 127,                       // double press
-                 65,                        // long press
+                 PED_PRESS_1,               // press mode
                  0,                         // invert polarity disabled
                  0,                         // map function
                  50,                        // expression pedal zero
@@ -74,6 +71,8 @@ void load_factory_default()
   pedals[11].mode     = PED_MOMENTARY2;
   pedals[12].function = PED_MENU;
   pedals[12].mode     = PED_MOMENTARY3;
+  pedals[15].function = PED_MIDI;
+  pedals[15].mode     = PED_ANALOG;
 
   for (byte i = 0; i < INTERFACES; i++)
     interfaces[i] = {PED_ENABLE,            // MIDI IN
@@ -82,8 +81,10 @@ void load_factory_default()
                      PED_ENABLE,            // MIDI routing
                      PED_DISABLE            // MIDI clock
                     };
-}
 
+  for (byte c = 0; c < IR_CUSTOM_CODES; c++)
+    ircustomcode[c] = 0xFFFFFE;
+}
 
 //
 //  Write current configuration to EEPROM (changes only)
@@ -92,7 +93,7 @@ void update_eeprom() {
 
   int offset = 0;
 
-  DPRINT("Updating EEPROM ... ");
+  DPRINTLN("Updating EEPROM ... ");
 
   EEPROM.put(offset, SIGNATURE);
   offset += sizeof(SIGNATURE);
@@ -147,17 +148,57 @@ void update_eeprom() {
     offset += sizeof(byte);
   }
 
+  DPRINT("[0x");
+  DPRINT(offset, HEX);
+  DPRINT("] ");
   EEPROM.put(offset, currentBank);
   offset += sizeof(byte);
+  DPRINT("Current bank:      0x");
+  DPRINTLN(currentBank, HEX);
+
+  DPRINT("[0x");
+  DPRINT(offset, HEX);
+  DPRINT("] ");
   EEPROM.put(offset, currentPedal);
   offset += sizeof(byte);
+  DPRINT("Current pedal:     0x");
+  DPRINTLN(currentPedal, HEX);
+
+  DPRINT("[0x");
+  DPRINT(offset, HEX);
+  DPRINT("] ");
   EEPROM.put(offset, currentInterface);
   offset += sizeof(byte);
-  EEPROM.put(offset, currentWiFiMode);
-  offset += sizeof(byte);
+  DPRINT("Current interface: 0x");
+  DPRINTLN(currentInterface, HEX);
 
-  DPRINTLN("end.");
+  DPRINT("[0x");
+  DPRINT(offset, HEX);
+  DPRINT("] ");
+  EEPROM.put(offset, backlight);
+  offset += sizeof(byte);
+  DPRINT("Backlight:         0x");
+  DPRINTLN(backlight, HEX);
+
+  for (byte c = 0; c < IR_CUSTOM_CODES; c++) {
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
+    EEPROM.put(offset, ircustomcode[c]);
+    offset += sizeof(unsigned long);
+    DPRINT("IR Code ");
+    if (c < 10) DPRINT(" ");
+    DPRINT(c);
+    DPRINT(":        0x");
+    DPRINTLN(ircustomcode[c], HEX);
+  }
+
+  DPRINT(offset);
+  DPRINT(" bytes of ");
+  DPRINT(EEPROM.length());
+  DPRINTLN(" updated.");
 }
+
 
 //
 //  Read configuration from EEPROM
@@ -182,7 +223,7 @@ void read_eeprom() {
 
   if ((strcmp(signature, SIGNATURE) == 0) && (saved_version == EEPROM_VERSION)) {
 
-    DPRINT("Reading EEPROM ... ");
+    DPRINTLN("Reading EEPROM ... ");
 
     for (byte b = 0; b < BANKS; b++)
       for (byte p = 0; p < PEDALS; p++) {
@@ -232,16 +273,58 @@ void read_eeprom() {
       offset += sizeof(byte);
     }
 
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
     EEPROM.get(offset, currentBank);
+    currentBank = constrain(currentBank, 0, BANKS - 1);
     offset += sizeof(byte);
+    DPRINT("Current bank:      0x");
+    DPRINTLN(currentBank, HEX);
+    
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
     EEPROM.get(offset, currentPedal);
+    currentPedal = constrain(currentPedal, 0, PEDALS - 1);
     offset += sizeof(byte);
+    DPRINT("Current pedal:     0x");
+    DPRINTLN(currentPedal, HEX);
+    
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
     EEPROM.get(offset, currentInterface);
+    currentInterface = constrain(currentInterface, 0, INTERFACES - 1);
     offset += sizeof(byte);
-    EEPROM.get(offset, currentWiFiMode);
-    offset += sizeof(byte);
+    DPRINT("Current interface: 0x");
+    DPRINTLN(currentInterface, HEX);
 
-    DPRINTLN("end.");
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
+    EEPROM.get(offset, backlight);
+    offset += sizeof(byte);
+    DPRINT("Backlight:         0x");
+    DPRINTLN(backlight, HEX);
+
+    for (byte c = 0; c < IR_CUSTOM_CODES; c++) {
+      DPRINT("[0x");
+      DPRINT(offset, HEX);
+      DPRINT("] ");
+      EEPROM.get(offset, ircustomcode[c]);
+      offset += sizeof(unsigned long);
+      DPRINT("IR Code ");
+      if (c < 10) DPRINT(" ");
+      DPRINT(c);
+      DPRINT(":        0x");
+      DPRINTLN(ircustomcode[c], HEX);
+    }
+
+    DPRINT(offset);
+    DPRINT(" bytes of ");
+    DPRINT(EEPROM.length());
+    DPRINTLN(" read.");
   }
 }
 
