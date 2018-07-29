@@ -48,6 +48,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Configuration via IR/Bluetooth remote control
 - Change bank via IR remote control
 - Simulate footswitch push via IR remote control
+- Use any spare IR remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
 - Firmware update via HTTP (http://pedalino.local/update)
 
