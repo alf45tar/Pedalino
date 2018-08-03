@@ -20,6 +20,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Open Sound Control (OSC) via Wi-Fi
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
+- MIDI clock generator
 - OSC to MIDI and vicecersa
 - Any number of pedals of any type in any order
 - Auto-sensing footswitches and expression pedals
