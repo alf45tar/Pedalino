@@ -1,4 +1,4 @@
-#define LINE1PERSISTENCE   1500;
+#define LCD_LINE1_PERSISTENCE   1500;
 
 byte m1, m2, m3, m4;
 unsigned long endMillis2;
@@ -10,7 +10,7 @@ void screen_info(byte b1, byte b2, byte b3, byte b4)
   m2 = b2;
   m3 = b3;
   m4 = b4;
-  endMillis2 = millis() + LINE1PERSISTENCE;
+  endMillis2 = millis() + LCD_LINE1_PERSISTENCE;
 }
 
 
@@ -61,10 +61,29 @@ void screen_update(bool force = false) {
     }
     else {
       memset(buf, 0, sizeof(buf));
-      for (byte i = 0; i < PEDALS; i++) {
+      if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroClockMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroClockSlave) {
+        sprintf(&buf[strlen(buf)], "%3dBPM", bpm);
+        for (byte i = 6; i < LCD_COLS; i++)
+          buf[i] = ' ';
+      }
+      else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCSlave) {
+        sprintf(&buf[strlen(buf)], "MTC  %02d:%02d:%02d:%02d", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());
+      }
+      /*
+        if (playing) {
+        for (byte i = 0; i < 10; i++)
+          buf[6 + i] = ((beat % 4) == i) && ((blinkCount % 24) < 12) ? '>' : ' ';
+        }
+        else
+        for (byte i = 6; i < LCD_COLS; i++)
+          buf[i] = ' ';
+      */
+      /*
+        for (byte i = 0; i < PEDALS; i++) {
         //buf[i] = foot_char(i);
         buf[i] = ' ';
-      }
+        }
+      */
       if (force || strcmp(screen1, buf) != 0) {
         memset(screen1, 0, LCD_COLS + 1);
         strncpy(screen1, buf, LCD_COLS);
@@ -74,6 +93,9 @@ void screen_update(bool force = false) {
     }
     // Line 2
     memset(buf, 0, sizeof(buf));
+    //if (playing)
+    //  sprintf(&buf[strlen(buf)], "BPM%3d", bpm / 10);
+    //else
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
     //sprintf(&buf[strlen(buf)], "%2x%2x%2x", currentBank + 1, banks[currentBank][lastUsedSwitch].midiChannel, banks[currentBank][lastUsedSwitch].midiCode);
     if (lastUsedPedal >= 0 && lastUsedPedal < PEDALS) {

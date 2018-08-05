@@ -12,6 +12,8 @@
 //#define BOUNCE_WITH_PROMPT_DETECTION  // Report accurate switch time normally with no delay. Use when accurate switch transition timing is important.
 #include <Bounce2.h>                    // https://github.com/thomasfredericks/Bounce2
 
+#include "MidiTimeCode.h"
+
 #define SIGNATURE "Pedalino(TM)"
 
 #define BANKS             10
@@ -53,12 +55,13 @@
 #define PED_BANK_MINUS      2
 #define PED_START           3
 #define PED_STOP            4
-#define PED_TAP             5
-#define PED_MENU            6
-#define PED_CONFIRM         7
-#define PED_ESCAPE          8
-#define PED_NEXT            9
-#define PED_PREVIOUS        10
+#define PED_CONTINUE        5
+#define PED_TAP             6
+#define PED_MENU            7
+#define PED_CONFIRM         8
+#define PED_ESCAPE          9
+#define PED_NEXT            10
+#define PED_PREVIOUS        11
 
 #define PED_LINEAR          0
 #define PED_LOG             1
@@ -75,6 +78,14 @@
 #define PED_LEGACY_MIDI_OUT   0
 #define PED_LEGACY_MIDI_IN    1
 #define PED_LEGACY_MIDI_THRU  2
+
+#define PED_MTC_NONE    0
+#define PED_MTC_SLAVE   1
+#define PED_MTC24       2
+#define PED_MTC25       3 
+#define PED_MTC30DF     4
+#define PED_MTC30       5
+#define PED_MIDICLOCK   6
 
 #define MIDI_RESOLUTION         128       // MIDI 7-bit CC resolution
 #define ADC_RESOLUTION         1024       // 10-bit ADC converter resolution
@@ -162,6 +173,10 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISett
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
 
+MidiTimeCode  MTC;
+byte          currentMidiTimeCode = PED_MTC24;
+unsigned int  bpm = 120;
+
 //
 MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 {
@@ -200,7 +215,7 @@ byte          backlight  = 150;
 #include <IRremote.h>
 
 #define RECV_PIN       2     // connect Y to this PIN, G to GND, R to 5V
-#define RECV_LED_PIN   3
+#define RECV_LED_PIN   8
 
 #define IR_ON_OFF   0xFFA25D
 #define IR_OK       0xFF02FD

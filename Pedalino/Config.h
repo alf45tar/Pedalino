@@ -1,5 +1,5 @@
 
-#define EEPROM_VERSION    8     // Increment each time you change the eeprom structure
+#define EEPROM_VERSION    5     // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -67,6 +67,14 @@ void load_factory_default()
                  nullptr, nullptr, nullptr, nullptr, nullptr
                 };
 
+  pedals[7].function  = PED_START;
+  pedals[7].mode      = PED_MOMENTARY1;
+  pedals[8].function  = PED_STOP;
+  pedals[8].mode      = PED_MOMENTARY1;
+  pedals[9].function  = PED_CONTINUE;
+  pedals[9].mode      = PED_MOMENTARY1;
+  pedals[10].function = PED_TAP;
+  pedals[10].mode     = PED_MOMENTARY1;
   pedals[11].function = PED_BANK_PLUS;
   pedals[11].mode     = PED_MOMENTARY2;
   pedals[12].function = PED_MENU;
@@ -171,6 +179,14 @@ void update_eeprom() {
   offset += sizeof(byte);
   DPRINT("Current interface: 0x");
   DPRINTLN(currentInterface, HEX);
+
+  DPRINT("[0x");
+  DPRINT(offset, HEX);
+  DPRINT("] ");
+  EEPROM.put(offset, currentMidiTimeCode);
+  offset += sizeof(byte);
+  DPRINT("Current MTC:       0x");
+  DPRINTLN(currentMidiTimeCode, HEX);
 
   DPRINT("[0x");
   DPRINT(offset, HEX);
@@ -281,7 +297,7 @@ void read_eeprom() {
     offset += sizeof(byte);
     DPRINT("Current bank:      0x");
     DPRINTLN(currentBank, HEX);
-    
+
     DPRINT("[0x");
     DPRINT(offset, HEX);
     DPRINT("] ");
@@ -290,7 +306,7 @@ void read_eeprom() {
     offset += sizeof(byte);
     DPRINT("Current pedal:     0x");
     DPRINTLN(currentPedal, HEX);
-    
+
     DPRINT("[0x");
     DPRINT(offset, HEX);
     DPRINT("] ");
@@ -299,6 +315,14 @@ void read_eeprom() {
     offset += sizeof(byte);
     DPRINT("Current interface: 0x");
     DPRINTLN(currentInterface, HEX);
+
+    DPRINT("[0x");
+    DPRINT(offset, HEX);
+    DPRINT("] ");
+    EEPROM.get(offset, currentMidiTimeCode);
+    offset += sizeof(byte);
+    DPRINT("Current MTC:       0x");
+    DPRINTLN(currentMidiTimeCode, HEX);
 
     DPRINT("[0x");
     DPRINT(offset, HEX);

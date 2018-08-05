@@ -2,6 +2,7 @@
 
 #include "Pedalino.h"
 #include "Config.h"
+//#include "MIDIClock.h"
 #include "MIDIRouting.h"
 #include "Controller.h"
 #include "Display.h"
@@ -30,6 +31,30 @@ void setup(void)
   autosensing_setup();
   controller_setup();
   //midi_clock_setup();
+  MTC.setup();
+  switch (currentMidiTimeCode) {
+
+    case PED_MTC_NONE:
+      MTC.setMode(MidiTimeCode::SynchroNone);
+      break;
+
+    case PED_MTC_SLAVE:
+      MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+      break;
+
+    case PED_MIDICLOCK:
+      MTC.setMode(MidiTimeCode::SynchroClockMaster);
+      MTC.setBpm(bpm);
+      break;
+
+    case PED_MTC24:
+    case PED_MTC25:
+    case PED_MTC30DF:
+    case PED_MTC30:
+      MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+      MTC.sendPosition(0, 0, 0, 0);
+      break;
+  }
 
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
@@ -73,5 +98,6 @@ void loop(void)
   // Check whether the input has changed since last time, if so, send the new value over MIDI
   midi_refresh();
   midi_routing();
+  //midi_clock();
 }
 

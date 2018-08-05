@@ -52,7 +52,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_IRLEARN        51
 #define II_IRCLEAR        52
 #define II_WIFIRESET      53
-#define II_DEFAULT        54
+#define II_MIDITIMECODE   54
+#define II_DEFAULT        55
 
 // Global menu data and definitions
 
@@ -66,7 +67,7 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
   { M_PEDALSETUP,     "Pedals Setup",    40, 49, 0 },
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
   { M_PROFILE,        "Profiles",        70, 71, 0 },
-  { M_OPTIONS,        "Options",         80, 84, 0 }
+  { M_OPTIONS,        "Options",         80, 85, 0 }
 };
 
 // Menu Items ----------
@@ -114,18 +115,20 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 81, "Remote Control",  MD_Menu::MNU_INPUT, II_IRLEARN },
   { 82, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
   { 83, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
-  { 84, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 84, "MIDI Time Code",  MD_Menu::MNU_INPUT, II_MIDITIMECODE },
+  { 85, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
 const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
-const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |  Start/Pause |     Stop     |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
+const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Start    |     Stop     |   Continue   |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
 const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   ";
 const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
 const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
+const PROGMEM char listMidiTimeCode[]    = "    None      |     Slave    |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  MIDI Clock  ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
@@ -166,6 +169,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_IRLEARN,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_IRCLEAR,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_WIFIRESET,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
+  { II_MIDITIMECODE,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiTimeCode },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
 
@@ -311,6 +315,36 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_MIDI_CLOCK:
       if (bGet) vBuf.value = interfaces[currentInterface].midiClock;
       else interfaces[currentInterface].midiClock = vBuf.value;
+      break;
+
+    case II_MIDITIMECODE:
+      if (bGet) vBuf.value = currentMidiTimeCode;
+      else {
+        currentMidiTimeCode = vBuf.value;
+        switch (currentMidiTimeCode) {
+
+          case PED_MTC_NONE:
+            MTC.setMode(MidiTimeCode::SynchroNone);
+            break;
+
+          case PED_MTC_SLAVE:
+            MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+            break;
+
+          case PED_MIDICLOCK:
+            MTC.setMode(MidiTimeCode::SynchroClockMaster);
+            MTC.setBpm(120);
+            break;
+
+          case PED_MTC24:
+          case PED_MTC25:
+          case PED_MTC30DF:
+          case PED_MTC30:
+            MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+            MTC.sendPosition(0, 0, 0, 0);
+            break;
+        }
+      }
       break;
 
     case II_BACKLIGHT:
@@ -580,12 +614,66 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
           break;
 
         case PED_START:
-          //uClock.start();
+          switch (k) {
+            case 1:
+              //midi_clock_start_stop();
+              MTC.sendPosition(0, 0, 0, 0);
+              MTC.sendPlay();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              break;
+            case 3:
+              break;
+          }
           break;
+
+
         case PED_STOP:
-          //uClock.stop();
+          switch (k) {
+            case 1:
+              //midi_clock_start_stop();
+              MTC.sendStop();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              if (bpm > 0) MTC.setBpm(bpm);
+              break;
+            case 3:
+              break;
+          }
           break;
+
+        case PED_CONTINUE:
+          switch (k) {
+            case 1:
+              //midi_clock_start_stop();
+              MTC.sendContinue();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              break;
+            case 3:
+              break;
+          }
+          break;
+
         case PED_TAP:
+          switch (k) {
+            case 1:
+              //midi_clock_tap();
+              bpm = MTC.tapTempo();
+              if (bpm > 0) MTC.setBpm(bpm);
+              break;
+            case 2:
+              //midi_clock_start_stop();
+              MTC.sendPlay();
+              break;
+            case 3:
+              //midi_clock_start_stop();
+              MTC.sendStop();
+              break;
+          }
           break;
 
         case PED_MENU:
@@ -598,6 +686,7 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
               return MD_Menu::NAV_ESC;
           }
           break;
+
         case PED_CONFIRM:
           return MD_Menu::NAV_SEL;
           break;
