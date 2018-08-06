@@ -45,11 +45,11 @@ RemoteDebug Debug;
 #define LED_BUILTIN    2
 #endif
 
-#define LINK_LED       LED_BUILTIN  // onboard LED, used as status indicator
+#define WIFI_LED       LED_BUILTIN  // onboard LED, used as status indicator
 
 #if defined(ARDUINO_ARCH_ESP8266) && defined(PEDALINO_SERIAL_DEBUG)
 #define SERIALDEBUG       Serial1
-#define LINK_LED       0  // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
+#define WIFI_LED       0  // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(PEDALINO_SERIAL_DEBUG)
@@ -65,13 +65,19 @@ RemoteDebug Debug;
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
-#define BUILTIN_LED_OFF() digitalWrite(LINK_LED, HIGH)
-#define BUILTIN_LED_ON()  digitalWrite(LINK_LED, LOW)
+#define BLE_LED_OFF()
+#define BLE_LED_ON()
+#define WIFI_LED_OFF() digitalWrite(WIFI_LED, HIGH)
+#define WIFI_LED_ON()  digitalWrite(WIFI_LED, LOW)
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-#define BUILTIN_LED_OFF() digitalWrite(LINK_LED, LOW)
-#define BUILTIN_LED_ON()  digitalWrite(LINK_LED, HIGH)
+#define BLE_LED         21
+#define WIFI_LED        19
+#define BLE_LED_OFF()   digitalWrite(BLE_LED, LOW)
+#define BLE_LED_ON()    digitalWrite(BLE_LED, HIGH)
+#define WIFI_LED_OFF()  digitalWrite(WIFI_LED, LOW)
+#define WIFI_LED_ON()   digitalWrite(WIFI_LED, HIGH)
 #endif
 
 const char host[]     = "pedalino";
@@ -101,13 +107,14 @@ unsigned long         msOffset = 0;
 #define MAX_TIMESTAMP 0x01FFF         //13 bits, 8192 dec
 #endif
 bool                  bleMidiConnected = false;
+unsigned long         bleLastOn        = 0;
 
 // WiFi MIDI interface to comunicate with AppleMIDI/RTP-MDI devices
 
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, AppleMIDI); // see definition in AppleMidi_Defs.h
 
 bool          appleMidiConnected = false;
-unsigned long lastOn             = 0;
+unsigned long wifiLastOn         = 0;
 
 // Serial MIDI interface to comunicate with Arduino
 
@@ -1028,14 +1035,14 @@ void OnOscControlChange(OSCMessage &msg)
 
 void status_blink()
 {
-  BUILTIN_LED_ON();
+  WIFI_LED_ON();
   delay(50);
-  BUILTIN_LED_OFF();
+  WIFI_LED_OFF();
 }
 
 void ap_mode_start()
 {
-  BUILTIN_LED_OFF();
+  WIFI_LED_OFF();
 
   WiFi.mode(WIFI_AP);
   boolean result = WiFi.softAP("Pedalino");
@@ -1047,7 +1054,7 @@ void ap_mode_stop()
 {
   if (WiFi.getMode() == WIFI_AP) {
     WiFi.softAPdisconnect();
-    BUILTIN_LED_OFF();
+    WIFI_LED_OFF();
   }
 }
 
@@ -1112,7 +1119,7 @@ bool auto_reconnect()
     DPRINT(".");
   }
 
-  WiFi.status() == WL_CONNECTED ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+  WiFi.status() == WL_CONNECTED ? WIFI_LED_ON() : WIFI_LED_OFF();
 
   if (WiFi.status() == WL_CONNECTED)
     DPRINTLN("[SUCCESS]");
@@ -1272,9 +1279,10 @@ void setup()
   DPRINTLN("***     Pedalino(TM)     ***");
   DPRINTLN("****************************");
 
-  pinMode(LINK_LED, OUTPUT);
+  pinMode(WIFI_LED, OUTPUT);
 
 #ifdef ARDUINO_ARCH_ESP32
+  pinMode(BLE_LED, OUTPUT);
   SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
 #endif
 
@@ -1299,28 +1307,31 @@ void setup()
 
 void loop()
 {
-  if (!appleMidiConnected && !bleMidiConnected) BUILTIN_LED_OFF();
-  if (appleMidiConnected || bleMidiConnected) {
+  if (!appleMidiConnected) WIFI_LED_OFF();
+  if (!bleMidiConnected)  BLE_LED_OFF();
+  if (appleMidiConnected ||  bleMidiConnected) {
     // led fast blinking (5 times per second)
-    if (millis() - lastOn > 200) {
-      BUILTIN_LED_ON();
-      lastOn = millis();
+    if (millis() - wifiLastOn > 200) {
+      if (bleMidiConnected) BLE_LED_ON();
+      if (appleMidiConnected) WIFI_LED_ON();
+      wifiLastOn = millis();
     }
-    else if (millis() - lastOn > 100) {
-      BUILTIN_LED_OFF();
+    else if (millis() - wifiLastOn > 100) {
+      BLE_LED_OFF();
+      WIFI_LED_OFF();
     }
   }
   else
     // led always on if connected to an AP or one or more client connected the the internal AP
     switch (WiFi.getMode()) {
       case WIFI_STA:
-        WiFi.isConnected() ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+        WiFi.isConnected() ? WIFI_LED_ON() : WIFI_LED_OFF();
         break;
       case WIFI_AP:
-        WiFi.softAPgetStationNum() > 0 ? BUILTIN_LED_ON() : BUILTIN_LED_OFF();
+        WiFi.softAPgetStationNum() > 0 ? WIFI_LED_ON() : WIFI_LED_OFF();
         break;
       default:
-        BUILTIN_LED_OFF();
+        WIFI_LED_OFF();
         break;
     }
 
