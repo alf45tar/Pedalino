@@ -105,6 +105,7 @@ void MidiTimeCode::doSendMidiClock()
     Serial.write(mNextEvent);
     Serial2.write(mNextEvent);
     Serial3.write(mNextEvent);
+    mPlaying = (mNextEvent == Start) || (mNextEvent == Continue);
     mNextEvent = InvalidType;
   }
 
@@ -113,6 +114,8 @@ void MidiTimeCode::doSendMidiClock()
     Serial.write(Clock);
     Serial2.write(Clock);
     Serial3.write(Clock);
+    mClick = (mClick + 1) % MidiTimeCode::mMidiClockPpqn;
+    if (mClick == 0) mBeat = (mBeat + 1) % 4;
   }
 }
 
@@ -142,7 +145,7 @@ void MidiTimeCode::sendPosition(byte hours, byte minutes, byte seconds, byte fra
   noInterrupts();
   setPlayhead(hours, minutes, seconds, frames);
   if (mMode == MidiTimeCode::SynchroMTCMaster) mNextEvent = SongPosition;
-  mCurrentQFrame = 0;
+  //mCurrentQFrame = 0;
   interrupts();
 }
 
@@ -168,7 +171,7 @@ byte MidiTimeCode::getFrames()
 
 bool MidiTimeCode::isPlaying() const
 {
-  return (mNextEvent == Continue) || (mNextEvent == Start);
+  return (mNextEvent == Continue) || (mNextEvent == Start) || mPlaying;
 }
 
 void MidiTimeCode::doSendMTC()
@@ -184,7 +187,9 @@ void MidiTimeCode::doSendMTC()
     if ( mNextEvent == Start)
     {
       resetPlayhead();
-      mCurrentQFrame = 0;
+      //mCurrentQFrame = 0;
+      mClick = 0;
+      mBeat = 0;
       mNextEvent = Continue;
     }
 
@@ -328,6 +333,11 @@ const float MidiTimeCode::tapTempo()
   return 0.0f;
 }
 
+byte MidiTimeCode::getBeat()
+{
+  return mBeat;
+}
+
 void MidiTimeCode::setTimer(const double frequency)
 {
   if (frequency > 244.16f) // First value with cmp_match < 65536 (thus allowing to decrease prescaler for higher precision)
@@ -376,6 +386,10 @@ unsigned char           MidiTimeCode::mSelectBits = 0;
 const int               MidiTimeCode::mMidiClockPpqn = 24;
 volatile unsigned long  MidiTimeCode::mEventTime = 0;
 volatile MidiTimeCode::MidiType MidiTimeCode::mNextEvent = InvalidType;
+volatile byte           MidiTimeCode::mClick = 0;
+volatile byte           MidiTimeCode::mBeat = 0;
+volatile bool           MidiTimeCode::mPlaying = false;
+
 
 const         MidiTimeCode::SmpteMask MidiTimeCode::mCurrentSmpteType = Frames24;
 volatile      MidiTimeCode::Playhead  MidiTimeCode::mPlayhead = MidiTimeCode::Playhead();

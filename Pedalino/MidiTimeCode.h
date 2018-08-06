@@ -52,6 +52,7 @@ class MidiTimeCode
     // Only active in Midi Clock mode
     void        setBpm(const float iBpm);
     const float tapTempo();
+    byte        getBeat();
     //
 
     static void setMode(MidiSynchro newMode);
@@ -145,6 +146,9 @@ class MidiTimeCode
     static volatile MidiType          mNextEvent;
     static int                        mPrescaler;
     static unsigned char              mSelectBits;
+    static volatile byte              mClick;
+    static volatile byte              mBeat;
+    static volatile bool              mPlaying;
 
     // MTC stuff
     static const SmpteMask            mCurrentSmpteType;

@@ -24,7 +24,6 @@ void setup(void)
   read_eeprom();
 
   // Initiate serial MIDI communications, listen to all channels and turn Thru off
-  //midi_routing_start();
 #ifndef DEBUG_PEDALINO
   USB_MIDI.begin(MIDI_CHANNEL_OMNI);
   interfaces[PED_USBMIDI].midiThru ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();

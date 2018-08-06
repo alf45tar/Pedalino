@@ -63,8 +63,11 @@ void screen_update(bool force = false) {
       memset(buf, 0, sizeof(buf));
       if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroClockMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroClockSlave) {
         sprintf(&buf[strlen(buf)], "%3dBPM", bpm);
-        for (byte i = 6; i < LCD_COLS; i++)
-          buf[i] = ' ';
+        for (byte i = 0; i < 10; i++)
+          if (MTC.isPlaying())
+            buf[6 + i] = (MTC.getBeat() == i) ? '>' : ' ';
+          else
+            buf[6 + i] = (MTC.getBeat() == i) ? '.' : ' ';
       }
       else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCSlave) {
         sprintf(&buf[strlen(buf)], "MTC  %02d:%02d:%02d:%02d", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());

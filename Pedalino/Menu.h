@@ -617,7 +617,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case PED_START:
           switch (k) {
             case 1:
-              //midi_clock_start_stop();
               MTC.sendPosition(0, 0, 0, 0);
               MTC.sendPlay();
               break;
@@ -633,7 +632,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case PED_STOP:
           switch (k) {
             case 1:
-              //midi_clock_start_stop();
               MTC.sendStop();
               break;
             case 2:
@@ -648,7 +646,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case PED_CONTINUE:
           switch (k) {
             case 1:
-              //midi_clock_start_stop();
               MTC.sendContinue();
               break;
             case 2:
@@ -662,16 +659,13 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case PED_TAP:
           switch (k) {
             case 1:
-              //midi_clock_tap();
               bpm = MTC.tapTempo();
               if (bpm > 0) MTC.setBpm(bpm);
               break;
             case 2:
-              //midi_clock_start_stop();
               MTC.sendPlay();
               break;
             case 3:
-              //midi_clock_start_stop();
               MTC.sendStop();
               break;
           }
