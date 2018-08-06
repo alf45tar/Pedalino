@@ -1,5 +1,5 @@
 //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /*
-// Thnaks to https://github.com/adanselm/padchokola
+// Thanks to https://github.com/adanselm/padchokola
 //
 #ifndef _MIDI_CLOCK_MTC_H_
 #define _MIDI_CLOCK_MTC_H_

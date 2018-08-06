@@ -11,9 +11,9 @@ void load_factory_default()
       switch (b % 4)
       {
         case 0:
-          banks[b][p] = { PED_PROGRAM_CHANGE,    // MIDI message
-                          b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p,        // MIDI code
+          banks[b][p] = { PED_PROGRAM_CHANGE,             // MIDI message
+                          (byte)(b / 4 + 1),              // MIDI channel
+                          (byte)(b / 4 * 16 + p),         // MIDI code
                           127,
                           0,
                           65
@@ -21,9 +21,9 @@ void load_factory_default()
           break;
 
         case 1:
-          banks[b][p] = { PED_CONTROL_CHANGE,    // MIDI message
-                          b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p,        // MIDI code
+          banks[b][p] = { PED_CONTROL_CHANGE,             // MIDI message
+                          (byte)(b / 4 + 1),              // MIDI channel
+                          (byte)(b / 4 * 16 + p),          // MIDI code
                           127,
                           0,
                           65
@@ -31,9 +31,9 @@ void load_factory_default()
           break;
 
         case 2:
-          banks[b][p] = { PED_NOTE_ON_OFF,       // MIDI message
-                          b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p + 24,   // MIDI code
+          banks[b][p] = { PED_NOTE_ON_OFF,                // MIDI message
+                          (byte)(b / 4 + 1),              // MIDI channel
+                          (byte)(b / 4 * 16 + p + 24),    // MIDI code
                           127,
                           0,
                           65
@@ -41,9 +41,9 @@ void load_factory_default()
           break;
 
         case 3:
-          banks[b][p] = { PED_PITCH_BEND,        // MIDI message
-                          b / 4 + 1,             // MIDI channel
-                          b / 4 * 16 + p,        // MIDI code
+          banks[b][p] = { PED_PITCH_BEND,                  // MIDI message
+                          (byte)(b / 4 + 1),               // MIDI channel
+                          (byte)(b / 4 * 16 + p),          // MIDI code
                           127,
                           0,
                           65

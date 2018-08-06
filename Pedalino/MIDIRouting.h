@@ -6,8 +6,7 @@ void mtc_decode(byte b1, byte b2)
   static byte b[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   byte i;
 
-  if (b1 == midi::TimeCodeQuarterFrame)
-  {
+  if (b1 == midi::TimeCodeQuarterFrame) {
     DPRINT("MTC ");
     i = (b2 & 0xf0) >> 4;
     DPRINT(i);

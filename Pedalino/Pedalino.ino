@@ -1,8 +1,7 @@
-#define DEBUG_PEDALINO
+//#define DEBUG_PEDALINO
 
 #include "Pedalino.h"
 #include "Config.h"
-//#include "MIDIClock.h"
 #include "MIDIRouting.h"
 #include "Controller.h"
 #include "Display.h"
@@ -30,7 +29,6 @@ void setup(void)
 
   autosensing_setup();
   controller_setup();
-  //midi_clock_setup();
   MTC.setup();
   switch (currentMidiTimeCode) {
 
@@ -98,6 +96,5 @@ void loop(void)
   // Check whether the input has changed since last time, if so, send the new value over MIDI
   midi_refresh();
   midi_routing();
-  //midi_clock();
 }
 

@@ -465,7 +465,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
     case II_WIFIRESET:
       if (!bGet) {
-        RTP_MIDI.sendSysEx(8, "+++RESET");
+        const byte command[4] = {'+', 'R', 'S', 'T'};
+        RTP_MIDI.sendSysEx(4, command);
       }
       r = nullptr;
       break;
