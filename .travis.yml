@@ -9,11 +9,8 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=Pedalino PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560 --project-option='lib_ignore=RobotIRremote'"
-    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
-    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp12e"
-    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp32dev"
-    - PLATFORMIO_CI_SRC=PedalinoESP PLATFORMIO_CI_EXTRA_ARGS="--board=esp32doit-devkit-v1"
+    - PLATFORMIO_CI_SRC=Pedalino
+    - PLATFORMIO_CI_SRC=PedalinoESP
 
 install:
     - pip install -U platformio
@@ -23,7 +20,7 @@ install:
                                 https://github.com/z3t0/Arduino-IRremote.git
 
 script:
-    -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire" --project-conf=platformio.ini
+    -  platformio ci --project-conf=platformio.ini
 
 deploy-no:
   provider: pages
