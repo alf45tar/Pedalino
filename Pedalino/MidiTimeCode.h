@@ -17,7 +17,7 @@ class TapTempo
     TapTempo();
     ~TapTempo();
 
-    float         tap();
+    float         tap(byte ppqn = 1);
     void          reset();
 
   private:

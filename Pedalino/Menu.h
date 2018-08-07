@@ -128,7 +128,7 @@ const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
 const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
-const PROGMEM char listMidiTimeCode[]    = "    None      |     Slave    |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  MIDI Clock  ";
+const PROGMEM char listMidiTimeCode[]    = "    None      |   MTC Slave  |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  Clock Slave | Clock Master ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
@@ -331,17 +331,22 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
             MTC.setMode(MidiTimeCode::SynchroMTCSlave);
             break;
 
-          case PED_MIDICLOCK:
-            MTC.setMode(MidiTimeCode::SynchroClockMaster);
-            MTC.setBpm(120);
-            break;
-
-          case PED_MTC24:
-          case PED_MTC25:
-          case PED_MTC30DF:
-          case PED_MTC30:
+          case PED_MTC_MASTER_24:
+          case PED_MTC_MASTER_25:
+          case PED_MTC_MASTER_30DF:
+          case PED_MTC_MASTER_30:
             MTC.setMode(MidiTimeCode::SynchroMTCMaster);
             MTC.sendPosition(0, 0, 0, 0);
+            break;
+
+          case PED_MIDI_CLOCK_SLAVE:
+            MTC.setMode(MidiTimeCode::SynchroClockSlave);
+            bpm = 0;
+            break;
+
+          case PED_MIDI_CLOCK_MASTER:
+            MTC.setMode(MidiTimeCode::SynchroClockMaster);
+            MTC.setBpm(bpm);
             break;
         }
       }

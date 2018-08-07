@@ -86,13 +86,14 @@
 #define PED_LEGACY_MIDI_IN    1
 #define PED_LEGACY_MIDI_THRU  2
 
-#define PED_MTC_NONE    0
-#define PED_MTC_SLAVE   1
-#define PED_MTC24       2
-#define PED_MTC25       3 
-#define PED_MTC30DF     4
-#define PED_MTC30       5
-#define PED_MIDICLOCK   6
+#define PED_MTC_NONE            0
+#define PED_MTC_SLAVE           1
+#define PED_MTC_MASTER_24       2
+#define PED_MTC_MASTER_25       3 
+#define PED_MTC_MASTER_30DF     4
+#define PED_MTC_MASTER_30       5
+#define PED_MIDI_CLOCK_SLAVE    6
+#define PED_MIDI_CLOCK_MASTER   7
 
 #define MIDI_RESOLUTION         128       // MIDI 7-bit CC resolution
 #define ADC_RESOLUTION         1024       // 10-bit ADC converter resolution
@@ -181,7 +182,7 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
 
 MidiTimeCode  MTC;
-byte          currentMidiTimeCode = PED_MTC24;
+byte          currentMidiTimeCode = PED_MTC_MASTER_24;
 unsigned int  bpm = 120;
 
 //

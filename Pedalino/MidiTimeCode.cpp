@@ -26,7 +26,7 @@ void TapTempo::reset()
   }
 }
 
-float TapTempo::tap()
+float TapTempo::tap(byte ppqn = 1)
 {
   const unsigned long currentTime = millis();
   if ( mLastTap > 0 )
@@ -34,7 +34,7 @@ float TapTempo::tap()
     if ( timeout(currentTime) )
       reset();
 
-    mReadings[ mCurrentReadingPos % TAP_NUM_READINGS ] = calcBpmFromTime(currentTime);
+    mReadings[ mCurrentReadingPos % TAP_NUM_READINGS ] = calcBpmFromTime(currentTime * ppqn);
     ++mCurrentReadingPos;
 
     if ( mCurrentReadingPos >= 2 )
@@ -207,10 +207,17 @@ void MidiTimeCode::setMode(MidiTimeCode::MidiSynchro newMode)
   {
     mMode = newMode;
 
-    if (mMode == MidiTimeCode::SynchroMTCMaster)
-    {
-      setTimer(24 * 4);
+    switch (mMode) {
+      
+      case MidiTimeCode::SynchroMTCMaster:
+        setTimer(24 * 4);
+        break;
+        
+      default:
+        setTimer(1.0f);
+        break;
     }
+
   }
 }
 
@@ -327,9 +334,10 @@ void MidiTimeCode::setBpm(const float iBpm)
 const float MidiTimeCode::tapTempo()
 {
   if ( getMode() == SynchroClockMaster )
-  {
-    return mTapTempo.tap();
-  }
+    return mTapTempo.tap(1);
+  else if ( getMode() == SynchroClockSlave )
+    return mTapTempo.tap(mMidiClockPpqn);
+
   return 0.0f;
 }
 
