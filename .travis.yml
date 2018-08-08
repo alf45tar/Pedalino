@@ -20,14 +20,14 @@ install:
     - platformio update
     - platformio lib -g install Bounce2
                                 IRremote
-				LiquidCrystal
-				MD_Menu
-				MD_UISwitch
-				MIDI Library
-				ResponsiveAnalogRead
-				AppleMIDI
-				OSC
-				RemoteDebug	
+                                LiquidCrystal
+                                MD_Menu
+                                MD_UISwitch
+                                MIDI Library
+                                ResponsiveAnalogRead
+                                AppleMIDI
+                                OSC
+                                RemoteDebug	
 
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire" --project-option="board_build.partitions=no_ota.csv"
