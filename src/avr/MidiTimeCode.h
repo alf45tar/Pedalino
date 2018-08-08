@@ -17,7 +17,7 @@ class TapTempo
     TapTempo();
     ~TapTempo();
 
-    float         tap(byte ppqn = 1);
+    float         tap();
     void          reset();
 
   private:
@@ -71,6 +71,8 @@ class MidiTimeCode
     byte getMinutes();
     byte getSeconds();
     byte getFrames();
+    void decodMTCQuarterFrame(byte MTCData);
+    void decodeMTCFullFrame(unsigned size, byte* array);
     //
 
     static void doSendMidiClock();

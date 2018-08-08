@@ -26,7 +26,7 @@ void TapTempo::reset()
   }
 }
 
-float TapTempo::tap(byte ppqn = 1)
+float TapTempo::tap()
 {
   const unsigned long currentTime = millis();
   if ( mLastTap > 0 )
@@ -34,7 +34,7 @@ float TapTempo::tap(byte ppqn = 1)
     if ( timeout(currentTime) )
       reset();
 
-    mReadings[ mCurrentReadingPos % TAP_NUM_READINGS ] = calcBpmFromTime(currentTime * ppqn);
+    mReadings[ mCurrentReadingPos % TAP_NUM_READINGS ] = calcBpmFromTime(currentTime);
     ++mCurrentReadingPos;
 
     if ( mCurrentReadingPos >= 2 )
@@ -123,6 +123,8 @@ void MidiTimeCode::sendPlay()
 {
   noInterrupts();
   mNextEvent = Start;
+  mClick = 0;
+  mBeat = 0;
   interrupts();
 }
 
@@ -208,11 +210,11 @@ void MidiTimeCode::setMode(MidiTimeCode::MidiSynchro newMode)
     mMode = newMode;
 
     switch (mMode) {
-      
+
       case MidiTimeCode::SynchroMTCMaster:
         setTimer(24 * 4);
         break;
-        
+
       default:
         setTimer(1.0f);
         break;
@@ -224,6 +226,49 @@ void MidiTimeCode::setMode(MidiTimeCode::MidiSynchro newMode)
 MidiTimeCode::MidiSynchro MidiTimeCode::getMode()
 {
   return mMode;
+}
+
+void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
+{
+  static byte b[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+  if (getMode() == MidiTimeCode::SynchroMTCSlave) {
+    byte i = (MTCData & 0xf0) >> 4;   // MSB
+    if (i > 7) return;
+
+    b[i] = MTCData & 0x0f;            // LSB
+
+    if (i == 7)
+    {
+      byte frameType;
+
+      frameType = b[7] & 0x06;
+
+      byte h = (b[7] & 0x01) << 4 | b[6];
+      byte m = b[5] << 4 | b[4];
+      byte s = b[3] << 4 | b[2];
+      byte f = b[1] << 4 | b[0];
+
+      if (h > 23)  h = 23;
+      if (m > 59)  m = 59;
+      if (s > 59)  s = 59;
+      if (f > 30)  f = 30;
+
+      sendPosition(h, m, s, f);
+      for (i = 0; i < 8; i++)
+        b[i] = 0;
+    }
+  }
+}
+
+void MidiTimeCode::decodeMTCFullFrame(unsigned size, byte* array)
+{
+  /// F0 7F cc 01 01 hr mn sc fr F7
+  // cc -> channel (0x7f to broadcast)
+  // hr -> hour, mn -> minutes, sc -> seconds, fr -> frames
+  if (getMode() == MidiTimeCode::SynchroMTCSlave && size == 10)
+    if (array[0] == 0xF0 && array[1] == 0x7F && array[2] == 0x7F && array[3] == 0x01 && array[4] == 0x01 && array[9] == 0xF7)
+      sendPosition(array[5], array[6], array[7], array[8]);
 }
 
 void MidiTimeCode::sendMTCQuarterFrame(int index)
@@ -333,10 +378,21 @@ void MidiTimeCode::setBpm(const float iBpm)
 
 const float MidiTimeCode::tapTempo()
 {
-  if ( getMode() == SynchroClockMaster )
-    return mTapTempo.tap(1);
-  else if ( getMode() == SynchroClockSlave )
-    return mTapTempo.tap(mMidiClockPpqn);
+  static float bpm = 0.0f;
+
+  switch (getMode()) {
+
+    case SynchroClockMaster:
+      return mTapTempo.tap();
+
+    case SynchroClockSlave:
+      mClick = (mClick + 1) % MidiTimeCode::mMidiClockPpqn;
+      if (mClick == 0) {
+        mBeat = (mBeat + 1) % 4;
+        bpm = mTapTempo.tap();
+      }
+      return bpm;
+  }
 
   return 0.0f;
 }

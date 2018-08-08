@@ -346,6 +346,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
           case PED_MIDI_CLOCK_MASTER:
             MTC.setMode(MidiTimeCode::SynchroClockMaster);
+            bpm = 120;
             MTC.setBpm(bpm);
             break;
         }
