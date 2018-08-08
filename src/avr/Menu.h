@@ -1,0 +1,920 @@
+#include "NoteNumbers.h"
+#include "ControlChange.h"
+
+const bool      AUTO_START = true;    // auto start the menu, manual detect and start if false
+const uint16_t  MENU_TIMEOUT = 5000;  // in milliseconds
+
+
+// Function prototypes for Navigation/Display
+bool display(MD_Menu::userDisplayAction_t, char* = nullptr);
+MD_Menu::userNavAction_t navigation(uint16_t &incDelta);
+
+// Function prototypes for variable get/set functions
+MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
+
+#define M_ROOT            10
+#define M_BANKSETUP       11
+#define M_PEDALSETUP      12
+#define M_INTERFACESETUP  13
+#define M_PROFILE         14
+#define M_OPTIONS         15
+
+#define II_BANK           20
+#define II_PEDAL          21
+#define II_MIDICHANNEL    22
+#define II_MIDIMESSAGE    23
+#define II_MIDICODE       24
+#define II_MIDINOTE       25
+#define II_MIDIVALUE1     26
+#define II_MIDIVALUE2     27
+#define II_MIDIVALUE3     28
+#define II_FUNCTION       29
+#define II_AUTOSENSING    30
+#define II_MODE           31
+#define II_PRESS_MODE     32
+#define II_VALUE_SINGLE   33
+#define II_VALUE_DOUBLE   34
+#define II_VALUE_LONG     35
+#define II_POLARITY       36
+#define II_CALIBRATE      37
+#define II_ZERO           38
+#define II_MAX            39
+#define II_RESPONSECURVE  40
+#define II_INTERFACE      41
+#define II_MIDI_IN        42
+#define II_MIDI_OUT       43
+#define II_MIDI_THRU      44
+#define II_MIDI_ROUTING   45
+#define II_MIDI_CLOCK     46
+#define II_PROFILE_LOAD   48
+#define II_PROFILE_SAVE   49
+#define II_BACKLIGHT      50
+#define II_IRLEARN        51
+#define II_IRCLEAR        52
+#define II_WIFIRESET      53
+#define II_MIDITIMECODE   54
+#define II_DEFAULT        55
+
+// Global menu data and definitions
+
+MD_Menu::value_t vBuf;  // interface buffer for values
+
+// Menu Headers --------
+const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
+{
+  { M_ROOT,           SIGNATURE,         10, 14, 0 },
+  { M_BANKSETUP,      "Banks Setup",     20, 37, 0 },
+  { M_PEDALSETUP,     "Pedals Setup",    40, 49, 0 },
+  { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
+  { M_PROFILE,        "Profiles",        70, 71, 0 },
+  { M_OPTIONS,        "Options",         80, 85, 0 }
+};
+
+// Menu Items ----------
+const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
+{
+  // Starting (Root) menu
+  { 10, "Banks Setup",     MD_Menu::MNU_MENU,  M_BANKSETUP },
+  { 11, "Pedals Setup",    MD_Menu::MNU_MENU,  M_PEDALSETUP },
+  { 12, "Interface Setup", MD_Menu::MNU_MENU,  M_INTERFACESETUP },
+  { 13, "Profiles",        MD_Menu::MNU_MENU,  M_PROFILE },
+  { 14, "Options",         MD_Menu::MNU_MENU,  M_OPTIONS },
+  // Banks Setup
+  { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
+  { 30, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
+  { 31, "SetMIDIChannel",  MD_Menu::MNU_INPUT, II_MIDICHANNEL },
+  { 32, "SetMIDIMessage",  MD_Menu::MNU_INPUT, II_MIDIMESSAGE },
+  { 33, "Set MIDI Code",   MD_Menu::MNU_INPUT, II_MIDICODE },
+  { 34, "Set MIDI Note",   MD_Menu::MNU_INPUT, II_MIDINOTE },
+  { 35, "Set Value 1",     MD_Menu::MNU_INPUT, II_MIDIVALUE1 },
+  { 36, "Set Value 2",     MD_Menu::MNU_INPUT, II_MIDIVALUE2 },
+  { 37, "Set Value 3",     MD_Menu::MNU_INPUT, II_MIDIVALUE3 },
+  // Pedals Setup
+  { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
+  { 41, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
+  { 42, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
+  { 43, "Set Function",    MD_Menu::MNU_INPUT, II_FUNCTION },
+  { 44, "Set Press Mode",  MD_Menu::MNU_INPUT, II_PRESS_MODE },
+  { 45, "Set Polarity",    MD_Menu::MNU_INPUT, II_POLARITY },
+  { 46, "Calibrate",       MD_Menu::MNU_INPUT, II_CALIBRATE },
+  { 47, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
+  { 48, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
+  { 49, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
+  // Interface Setup
+  { 60, "Select Interf.",  MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 61, "MIDI IN",         MD_Menu::MNU_INPUT, II_MIDI_IN },
+  { 62, "MIDI OUT",        MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  { 63, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
+  { 64, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
+  { 65, "MIDI Clock",      MD_Menu::MNU_INPUT, II_MIDI_CLOCK },
+  // Profiles Setup
+  { 70, "Load Profile",    MD_Menu::MNU_INPUT, II_INTERFACE },
+  { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  // Options
+  { 80, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
+  { 81, "Remote Control",  MD_Menu::MNU_INPUT, II_IRLEARN },
+  { 82, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
+  { 83, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
+  { 84, "MIDI Time Code",  MD_Menu::MNU_INPUT, II_MIDITIMECODE },
+  { 85, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+};
+
+// Input Items ---------
+const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
+const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Start    |     Stop     |   Continue   |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
+const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   ";
+const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
+const PROGMEM char listPolarity[]        = " No|Yes";
+const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
+const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
+const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
+const PROGMEM char listMidiTimeCode[]    = "    None      |   MTC Slave  |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  Clock Slave | Clock Master ";
+
+const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
+{
+  { II_BANK,          ">1-10:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,  BANKS, 0, 10, nullptr },
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+  { II_PEDAL,         ">1-8:       ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  { II_PEDAL,         ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0, PEDALS, 0, 10, nullptr },
+#endif
+  { II_MIDICHANNEL,   ">1-16:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,                 16, 0, 10, nullptr },
+  { II_MIDIMESSAGE,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiMessage },
+  { II_MIDICODE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiControlChange },
+  { II_MIDINOTE,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiNoteNumbers },
+  { II_MIDIVALUE1,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE2,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_MIDIVALUE3,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_FUNCTION,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalFunction },
+  { II_AUTOSENSING,   ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MODE,          ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalMode },
+  { II_PRESS_MODE,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listPedalPressMode },
+  { II_VALUE_SINGLE,  ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_DOUBLE,  ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_VALUE_LONG,    ">0-127:    " , MD_Menu::INP_INT,   mnuValueRqst,  3, 0, 0,                127, 0, 10, nullptr },
+  { II_POLARITY,      "Invert:    " , MD_Menu::INP_LIST,  mnuValueRqst,  3, 0, 0,                  0, 0,  0, listPolarity },
+  { II_CALIBRATE,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
+  { II_ZERO,          ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
+  { II_MAX,           ">0-1023:  "  , MD_Menu::INP_INT,   mnuValueRqst,  4, 0, 0, ADC_RESOLUTION - 1, 0, 10, nullptr },
+  { II_RESPONSECURVE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listResponseCurve },
+  { II_INTERFACE,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listInterface },
+  { II_MIDI_IN,       ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_OUT,      ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_THRU,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_ROUTING,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_MIDI_CLOCK,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
+  { II_PROFILE_LOAD,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
+  { II_PROFILE_SAVE,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
+  { II_BACKLIGHT,     ">1-10:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,                 10, 0, 10, nullptr },
+  { II_IRLEARN,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
+  { II_IRCLEAR,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
+  { II_WIFIRESET,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
+  { II_MIDITIMECODE,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiTimeCode },
+  { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
+};
+
+// bring it all together in the global menu object
+MD_Menu M(navigation, display,        // user navigation and display
+          mnuHdr, ARRAY_SIZE(mnuHdr), // menu header data
+          mnuItm, ARRAY_SIZE(mnuItm), // menu item data
+          mnuInp, ARRAY_SIZE(mnuInp));// menu input data
+
+// Callback code for menu set/get input values
+
+MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
+{
+  MD_Menu::value_t *r = &vBuf;
+
+  switch (id)
+  {
+    case II_BANK:
+      if (bGet) vBuf.value = currentBank + 1;
+      else currentBank = vBuf.value - 1;
+      break;
+
+    case II_PEDAL:
+      if (bGet) vBuf.value = currentPedal + 1;
+      else currentPedal = vBuf.value - 1;
+      break;
+
+    case II_MIDICHANNEL:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiChannel;
+      else banks[currentBank][currentPedal].midiChannel = vBuf.value;
+      break;
+
+    case II_MIDIMESSAGE:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiMessage;
+      else banks[currentBank][currentPedal].midiMessage = vBuf.value;
+      break;
+
+    case II_MIDICODE:
+    case II_MIDINOTE:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiCode;
+      else banks[currentBank][currentPedal].midiCode = vBuf.value;
+      break;
+
+    case II_MIDIVALUE1:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue1;
+      else banks[currentBank][currentPedal].midiValue1 = vBuf.value;
+      break;
+
+    case II_MIDIVALUE2:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue2;
+      else banks[currentBank][currentPedal].midiValue2 = vBuf.value;
+      break;
+
+    case II_MIDIVALUE3:
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue3;
+      else banks[currentBank][currentPedal].midiValue3 = vBuf.value;
+      break;
+
+    case II_FUNCTION:
+      if (bGet) vBuf.value = pedals[currentPedal].function;
+      else pedals[currentPedal].function = vBuf.value;
+      break;
+
+    case II_AUTOSENSING:
+      if (bGet) vBuf.value = pedals[currentPedal].autoSensing;
+      else pedals[currentPedal].autoSensing = vBuf.value;
+      break;
+
+    case II_MODE:
+      if (bGet) vBuf.value = pedals[currentPedal].mode;
+      else pedals[currentPedal].mode = vBuf.value;
+      break;
+
+    case II_PRESS_MODE:
+      if (bGet) vBuf.value = pedals[currentPedal].pressMode;
+      else pedals[currentPedal].pressMode = vBuf.value;
+      break;
+
+    case II_POLARITY:
+      if (bGet) vBuf.value = pedals[currentPedal].invertPolarity;
+      else pedals[currentPedal].invertPolarity = vBuf.value;
+      break;
+
+    case II_CALIBRATE:
+      if (!bGet && pedals[currentPedal].mode == PED_ANALOG) calibrate();
+      r = nullptr;
+      break;
+
+    case II_ZERO:
+      if (bGet)
+        if (pedals[currentPedal].mode == PED_ANALOG)
+          vBuf.value = pedals[currentPedal].expZero;
+        else r = nullptr;
+      else pedals[currentPedal].expZero = vBuf.value;
+      break;
+
+    case II_MAX:
+      if (bGet)
+        if (pedals[currentPedal].mode == PED_ANALOG)
+          vBuf.value = pedals[currentPedal].expMax;
+        else r = nullptr;
+      else pedals[currentPedal].expMax = vBuf.value;
+      break;
+
+    case II_RESPONSECURVE:
+      if (bGet)
+        if (pedals[currentPedal].mode == PED_ANALOG)
+          vBuf.value = pedals[currentPedal].mapFunction;
+        else r = nullptr;
+      else pedals[currentPedal].mapFunction = vBuf.value;
+      break;
+
+    case II_INTERFACE:
+      if (bGet) vBuf.value = currentInterface;
+      else currentInterface = vBuf.value;
+      break;
+
+    case II_MIDI_IN:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiIn;
+      else interfaces[currentInterface].midiIn = vBuf.value;
+      break;
+
+    case II_MIDI_OUT:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiOut;
+      else interfaces[currentInterface].midiOut = vBuf.value;
+      break;
+
+    case II_MIDI_THRU:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiThru;
+      else {
+        interfaces[currentInterface].midiThru = vBuf.value;
+        interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
+        interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
+        interfaces[PED_APPLEMIDI].midiThru  ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
+      }
+      break;
+
+    case II_MIDI_ROUTING:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiRouting;
+      else interfaces[currentInterface].midiRouting = vBuf.value;
+      break;
+
+    case II_MIDI_CLOCK:
+      if (bGet) vBuf.value = interfaces[currentInterface].midiClock;
+      else interfaces[currentInterface].midiClock = vBuf.value;
+      break;
+
+    case II_MIDITIMECODE:
+      if (bGet) vBuf.value = currentMidiTimeCode;
+      else {
+        currentMidiTimeCode = vBuf.value;
+        switch (currentMidiTimeCode) {
+
+          case PED_MTC_NONE:
+            MTC.setMode(MidiTimeCode::SynchroNone);
+            break;
+
+          case PED_MTC_SLAVE:
+            MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+            break;
+
+          case PED_MTC_MASTER_24:
+          case PED_MTC_MASTER_25:
+          case PED_MTC_MASTER_30DF:
+          case PED_MTC_MASTER_30:
+            MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+            MTC.sendPosition(0, 0, 0, 0);
+            break;
+
+          case PED_MIDI_CLOCK_SLAVE:
+            MTC.setMode(MidiTimeCode::SynchroClockSlave);
+            bpm = 0;
+            break;
+
+          case PED_MIDI_CLOCK_MASTER:
+            MTC.setMode(MidiTimeCode::SynchroClockMaster);
+            MTC.setBpm(bpm);
+            break;
+        }
+      }
+      break;
+
+    case II_BACKLIGHT:
+      if (bGet) vBuf.value = backlight / 25;
+      else {
+        backlight = vBuf.value * 25;
+        //lcd.setBacklight(backlight);
+        analogWrite(LCD_BACKLIGHT, backlight);
+      }
+      break;
+
+    case II_IRLEARN:
+      if (!bGet) {
+        unsigned long startMillis;
+        unsigned long elapsedTime;
+        for (byte c = 0; c < IR_CUSTOM_CODES; c++)
+        {
+          // empty IR buffer
+          startMillis = millis();
+          elapsedTime = 0;
+          while (elapsedTime <= 100) {
+            if (irrecv.decode(&results)) irrecv.resume();
+            elapsedTime = millis() - startMillis;
+          }
+
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          switch (c) {
+            case IRC_ON_OFF:
+              lcd.print("Press ON/OFF");
+              break;
+            case IRC_OK:
+              lcd.print("Press OK");
+              break;
+            case IRC_ESC:
+              lcd.print("Press ESC");
+              break;
+            case IRC_LEFT:
+              lcd.print("Press LEFT");
+              break;
+            case IRC_RIGHT:
+              lcd.print("Press RIGHT");
+              break;
+            case IRC_UP:
+              lcd.print("Press UP");
+              break;
+            case IRC_DOWN:
+              lcd.print("Press DOWN");
+              break;
+            case IRC_SWITCH:
+              lcd.print("Press SWITCH");
+              break;
+            case IRC_KEY_1:
+              lcd.print("Press 1");
+              break;
+            case IRC_KEY_2:
+              lcd.print("Press 2");
+              break;
+            case IRC_KEY_3:
+              lcd.print("Press 3");
+              break;
+            case IRC_KEY_4:
+              lcd.print("Press 4");
+              break;
+            case IRC_KEY_5:
+              lcd.print("Press 5");
+              break;
+            case IRC_KEY_6:
+              lcd.print("Press 6");
+              break;
+            case IRC_KEY_7:
+              lcd.print("Press 7");
+              break;
+            case IRC_KEY_8:
+              lcd.print("Press 8");
+              break;
+            case IRC_KEY_9:
+              lcd.print("Press 9");
+              break;
+            case IRC_KEY_0:
+              lcd.print("Press 0");
+              break;
+          }
+          startMillis = millis();
+          elapsedTime  = 0;
+          while (!irrecv.decode(&results) && elapsedTime <= 10000) {            // wait an IR code or timeout
+            lcd.setCursor(map(elapsedTime, 0, 10000, 0, LCD_COLS - 1), 1);
+            lcd.print(char(B10100101));
+            elapsedTime = millis() - startMillis;
+          }
+          if (elapsedTime <= 10000) {
+            ircustomcode[c] = results.value;
+            lcd.setCursor(0, 1);
+            lcd.print(results.value, HEX);
+            delay(300);
+            irrecv.resume();
+          }
+        }
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(" Remote control");
+        lcd.setCursor(0, 1);
+        lcd.print("   saving...");
+        update_eeprom();
+        lcd.setCursor(0, 1);
+        lcd.print("    saved");
+        delay(1000);
+      }
+      r = nullptr;
+      break;
+
+    case II_IRCLEAR:
+      if (!bGet) {
+        for (byte c = 0; c < IR_CUSTOM_CODES; c++) ircustomcode[c] = 0xFFFFFE;
+      }
+      r = nullptr;
+      break;
+
+    case II_WIFIRESET:
+      if (!bGet) {
+        const byte command[4] = {'+', 'R', 'S', 'T'};
+        RTP_MIDI.sendSysEx(4, command);
+      }
+      r = nullptr;
+      break;
+
+    case II_DEFAULT:
+      if (!bGet) {
+        lcd.clear();
+        // Sets all of the bytes of the EEPROM to 0.
+        for (int i = 0 ; i < EEPROM.length() ; i++) {
+          EEPROM.write(i, 0);
+          lcd.setCursor(map(i, 0, EEPROM.length(), 0, LCD_COLS - 1), 0);
+          lcd.print(char(B10100101));
+        }
+        Reset_AVR();
+      }
+
+    default:
+      r = nullptr;
+      break;
+  }
+
+  if (!bGet && id != II_IRLEARN) {
+    update_eeprom();
+    controller_setup();
+  }
+
+  return (r);
+}
+
+bool display(MD_Menu::userDisplayAction_t action, char *msg)
+{
+  static char szLine[LCD_COLS + 1] = { '\0' };
+
+  switch (action)
+  {
+    case MD_Menu::DISP_INIT:
+      lcd.begin(LCD_COLS, LCD_ROWS);
+      lcd.clear();
+      lcd.noCursor();
+      memset(szLine, ' ', LCD_COLS);
+      break;
+
+    case MD_Menu::DISP_CLEAR:
+      lcd.clear();
+      break;
+
+    case MD_Menu::DISP_L0:
+      lcd.setCursor(0, 0);
+      lcd.print(szLine);
+      lcd.setCursor(0, 0);
+      if (strcmp(msg, "Pedals Setup") == 0) {
+        lcd.print("Pedal ");
+        if (currentPedal < 9) lcd.print(" ");
+        lcd.print(currentPedal + 1);
+      }
+      else if (strcmp(msg, "Banks Setup") == 0) {
+        lcd.print("Bank ");
+        if (currentPedal < 9) lcd.print(" ");
+        lcd.print(currentBank + 1);
+        lcd.print(" Pedal ");
+        if (currentPedal < 9) lcd.print(" ");
+        lcd.print(currentPedal + 1);
+      }
+      else if (strcmp(msg, "Interface Setup") == 0) {
+        switch (currentInterface) {
+          case PED_USBMIDI:
+            lcd.print("USB MIDI");
+            break;
+          case PED_LEGACYMIDI:
+            lcd.print("Legacy MIDI");
+            break;
+          case PED_APPLEMIDI:
+            lcd.print("AppleMIDI");
+            break;
+          case PED_BLUETOOTHMIDI:
+            lcd.print("Bluetooth MIDI");
+            break;
+        }
+      }
+      else
+        lcd.print(msg);
+      break;
+
+    case MD_Menu::DISP_L1:
+      lcd.setCursor(0, 1);
+      lcd.print(szLine);
+      lcd.setCursor(0, 1);
+      lcd.print(msg);
+      break;
+  }
+
+  return (true);
+}
+
+
+MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
+{
+  incDelta = 1;
+  static unsigned long  previous_value;
+  static byte           count = 0;
+  unsigned long         ircode;
+  byte                  numberPressed = 0;
+
+  MD_UISwitch::keyResult_t k1;
+  MD_UISwitch::keyResult_t k2;
+  byte                     k;
+
+  for (byte i = 0; i < PEDALS; i++) {
+    if (pedals[i].function == PED_MIDI) continue;
+    k = 0;
+    k1 = MD_UISwitch::KEY_NULL;
+    k2 = MD_UISwitch::KEY_NULL;
+    if (pedals[i].footSwitch[0] != nullptr) k1 = pedals[i].footSwitch[0]->read();
+    if (pedals[i].footSwitch[1] != nullptr) k2 = pedals[i].footSwitch[1]->read();
+    if ((k1 == MD_UISwitch::KEY_PRESS || k1 == MD_UISwitch::KEY_DPRESS || k1 == MD_UISwitch::KEY_LONGPRESS) && k2 == MD_UISwitch::KEY_NULL) k = 1;
+    if ((k2 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_DPRESS || k2 == MD_UISwitch::KEY_LONGPRESS) && k1 == MD_UISwitch::KEY_NULL) k = 2;
+    if ((k1 == MD_UISwitch::KEY_PRESS || k1 == MD_UISwitch::KEY_DPRESS || k1 == MD_UISwitch::KEY_LONGPRESS) &&
+        (k2 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_DPRESS || k2 == MD_UISwitch::KEY_LONGPRESS)) k = 3;
+    if (k > 0 && (k1 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_PRESS)) {
+      switch (pedals[i].function) {
+
+        case PED_BANK_PLUS:
+          switch (k) {
+            case 1:
+              if (currentBank < BANKS - 1) currentBank++;
+              break;
+            case 2:
+              if (currentBank > 0) currentBank--;
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+        case PED_BANK_MINUS:
+          switch (k) {
+            case 1:
+              if (currentBank > 0) currentBank--;
+              break;
+            case 2:
+              if (currentBank < BANKS - 1) currentBank++;
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+        case PED_START:
+          switch (k) {
+            case 1:
+              MTC.sendPosition(0, 0, 0, 0);
+              MTC.sendPlay();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+
+        case PED_STOP:
+          switch (k) {
+            case 1:
+              MTC.sendStop();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              if (bpm > 0) MTC.setBpm(bpm);
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+        case PED_CONTINUE:
+          switch (k) {
+            case 1:
+              MTC.sendContinue();
+              break;
+            case 2:
+              bpm = MTC.tapTempo();
+              break;
+            case 3:
+              break;
+          }
+          break;
+
+        case PED_TAP:
+          switch (k) {
+            case 1:
+              bpm = MTC.tapTempo();
+              if (bpm > 0) MTC.setBpm(bpm);
+              break;
+            case 2:
+              MTC.sendPlay();
+              break;
+            case 3:
+              MTC.sendStop();
+              break;
+          }
+          break;
+
+        case PED_MENU:
+          switch (k) {
+            case 1:
+              return MD_Menu::NAV_INC;
+            case 2:
+              return MD_Menu::NAV_DEC;
+            case 3:
+              return MD_Menu::NAV_ESC;
+          }
+          break;
+
+        case PED_CONFIRM:
+          return MD_Menu::NAV_SEL;
+          break;
+        case PED_ESCAPE:
+          return MD_Menu::NAV_ESC;
+          break;
+        case PED_NEXT:
+          return MD_Menu::NAV_INC;
+          break;
+        case PED_PREVIOUS:
+          return MD_Menu::NAV_DEC;
+          break;
+      }
+    }
+
+    if (pedals[i].footSwitch[0] != nullptr)
+      switch (k1) {
+        case MD_UISwitch::KEY_NULL:
+          pedals[i].footSwitch[0]->setDoublePressTime(300);
+          pedals[i].footSwitch[0]->setLongPressTime(500);
+          pedals[i].footSwitch[0]->setRepeatTime(500);
+          pedals[i].footSwitch[0]->enableDoublePress(true);
+          pedals[i].footSwitch[0]->enableLongPress(true);
+          break;
+        case MD_UISwitch::KEY_RPTPRESS:
+          pedals[i].footSwitch[0]->setDoublePressTime(0);
+          pedals[i].footSwitch[0]->setLongPressTime(0);
+          pedals[i].footSwitch[0]->setRepeatTime(10);
+          pedals[i].footSwitch[0]->enableDoublePress(false);
+          pedals[i].footSwitch[0]->enableLongPress(false);
+          break;
+        case MD_UISwitch::KEY_DPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_SEL;
+          break;
+        case MD_UISwitch::KEY_LONGPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
+          break;
+      }
+
+    if (pedals[i].footSwitch[1] != nullptr)
+      switch (k2) {
+        case MD_UISwitch::KEY_NULL:
+          pedals[i].footSwitch[1]->setDoublePressTime(300);
+          pedals[i].footSwitch[1]->setLongPressTime(500);
+          pedals[i].footSwitch[1]->setRepeatTime(500);
+          pedals[i].footSwitch[1]->enableDoublePress(true);
+          pedals[i].footSwitch[1]->enableLongPress(true);
+          break;
+        case MD_UISwitch::KEY_RPTPRESS:
+          pedals[i].footSwitch[1]->setDoublePressTime(0);
+          pedals[i].footSwitch[1]->setLongPressTime(0);
+          pedals[i].footSwitch[1]->setRepeatTime(10);
+          pedals[i].footSwitch[1]->enableDoublePress(false);
+          pedals[i].footSwitch[1]->enableLongPress(false);
+          break;
+        case MD_UISwitch::KEY_DPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_SEL;
+          break;
+        case MD_UISwitch::KEY_LONGPRESS:
+          if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
+          break;
+      }
+
+    if (k1 != MD_UISwitch::KEY_NULL) {
+      switch (pedals[i].footSwitch[0]->getKey()) {
+        case 'L':
+          return MD_Menu::NAV_INC;
+          break;
+        case 'R':
+          return MD_Menu::NAV_DEC;
+          break;
+      }
+    }
+  }
+
+  // IR Remote Control navigation
+
+  if (irrecv.decode(&results)) {
+    ircode = results.value;
+    irrecv.resume();
+    if (ircode == REPEAT) count++;
+    else {
+      count = 0;
+      previous_value = ircode;
+    }
+    if (count > REPEAT_TO_SKIP) ircode = previous_value;
+
+    switch (results.decode_type) {
+      default:
+      case UNKNOWN:      DPRINT("UNKNOWN");       break ;
+      case NEC:          DPRINT("NEC");           break ;
+      case SONY:         DPRINT("SONY");          break ;
+      case RC5:          DPRINT("RC5");           break ;
+      case RC6:          DPRINT("RC6");           break ;
+      case DISH:         DPRINT("DISH");          break ;
+      case SHARP:        DPRINT("SHARP");         break ;
+      case JVC:          DPRINT("JVC");           break ;
+      case SANYO:        DPRINT("SANYO");         break ;
+      case MITSUBISHI:   DPRINT("MITSUBISHI");    break ;
+      case SAMSUNG:      DPRINT("SAMSUNG");       break ;
+      case LG:           DPRINT("LG");            break ;
+      case WHYNTER:      DPRINT("WHYNTER");       break ;
+      case AIWA_RC_T501: DPRINT("AIWA_RC_T501");  break ;
+      case PANASONIC:    DPRINT("PANASONIC");     break ;
+      case DENON:        DPRINT("Denon");         break ;
+    }
+    DPRINT(" IR Code: 0x");
+    DPRINTLN(ircode, HEX);
+
+    if      (ircode == ircustomcode[IRC_ON_OFF])  ircode = IR_ON_OFF;
+    else if (ircode == ircustomcode[IRC_OK])      ircode = IR_OK;
+    else if (ircode == ircustomcode[IRC_ESC])     ircode = IR_ESC;
+    else if (ircode == ircustomcode[IRC_LEFT])    ircode = IR_LEFT;
+    else if (ircode == ircustomcode[IRC_RIGHT])   ircode = IR_RIGHT;
+    else if (ircode == ircustomcode[IRC_UP])      ircode = IR_UP;
+    else if (ircode == ircustomcode[IRC_DOWN])    ircode = IR_DOWN;
+    else if (ircode == ircustomcode[IRC_SWITCH])  ircode = IR_SWITCH;
+    else if (ircode == ircustomcode[IRC_KEY_1])   ircode = IR_KEY_1;
+    else if (ircode == ircustomcode[IRC_KEY_2])   ircode = IR_KEY_2;
+    else if (ircode == ircustomcode[IRC_KEY_3])   ircode = IR_KEY_3;
+    else if (ircode == ircustomcode[IRC_KEY_4])   ircode = IR_KEY_4;
+    else if (ircode == ircustomcode[IRC_KEY_5])   ircode = IR_KEY_5;
+    else if (ircode == ircustomcode[IRC_KEY_6])   ircode = IR_KEY_6;
+    else if (ircode == ircustomcode[IRC_KEY_7])   ircode = IR_KEY_7;
+    else if (ircode == ircustomcode[IRC_KEY_8])   ircode = IR_KEY_8;
+    else if (ircode == ircustomcode[IRC_KEY_9])   ircode = IR_KEY_9;
+    else if (ircode == ircustomcode[IRC_KEY_0])   ircode = IR_KEY_0;
+
+    switch (ircode) {
+      case IR_ON_OFF:
+        (powersaver) ? lcd.on() : lcd.off();
+        powersaver = !powersaver;
+        return MD_Menu::NAV_NULL;
+
+      case IR_OK:
+        return MD_Menu::NAV_SEL;
+
+      case IR_ESC:
+        return MD_Menu::NAV_ESC;
+
+      case IR_RIGHT:
+      case IR_DOWN:
+        return MD_Menu::NAV_DEC;
+
+      case IR_LEFT:
+      case IR_UP:
+        return MD_Menu::NAV_INC;
+
+      case IR_KEY_1:
+        numberPressed = 1;
+        break;
+      case IR_KEY_2:
+        numberPressed = 2;
+        break;
+      case IR_KEY_3:
+        numberPressed = 3;
+        break;
+      case IR_KEY_4:
+        numberPressed = 4;
+        break;
+      case IR_KEY_5:
+        numberPressed = 5;
+        break;
+      case IR_KEY_6:
+        numberPressed = 6;
+        break;
+      case IR_KEY_7:
+        numberPressed = 7;
+        break;
+      case IR_KEY_8:
+        numberPressed = 8;
+        break;
+      case IR_KEY_9:
+        numberPressed = 9;
+        break;
+      case IR_KEY_0:
+        numberPressed = 10;
+        break;
+
+      case IR_SWITCH:
+        selectBank = !selectBank;
+        break;
+    }
+
+    if (numberPressed != 0) {                                               // number pressed
+      if (selectBank) {                                                     // select the bank
+        if (numberPressed >= 1 && numberPressed <= BANKS) {
+          currentBank = numberPressed - 1;
+          update_eeprom();
+          controller_setup();
+        }
+      }
+      else if (numberPressed >= 1 && numberPressed <= PEDALS) {             // simulate pedal push
+        lastUsedSwitch = numberPressed - 1;
+        midi_send(banks[currentBank][lastUsedSwitch].midiMessage,
+                  banks[currentBank][lastUsedSwitch].midiCode,
+                  banks[currentBank][lastUsedSwitch].midiValue1,
+                  banks[currentBank][lastUsedSwitch].midiChannel);
+        pedals[lastUsedSwitch].pedalValue[0] = LOW;
+        pedals[lastUsedSwitch].lastUpdate[0] = millis();
+        screen_update();
+        delay(10);
+        midi_send(banks[currentBank][lastUsedSwitch].midiMessage,
+                  banks[currentBank][lastUsedSwitch].midiCode,
+                  banks[currentBank][lastUsedSwitch].midiValue2,
+                  banks[currentBank][lastUsedSwitch].midiChannel,
+                  pedals[lastUsedSwitch].mode == PED_LATCH1 || pedals[lastUsedSwitch].mode == PED_LATCH2);
+        pedals[lastUsedSwitch].pedalValue[0] = HIGH;
+        pedals[lastUsedSwitch].lastUpdate[0] = millis();
+        screen_update();
+      }
+    }
+  }
+
+  // Bluetooth navigation
+
+  if (bluetooth.available()) {
+    switch (char(bluetooth.read())) {
+      case 'L':
+        return MD_Menu::NAV_DEC;
+      case 'R':
+        return MD_Menu::NAV_INC;
+      case 'C':
+        return MD_Menu::NAV_SEL;
+      case 'E':
+        return MD_Menu::NAV_ESC;
+    }
+  }
+  return MD_Menu::NAV_NULL;
+}
+
