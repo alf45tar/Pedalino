@@ -23,7 +23,7 @@ install:
                                 LiquidCrystal
                                 MD_Menu
                                 MD_UISwitch
-                                MIDI Library
+                                "MIDI Library"
                                 ResponsiveAnalogRead
                                 AppleMIDI
                                 OSC
