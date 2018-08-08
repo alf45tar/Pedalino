@@ -19,7 +19,7 @@ install:
     - pip install -U platformio
     - platformio update
     - platformio lib -g install Bounce2
-                                Arduino-IRremote
+                                https://github.com/z3t0/Arduino-IRremote
                                 LiquidCrystal
                                 MD_Menu
                                 MD_UISwitch
