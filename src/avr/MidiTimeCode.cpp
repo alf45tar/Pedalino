@@ -232,7 +232,7 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
 {
   static byte b[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-  if (getMode() == MidiTimeCode::SynchroMTCSlave) {
+  if (mMode == MidiTimeCode::SynchroMTCSlave) {
     byte i = (MTCData & 0xf0) >> 4;   // MSB
     if (i > 7) return;
 
@@ -266,7 +266,7 @@ void MidiTimeCode::decodeMTCFullFrame(unsigned size, byte* array)
   /// F0 7F cc 01 01 hr mn sc fr F7
   // cc -> channel (0x7f to broadcast)
   // hr -> hour, mn -> minutes, sc -> seconds, fr -> frames
-  if (getMode() == MidiTimeCode::SynchroMTCSlave && size == 10)
+  if (mMode == MidiTimeCode::SynchroMTCSlave && size == 10)
     if (array[0] == 0xF0 && array[1] == 0x7F && array[2] == 0x7F && array[3] == 0x01 && array[4] == 0x01 && array[9] == 0xF7)
       sendPosition(array[5], array[6], array[7], array[8]);
 }
