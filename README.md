@@ -295,19 +295,24 @@ An USB to Serial adapter is required just for the first firmware update. Once co
 
 Many different procedures can be used and many tutorials are available on internet including YouTube video.
 
-## Build Software
+## Build and upload software
 
 ### PlatformIO (recommended)
 
-[PlatformiIO](https://platformio.org)]
+[PlatformiIO](https://platformio.org) is the recommended IDE for Pedalino build and upload.
 
 1. Install [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
-2. Clone GitHub [Pedalino repository](https://github.com/alf45tar/Pedalino)
-3. Tasks->Run Build Task...
+2. Run the following commands from View->Command Palette (Ctrl+Shift+P)
+  - Git: Clone
+  You will be asked for the URL of the remote repository (https://github.com/alf45tar/Pedalino) and the parent directory under which to put the local repository.
+  - PlaftormIO: Build
+  - PlatformIO: Upload
+
+That's all folks.
 
 ### Arduino IDE
 
-[Arduino IDE](https://www.arduino.cc/en/Guide/Environment)
+[Arduino IDE](https://www.arduino.cc/en/Guide/Environment) can be used for Pedalino build and upload but it requires more manual steps for libraries installation.
 
 ## Commercial alternatives
 
