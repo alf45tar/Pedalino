@@ -295,6 +295,20 @@ An USB to Serial adapter is required just for the first firmware update. Once co
 
 Many different procedures can be used and many tutorials are available on internet including YouTube video.
 
+## Build Software
+
+### PlatformIO (recommended)
+
+[PlatformiIO](https://platformio.org)]
+
+1. Install [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
+2. Clone GitHub [Pedalino repository](https://github.com/alf45tar/Pedalino)
+3. Tasks->Run Build Task...
+
+### Arduino IDE
+
+[Arduino IDE](https://www.arduino.cc/en/Guide/Environment)
+
 ## Commercial alternatives
 
 - [ControllerHub 8](https://ameliascompass.com/product/controllerhub-8/)
