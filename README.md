@@ -299,14 +299,14 @@ Many different procedures can be used and many tutorials are available on intern
 
 ### PlatformIO (recommended)
 
-[PlatformiIO](https://platformio.org) is the recommended IDE for Pedalino build and upload.
+[PlatformIO](https://platformio.org) is the recommended IDE for Pedalino build and upload.
 
 1. Install [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
 2. Run the following commands from View->Command Palette (Ctrl+Shift+P)
-  - Git: Clone
-  You will be asked for the URL of the remote repository (https://github.com/alf45tar/Pedalino) and the parent directory under which to put the local repository.
-  - PlaftormIO: Build
-  - PlatformIO: Upload
+    - Git: Clone  
+    - You will be asked for the URL of the remote repository (https://github.com/alf45tar/Pedalino) and the parent directory under which to put the local repository.
+    - PlaftormIO: Build
+    - PlatformIO: Upload
 
 That's all folks.
 
