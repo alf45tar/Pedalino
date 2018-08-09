@@ -39,10 +39,12 @@ void setup(void)
   switch (currentMidiTimeCode) {
 
     case PED_MTC_NONE:
+      DPRINTLN("MTC None");
       MTC.setMode(MidiTimeCode::SynchroNone);
       break;
 
     case PED_MTC_SLAVE:
+      DPRINTLN("MTC Slave");
       MTC.setMode(MidiTimeCode::SynchroMTCSlave);
       break;
 
@@ -50,20 +52,24 @@ void setup(void)
     case PED_MTC_MASTER_25:
     case PED_MTC_MASTER_30DF:
     case PED_MTC_MASTER_30:
+      DPRINTLN("MTC Master");
       MTC.setMode(MidiTimeCode::SynchroMTCMaster);
       MTC.sendPosition(0, 0, 0, 0);
       break;
 
     case PED_MIDI_CLOCK_SLAVE:
+      DPRINTLN("MIDI Clock Slave");
       MTC.setMode(MidiTimeCode::SynchroClockSlave);
       bpm = 0;
       break;
 
     case PED_MIDI_CLOCK_MASTER:
+      DPRINTLN("MIDI Clock Master");
       MTC.setMode(MidiTimeCode::SynchroClockMaster);
       MTC.setBpm(bpm);
       break;
   }
+  midi_routing_start();
 
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
