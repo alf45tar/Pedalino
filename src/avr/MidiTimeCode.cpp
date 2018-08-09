@@ -123,8 +123,6 @@ void MidiTimeCode::sendPlay()
 {
   noInterrupts();
   mNextEvent = Start;
-  mClick = 0;
-  mBeat = 0;
   interrupts();
 }
 
@@ -369,7 +367,7 @@ void MidiTimeCode::setPlayhead(byte hours, byte minutes, byte seconds, byte fram
 
 void MidiTimeCode::setBpm(const float iBpm)
 {
-  if ( getMode() == SynchroClockMaster )
+  if ( mMode == SynchroClockMaster )
   {
     const double midiClockPerSec = mMidiClockPpqn * iBpm / 60;
     setTimer(midiClockPerSec);
@@ -380,7 +378,7 @@ const float MidiTimeCode::tapTempo()
 {
   static float bpm = 0.0f;
 
-  switch (getMode()) {
+  switch (mMode) {
 
     case SynchroClockMaster:
       return mTapTempo.tap();
