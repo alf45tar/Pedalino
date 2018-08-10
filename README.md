@@ -35,6 +35,8 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Connect Windows PC to macOS and iOS devices via AppleMIDI or Bluetooth LE
 - Hands-free way to control your audio parameters during live performance
 - Dramatically expanded audio system parameter control via WIFI, Bluetooth, USB, MIDI or OSC.
+- Set your music free with wireless MIDI connectivity
+- Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
 
 ## Features
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
@@ -320,6 +322,7 @@ That's all folks.
 - [Audifront MIDI Expression](https://www.audiofront.net/MIDIExpression.php)
 - [BomeBox](https://www.bome.com/products/bomebox)
 - [iRig BlueBoard](http://www.ikmultimedia.com/products/irigblueboard)
+- [Yamaha MD-BT01](https://usa.yamaha.com/products/music_production/accessories/md-bt01/index.html)
 
 
 ## ToDo
