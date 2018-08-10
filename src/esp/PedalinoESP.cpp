@@ -191,7 +191,9 @@ void BLEmidiStart ()
                       BLECharacteristic::PROPERTY_NOTIFY |
                       BLECharacteristic::PROPERTY_WRITE_NR
                     );
-  pCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+
+  pCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);      // enable pairing
+  
   pCharacteristic->setCallbacks(new BLECCallbacks());
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
@@ -212,149 +214,102 @@ void BLEmidiStart ()
   DPRINTLN("BLE MIDI advertising started");
 }
 
-void BLEmidiTimestamp (uint8_t *a, uint8_t *b)
+void BLEmidiTimestamp (uint8_t *header, uint8_t *timestamp)
 {
-  unsigned long currentMillis = millis();
-  if (currentMillis < 5000) {
-    if (msOffset > 5000) {
-      //it's been 49 days! millis rolled.
-      while (msOffset > 5000) {
-        //roll msOffset - this should preserve current ~8 second count.
-        msOffset += MAX_TIMESTAMP;
-      }
-    }
-  }
-  //if the offset is more than 2^13 ms away, move it up in 2^13 ms intervals
-  while (currentMillis >= (unsigned long)(msOffset + MAX_TIMESTAMP)) {
-    msOffset += MAX_TIMESTAMP;
-  }
-  unsigned long currentTimeStamp = currentMillis - msOffset;
-  *a = ((currentTimeStamp >> 7) & 0x3F) | 0x80;     // 6 bits plus MSB
-  *b = (currentTimeStamp & 0x7F) | 0x80;            // 7 bits plus MSB
+/*
+  The first byte of all BLE packets must be a header byte. This is followed by timestamp bytes and MIDI messages. 
+  
+  Header Byte
+    bit 7     Set to 1.
+    bit 6     Set to 0. (Reserved for future use)
+    bits 5-0  timestampHigh:Most significant 6 bits of timestamp information.
+
+  The header byte contains the topmost 6 bits of timing information for MIDI events in the BLE
+  packet. The remaining 7 bits of timing information for individual MIDI messages encoded in a
+  packet is expressed by timestamp bytes.
+
+  Timestamp Byte
+  bit 7       Set to 1.
+  bits 6-0    timestampLow: Least Significant 7 bits of timestamp information.
+
+  The 13-bit timestamp for the first MIDI message in a packet is calculated using 6 bits from the
+  header byte and 7 bits from the timestamp byte. 
+
+  Timestamps are 13-bit values in milliseconds, and therefore the maximum value is 8,191 ms.
+  Timestamps must be issued by the sender in a monotonically increasing fashion.
+
+  timestampHigh is initially set using the lower 6 bits from the header byte while the timestampLow is
+  formed of the lower 7 bits from the timestamp byte. Should the timestamp value of a subsequent
+  MIDI message in the same packet overflow/wrap (i.e., the timestampLow is smaller than a
+  preceding timestampLow), the receiver is responsible for tracking this by incrementing the
+  timestampHigh by one (the incremented value is not transmitted, only understood as a result of the
+  overflow condition).
+  In practice, the time difference between MIDI messages in the same BLE packet should not span
+  more than twice the connection interval. As a result, a maximum of one overflow/wrap may occur
+  per BLE packet.
+  Timestamps are in the sender’s clock domain and are not allowed to be scheduled in the future.
+  Correlation between the receiver’s clock and the received timestamps must be performed to
+  ensure accurate rendering of MIDI messages, and is not addressed in this document.
+*/
+/*
+  Calculating a Timestamp
+
+  To calculate the timestamp, the built-in millis() is used.
+  The BLE standard only specifies 13 bits worth of millisecond data though,
+  so it’s bitwise anded with 0x1FFF for an ever repeating cycle of 13 bits.
+
+  This is done right after a MIDI message is detected. It’s split into a 6 upper bits, 7 lower bits,
+  and the MSB of both bytes are set to indicate that this is a header byte.
+  Both bytes are placed into the first two position of an array in preparation for a MIDI message.
+*/
+  unsigned long currentTimeStamp = millis() & 0x01FFF;
+
+  *header = ((currentTimeStamp >> 7) & 0x3F) | 0x80;        // 6 bits plus MSB
+  *timestamp = (currentTimeStamp & 0x7F) | 0x80;            // 7 bits plus MSB
 }
 
-// Check if MIDI data has come in through the serial port.  If found, it builds a characteristic buffer and sends it over BLE.
-// https://learn.sparkfun.com/tutorials/midi-ble-tutorial
-
-void BLEmidiSend()
-{
-  uint8_t midiPacket[5];
-
-  BLEmidiTimestamp(&midiPacket[0], &midiPacket[1]);
-
-  uint8_t statusByte = ((uint8_t)MIDI.getType() | ((MIDI.getChannel() - 1) & 0x0f));
-  switch (MIDI.getType())
-  {
-    //2 Byte Channel Messages
-    case midi::NoteOff :
-    case midi::NoteOn :
-    case midi::AfterTouchPoly :
-    case midi::ControlChange :
-    case midi::PitchBend :
-      midiPacket[2] = statusByte;
-      midiPacket[3] = MIDI.getData1();
-      midiPacket[4] = MIDI.getData2();
-      pCharacteristic->setValue(midiPacket, 5);
-      pCharacteristic->notify();
-      break;
-    //1 Byte Channel Messages
-    case midi::ProgramChange :
-    case midi::AfterTouchChannel :
-      midiPacket[2] = statusByte;
-      midiPacket[3] = MIDI.getData1();
-      pCharacteristic->setValue(midiPacket, 4);
-      pCharacteristic->notify();
-      break;
-    //System Common Messages
-    case midi::TimeCodeQuarterFrame :
-      midiPacket[2] = 0xF1;
-      midiPacket[3] = MIDI.getData1();
-      pCharacteristic->setValue(midiPacket, 4);
-      pCharacteristic->notify();
-      break;
-    case midi::SongPosition :
-      midiPacket[2] = 0xF2;
-      midiPacket[3] = MIDI.getData1();
-      midiPacket[4] = MIDI.getData2();
-      pCharacteristic->setValue(midiPacket, 5);
-      pCharacteristic->notify();
-      break;
-    case midi::SongSelect :
-      midiPacket[2] = 0xF3;
-      midiPacket[3] = MIDI.getData1();
-      pCharacteristic->setValue(midiPacket, 4);
-      pCharacteristic->notify();
-      break;
-    case midi::TuneRequest :
-      midiPacket[2] = 0xF6;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    //Real-time Messages
-    case midi::Clock :
-      midiPacket[2] = 0xF8;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    case midi::Start :
-      midiPacket[2] = 0xFA;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    case midi::Continue :
-      midiPacket[2] = 0xFB;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    case midi::Stop :
-      midiPacket[2] = 0xFC;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    case midi::ActiveSensing :
-      midiPacket[2] = 0xFE;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    case midi::SystemReset :
-      midiPacket[2] = 0xFF;
-      pCharacteristic->setValue(midiPacket, 3);
-      pCharacteristic->notify();
-      break;
-    //SysEx
-    case midi::SystemExclusive :
-      //              {
-      //                  // Sysex is special.
-      //                  // could contain very long data...
-      //                  // the data bytes form the length of the message,
-      //                  // with data contained in array member
-      //                  uint16_t length;
-      //                  const uint8_t  * data_p;
-      //
-      //                  Serial.print("SysEx, chan: ");
-      //                  Serial.print(MIDI.getChannel());
-      //                  length = MIDI.getSysExArrayLength();
-      //
-      //                  Serial.print(" Data: 0x");
-      //                  data_p = MIDI.getSysExArray();
-      //                  for (uint16_t idx = 0; idx < length; idx++)
-      //                  {
-      //                      Serial.print(data_p[idx], HEX);
-      //                      Serial.print(" 0x");
-      //                  }
-      //                  Serial.println();
-      //              }
-      break;
-    case midi::InvalidType :
-    default:
-      break;
-  }
-}
 
 // Decodes the BLE characteristics and calls MIDI.send if the packet contains sendable MIDI data
+// https://learn.sparkfun.com/tutorials/midi-ble-tutorial
 
 void BLEmidiReceive(uint8_t *buffer, uint8_t bufferSize)
 {
+/*
+  The general form of a MIDI message follows:
+  
+  n-byte MIDI Message
+    Byte 0            MIDI message Status byte, Bit 7 is Set to 1.
+    Bytes 1 to n-1    MIDI message Data bytes, if n > 1. Bit 7 is Set to 0
+
+  There are two types of MIDI messages that can appear in a single packet: full MIDI messages and
+  Running Status MIDI messages. Each is encoded differently.
+
+  A full MIDI message is simply the MIDI message with the Status byte included. 
+
+  A Running Status MIDI message is a MIDI message with the Status byte omitted. Running Status
+  MIDI messages may only be placed in the data stream if the following criteria are met:
+  1.  The original MIDI message is 2 bytes or greater and is not a System Common or System
+      Real-Time message.
+  2.  The omitted Status byte matches the most recently preceding full MIDI message’s Status
+      byte within the same BLE packet.
+
+  In addition, the following rules apply with respect to Running Status:
+  1.  A Running Status MIDI message is allowed within the packet after at least one full MIDI
+      message.
+  2.  Every MIDI Status byte must be preceded by a timestamp byte. Running Status MIDI
+      messages may be preceded by a timestamp byte. If a Running Status MIDI message is not
+      preceded by a timestamp byte, the timestamp byte of the most recently preceding message
+      in the same packet is used.
+  3.  System Common and System Real-Time messages do not cancel Running Status if
+      interspersed between Running Status MIDI messages. However, a timestamp byte must
+      precede the Running Status MIDI message that follows.
+  4.  The end of a BLE packet does cancel Running Status. 
+
+  In the MIDI 1.0 protocol, System Real-Time messages can be sent at any time and may be
+  inserted anywhere in a MIDI data stream, including between Status and Data bytes of any other
+  MIDI messages. In the MIDI BLE protocol, the System Real-Time messages must be deinterleaved
+  from other messages – except for System Exclusive messages.
+*/
   midi::Channel   channel;
   midi::MidiType  command;
 
@@ -513,6 +468,37 @@ void BLESendPitchBend(int bend, byte channel)
 
 void BLESendSystemExclusive(const byte* array, unsigned size)
 {
+/*
+  Multiple Packet Encoding (SysEx Only)
+
+  Only a SysEx (System Exclusive) message may span multiple BLE packets and is encoded as
+  follows:
+  1.  The SysEx start byte, which is a MIDI Status byte, is preceded by a timestamp byte.
+  2.  Following the SysEx start byte, any number of Data bytes (up to the number of the
+      remaining bytes in the packet) may be written.
+  3.  Any remaining data may be sent in one or more SysEx continuation packets. A SysEx
+      continuation packet begins with a header byte but does not contain a timestamp byte. It
+      then contains one or more bytes of the SysEx data, up to the maximum packet length. This
+      lack of a timestamp byte serves as a signal to the decoder of a SysEx continuation.
+  4.  System Real-Time messages may appear at any point inside a SysEx message and must
+      be preceded by a timestamp byte.
+  5.  SysEx continuations for unterminated SysEx messages must follow either the packet’s
+      header byte or a real-time byte.
+  6.  Continue sending SysEx continuation packets until the entire message is transmitted.
+  7.  In the last packet containing SysEx data, precede the EOX message (SysEx end byte),
+      which is a MIDI Status byte, with a timestamp byte.
+
+  Once a SysEx transfer has begun, only System Real-Time messages are allowed to precede its
+  completion as follows:
+  1.  A System Real-Time message interrupting a yet unterminated SysEx message must be
+      preceded by its own timestamp byte.
+  2.  SysEx continuations for unterminated SysEx messages must follow either the packet’s
+      header byte or a real-time byte.
+*/
+
+//
+//  to be implemented
+//
 }
 
 void BLESendTimeCodeQuarterFrame(byte data)
