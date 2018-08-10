@@ -566,7 +566,6 @@ void BLESendSystemReset(void)
 }
 #else
 #define BLEmidiStart(...)
-#define BLEmidiSend(...)
 #define BLEmidiReceive(...)
 #define BLESendNoteOn(...)
 #define BLESendNoteOff(...)
@@ -746,126 +745,126 @@ void OSCSendSystemReset(void)
 
 void OnSerialMidiNoteOn(byte channel, byte note, byte velocity)
 {
-  BLEmidiSend();
+  BLESendNoteOn(note, velocity, channel);
   AppleMIDI.noteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
 
 void OnSerialMidiNoteOff(byte channel, byte note, byte velocity)
 {
-  BLEmidiSend();
+  BLESendNoteOff(note, velocity, channel);
   AppleMIDI.noteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
 
 void OnSerialMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
-  BLEmidiSend();
+  BLESendAfterTouchPoly(note, pressure, channel);
   AppleMIDI.polyPressure(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
 void OnSerialMidiControlChange(byte channel, byte number, byte value)
 {
-  BLEmidiSend();
+  BLESendControlChange(number, value, channel);
   AppleMIDI.controlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
 
 void OnSerialMidiProgramChange(byte channel, byte number)
 {
-  BLEmidiSend();
+  BLESendProgramChange(number, channel);
   AppleMIDI.programChange(number, channel);
   OSCSendProgramChange(number, channel);
 }
 
 void OnSerialMidiAfterTouchChannel(byte channel, byte pressure)
 {
-  BLEmidiSend();
+  BLESendAfterTouch(pressure, channel);
   AppleMIDI.afterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
 
 void OnSerialMidiPitchBend(byte channel, int bend)
 {
-  BLEmidiSend();
+  BLESendPitchBend(bend, channel);
   AppleMIDI.pitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
 
 void OnSerialMidiSystemExclusive(byte* array, unsigned size)
 {
-  BLEmidiSend();
+  BLESendSystemExclusive(array, size);
   AppleMIDI.sysEx(array, size);
   OSCSendSystemExclusive(array, size);
 }
 
 void OnSerialMidiTimeCodeQuarterFrame(byte data)
 {
-  BLEmidiSend();
+  BLESendTimeCodeQuarterFrame(data);
   AppleMIDI.timeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
 
 void OnSerialMidiSongPosition(unsigned int beats)
 {
-  BLEmidiSend();
+  BLESendSongPosition(beats);
   AppleMIDI.songPosition(beats);
   OSCSendSongPosition(beats);
 }
 
 void OnSerialMidiSongSelect(byte songnumber)
 {
-  BLEmidiSend();
+  BLESendSongSelect(songnumber);
   AppleMIDI.songSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
 
 void OnSerialMidiTuneRequest(void)
 {
-  BLEmidiSend();
+  BLESendTuneRequest();
   AppleMIDI.tuneRequest();
   OSCSendTuneRequest();
 }
 
 void OnSerialMidiClock(void)
 {
-  BLEmidiSend();
+  BLESendClock();
   AppleMIDI.clock();
   OSCSendClock();
 }
 
 void OnSerialMidiStart(void)
 {
-  BLEmidiSend();
+  BLESendStart();
   AppleMIDI.start();
   OSCSendStart();
 }
 
 void OnSerialMidiContinue(void)
 {
-  BLEmidiSend();
+  BLESendContinue();
   AppleMIDI._continue();
   OSCSendContinue();
 }
 
 void OnSerialMidiStop(void)
 {
-  BLEmidiSend();
+  BLESendStop();
   AppleMIDI.stop();
   OSCSendStop();
 }
 
 void OnSerialMidiActiveSensing(void)
 {
-  BLEmidiSend();
+  BLESendActiveSensing();
   AppleMIDI.activeSensing();
   OSCSendActiveSensing();
 }
 
 void OnSerialMidiSystemReset(void)
 {
-  BLEmidiSend();
+  BLESendSystemReset();
   AppleMIDI.reset();
   OSCSendSystemReset();
 }
@@ -905,7 +904,7 @@ void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 {
-  MIDI.sendPolyPressure(note, pressure, channel);
+  MIDI.sendAfterTouch(note, pressure, channel);
   BLESendAfterTouchPoly(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
@@ -1286,11 +1285,11 @@ void setup()
   SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
 #endif
 
-  BLEmidiStart();
-
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
-  wifi_connect();
+  //wifi_connect();
+
+  BLEmidiStart();
 
 #ifdef PEDALINO_SERIAL_DEBUG
   SERIALDEBUG.flush();
