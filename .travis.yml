@@ -18,7 +18,7 @@ env:
 install:
     - pip install -U platformio
     - platformio update
-    - platformio lib -g install 62 136 222 423 1106 1266 1674 1954
+    - platformio lib -g install 62 64 136 222 423 1106 1266 1674 1954
                                 https://github.com/dxinteractive/ResponsiveAnalogRead.git
                                 https://github.com/z3t0/Arduino-IRremote.git
 
