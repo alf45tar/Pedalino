@@ -58,6 +58,7 @@ void screen_update(bool force = false) {
       lcd.noCursor();
       lcd.setCursor(0, 0);
       lcd.print(buf);
+      serialize_lcd1(buf);
     }
     else {
       memset(buf, 0, sizeof(buf));
@@ -72,33 +73,22 @@ void screen_update(bool force = false) {
       else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCSlave) {
         sprintf(&buf[strlen(buf)], "MTC  %02d:%02d:%02d:%02d", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());
       }
-      /*
-        if (playing) {
-        for (byte i = 0; i < 10; i++)
-          buf[6 + i] = ((beat % 4) == i) && ((blinkCount % 24) < 12) ? '>' : ' ';
-        }
-        else
-        for (byte i = 6; i < LCD_COLS; i++)
+      else {
+        for (byte i = 0; i < LCD_COLS; i++) {
+          //buf[i] = foot_char(i);
           buf[i] = ' ';
-      */
-      /*
-        for (byte i = 0; i < PEDALS; i++) {
-        //buf[i] = foot_char(i);
-        buf[i] = ' ';
         }
-      */
+      }
       if (force || strcmp(screen1, buf) != 0) {
         memset(screen1, 0, LCD_COLS + 1);
         strncpy(screen1, buf, LCD_COLS);
         lcd.setCursor(0, 0);
         lcd.print(buf);
+        serialize_lcd1(buf);
       }
     }
     // Line 2
     memset(buf, 0, sizeof(buf));
-    //if (playing)
-    //  sprintf(&buf[strlen(buf)], "BPM%3d", bpm / 10);
-    //else
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
     //sprintf(&buf[strlen(buf)], "%2x%2x%2x", currentBank + 1, banks[currentBank][lastUsedSwitch].midiChannel, banks[currentBank][lastUsedSwitch].midiCode);
     if (lastUsedPedal >= 0 && lastUsedPedal < PEDALS) {
@@ -110,6 +100,7 @@ void screen_update(bool force = false) {
       strncpy(screen2, buf, LCD_COLS);
       lcd.setCursor(0, 1);
       lcd.print(buf);
+      serialize_lcd2(buf);
     }
     if (selectBank) {
       lcd.setCursor(5, 1);

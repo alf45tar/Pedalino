@@ -341,12 +341,14 @@ void MidiTimeCode::updatePlayhead()
 {
   // Compute counter progress
   // update occurring every 2 frames
-  mPlayhead.frames += 2;
-  mPlayhead.seconds += mPlayhead.frames / 24;
-  mPlayhead.frames = mPlayhead.frames % 24;
+  mPlayhead.frames  += 2;
+  mPlayhead.seconds += mPlayhead.frames  / 24;
   mPlayhead.minutes += mPlayhead.seconds / 60;
-  mPlayhead.seconds = mPlayhead.seconds % 60;
-  mPlayhead.hours += mPlayhead.minutes / 60;
+  mPlayhead.hours   += mPlayhead.minutes / 60;
+  mPlayhead.frames  %= 24;
+  mPlayhead.seconds %= 60;
+  mPlayhead.minutes %= 60;
+  mPlayhead.hours   %= 100;
 }
 
 void MidiTimeCode::resetPlayhead()

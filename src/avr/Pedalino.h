@@ -13,6 +13,7 @@
 #include <MD_Menu.h>                    // https://github.com/MajicDesigns/MD_Menu
 #include <MD_UISwitch.h>                // https://github.com/MajicDesigns/MD_UISwitch
 #include <ResponsiveAnalogRead.h>       // https://github.com/dxinteractive/ResponsiveAnalogRead
+#include <ArduinoJson.h>
 
 #define DEBOUNCE_INTERVAL 20
 #define BOUNCE_LOCK_OUT                 // This method is a lot more responsive, but does not cancel noise.

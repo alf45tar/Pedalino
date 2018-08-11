@@ -513,10 +513,14 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.clear();
       lcd.noCursor();
       memset(szLine, ' ', LCD_COLS);
+      serialize_lcd1("");
+      serialize_lcd2("");
       break;
 
     case MD_Menu::DISP_CLEAR:
       lcd.clear();
+      serialize_lcd1("");
+      serialize_lcd2("");
       break;
 
     case MD_Menu::DISP_L0:
@@ -540,20 +544,25 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         switch (currentInterface) {
           case PED_USBMIDI:
             lcd.print("USB MIDI");
+            serialize_lcd1("USB MIDI");
             break;
           case PED_LEGACYMIDI:
             lcd.print("Legacy MIDI");
+            serialize_lcd1("Legacy MIDI");
             break;
           case PED_APPLEMIDI:
             lcd.print("AppleMIDI");
+            serialize_lcd1("AppleMIDI");
             break;
           case PED_BLUETOOTHMIDI:
             lcd.print("Bluetooth MIDI");
+            serialize_lcd1("Bluetooth MIDI");
             break;
         }
       }
       else
         lcd.print(msg);
+      serialize_lcd1(msg);
       break;
 
     case MD_Menu::DISP_L1:
@@ -561,6 +570,7 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.print(szLine);
       lcd.setCursor(0, 1);
       lcd.print(msg);
+      serialize_lcd2(msg);
       break;
   }
 
