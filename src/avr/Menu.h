@@ -504,7 +504,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
 bool display(MD_Menu::userDisplayAction_t action, char *msg)
 {
-  static char szLine[LCD_COLS + 1] = { '\0' };
+  char line[LCD_COLS + 1];
 
   switch (action)
   {
@@ -512,65 +512,52 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.begin(LCD_COLS, LCD_ROWS);
       lcd.clear();
       lcd.noCursor();
-      memset(szLine, ' ', LCD_COLS);
-      serialize_lcd1("");
-      serialize_lcd2("");
+      serialize_lcd_clear();
       break;
 
     case MD_Menu::DISP_CLEAR:
       lcd.clear();
-      serialize_lcd1("");
-      serialize_lcd2("");
+      serialize_lcd_clear();
       break;
 
     case MD_Menu::DISP_L0:
-      lcd.setCursor(0, 0);
-      lcd.print(szLine);
-      lcd.setCursor(0, 0);
-      if (strcmp(msg, "Pedals Setup") == 0) {
-        lcd.print("Pedal ");
-        if (currentPedal < 9) lcd.print(" ");
-        lcd.print(currentPedal + 1);
-      }
-      else if (strcmp(msg, "Banks Setup") == 0) {
-        lcd.print("Bank ");
-        if (currentPedal < 9) lcd.print(" ");
-        lcd.print(currentBank + 1);
-        lcd.print(" Pedal ");
-        if (currentPedal < 9) lcd.print(" ");
-        lcd.print(currentPedal + 1);
-      }
-      else if (strcmp(msg, "Interface Setup") == 0) {
+      memset(line, 0, LCD_COLS + 1);
+      if (strcmp(msg, "Pedals Setup") == 0)
+        sprintf(line, "%s %2d", "Pedal", currentPedal + 1);
+      else if (strcmp(msg, "Banks Setup") == 0)
+        sprintf(line, "%s %2d %s %2d", "Bank", currentPedal + 1, "Pedal", currentPedal + 1);
+      else if (strcmp(msg, "Interface Setup") == 0)
         switch (currentInterface) {
           case PED_USBMIDI:
-            lcd.print("USB MIDI");
-            serialize_lcd1("USB MIDI");
+            strcpy(line, "USB MIDI");
             break;
           case PED_LEGACYMIDI:
-            lcd.print("Legacy MIDI");
-            serialize_lcd1("Legacy MIDI");
+            strcpy(line, "Legacy MIDI");
             break;
           case PED_APPLEMIDI:
-            lcd.print("AppleMIDI");
-            serialize_lcd1("AppleMIDI");
+            strcpy(line, "AppleMIDI");
             break;
           case PED_BLUETOOTHMIDI:
-            lcd.print("Bluetooth MIDI");
-            serialize_lcd1("Bluetooth MIDI");
+            strcpy(line, "Bluetooth MIDI");
             break;
         }
-      }
       else
-        lcd.print(msg);
-      serialize_lcd1(msg);
+        strcpy(line, msg);
+      for (int i = strlen(line); i < LCD_COLS; i++)
+        line[i] = ' ';
+      lcd.setCursor(0, 0);
+      lcd.print(line);
+      serialize_lcd1(line);
       break;
 
     case MD_Menu::DISP_L1:
+      memset(line, 0, LCD_COLS + 1);
+      strcpy(line, msg);
+      for (int i = strlen(line); i < LCD_COLS; i++)
+        line[i] = ' ';
       lcd.setCursor(0, 1);
-      lcd.print(szLine);
-      lcd.setCursor(0, 1);
-      lcd.print(msg);
-      serialize_lcd2(msg);
+      lcd.print(line);
+      serialize_lcd2(line);
       break;
   }
 

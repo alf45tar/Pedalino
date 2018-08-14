@@ -21,7 +21,19 @@ void setup(void)
 {
 #ifdef DEBUG_PEDALINO
   SERIALDEBUG.begin(115200);
+
+  DPRINTLN("");
+  DPRINTLN("");
+  DPRINTLN("  __________           .___      .__  .__                   ___ ________________    ___");
+  DPRINTLN("  \\______   \\ ____   __| _/____  |  | |__| ____   ____     /  / \\__    ___/     \\   \\  \\");
+  DPRINTLN("   |     ___// __ \\ / __ |\\__  \\ |  | |  |/    \\ /  _ \\   /  /    |    | /  \\ /  \\   \\  \\");
+  DPRINTLN("   |    |   \\  ___// /_/ | / __ \\|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \\   )  )");
+  DPRINTLN("   |____|    \\___  >____ |(____  /____/__|___|  /\\____/   \\  \\    |____|\\____|__  /  /  /");
+  DPRINTLN("                 \\/     \\/     \\/             \\/           \\__\\                 \\/  /__/");
+  DPRINTLN("                                                                       (c) 2018 alf45star");
+
 #endif
+
   read_eeprom();
 
   // Initiate serial MIDI communications, listen to all channels and turn Thru off
