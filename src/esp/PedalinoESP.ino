@@ -17,6 +17,7 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266LLMNR.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include <BlynkSimpleEsp8266.h>
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -32,8 +33,6 @@
 #include <esp_log.h>
 #include <string>
 #include <BlynkSimpleEsp32.h>
-
-static const char LOG_TAG[] = "PedalinoESP";
 #endif
 
 #include <WiFiClient.h>
@@ -45,7 +44,6 @@ static const char LOG_TAG[] = "PedalinoESP";
 #include <OSCBundle.h>
 #include <OSCData.h>
 
-//#define PEDALINO_SERIAL_DEBUG
 //#define PEDALINO_TELNET_DEBUG
 
 #ifdef PEDALINO_TELNET_DEBUG
@@ -56,19 +54,16 @@ RemoteDebug Debug;
 #define WIFI_CONNECT_TIMEOUT    10
 #define SMART_CONFIG_TIMEOUT    30
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN    2
-#endif
-
-#define WIFI_LED       LED_BUILTIN  // onboard LED, used as status indicator
-
-#if defined(ARDUINO_ARCH_ESP8266) && defined(PEDALINO_SERIAL_DEBUG)
-#define SERIALDEBUG       Serial1
-#define WIFI_LED       0  // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
+#if defined(ARDUINO_ARCH_ESP8266) && defined(DEBUG_ESP_PORT)
+#define SERIALDEBUG       DEBUG_ESP_PORT
+#define WIFI_LED          0                     // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
+#define DPRINT(...)       DEBUG_ESP_PORT.printf( __VA_ARGS__ )
+#define DPRINTLN(...)     DEBUG_ESP_PORT.printf( __VA_ARGS__ )
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
 #define SERIALDEBUG       Serial
+#define LOG_TAG           "PedalinoESP";
 #define DPRINT(...)       ESP_LOGI(LOG_TAG, __VA_ARGS__)
 #define DPRINTLN(...)     ESP_LOGI(LOG_TAG, __VA_ARGS__)
 #endif
@@ -87,6 +82,22 @@ RemoteDebug Debug;
 #define BLE_LED_ON()    digitalWrite(BLE_LED, HIGH)
 #define WIFI_LED_OFF()  digitalWrite(WIFI_LED, LOW)
 #define WIFI_LED_ON()   digitalWrite(WIFI_LED, HIGH)
+#endif
+
+#ifndef LED_BUILTIN
+#define LED_BUILTIN    2
+#endif
+
+#ifndef WIFI_LED
+#define WIFI_LED       LED_BUILTIN  // onboard LED, used as status indicator
+#endif
+
+#ifndef DPRINT
+#define DPRINT(...)
+#endif
+
+#ifndef DPRINTLN
+#define DPRINTLN(...)
 #endif
 
 const char host[]           = "pedalino";
@@ -183,7 +194,7 @@ class MyBLECharateristicCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
-void BLEMidiStart ()
+void ble_midi_start_service ()
 {
   BLEDevice::init("Pedal");
   pServer = BLEDevice::createServer();
@@ -200,8 +211,6 @@ void BLEMidiStart ()
   pCharacteristic->addDescriptor(new BLE2902());
   pService->start();
 
-  DPRINT("BLE Service started");
-
   pAdvertising = pServer->getAdvertising();
   pAdvertising->addServiceUUID(pService->getUUID());
   pAdvertising->start();
@@ -209,7 +218,7 @@ void BLEMidiStart ()
   pSecurity = new BLESecurity();
   pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_BOND);
 
-  DPRINT("BLE Advertising started");
+  DPRINT("BLE MIDI service advertising started");
 }
 
 void BLEMidiTimestamp (uint8_t *header, uint8_t *timestamp)
@@ -535,7 +544,7 @@ void BLESendSystemReset(void)
   BLESendRealTimeMessage(midi::SystemReset);
 }
 #else
-#define BLEMidiStart(...)
+#define ble_midi_start_service(...)
 #define BLEMidiReceive(...)
 #define BLESendNoteOn(...)
 #define BLESendNoteOff(...)
@@ -769,7 +778,7 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
   unsigned int decodedSize;
 
   //decodedSize = midi::decodeSysEx(array, decodedArray, size);
-  
+
   // Extract JSON string
   //
   memset(json, 0, size - 1);
@@ -1394,8 +1403,10 @@ BLYNK_WRITE(V95) {
 
 void setup()
 {
+#ifdef SERIALDEBUG
   SERIALDEBUG.begin(115200);
   SERIALDEBUG.setDebugOutput(true);
+#endif
 
   DPRINTLN("  __________           .___      .__  .__                   ___ ________________    ___");
   DPRINTLN("  \\______   \\ ____   __| _/____  |  | |__| ____   ____     /  / \\__    ___/     \\   \\  \\");
@@ -1406,10 +1417,10 @@ void setup()
   DPRINTLN("                                                                       (c) 2018 alf45star");
 
 #ifdef ARDUINO_ARCH_ESP32
-  esp_log_level_set("*",            ESP_LOG_ERROR);
-  esp_log_level_set("wifi",         ESP_LOG_WARN);
-  esp_log_level_set("ble",          ESP_LOG_DEBUG);
-  esp_log_level_set("PedalinoESP",  ESP_LOG_INFO);
+  esp_log_level_set("*",      ESP_LOG_ERROR);
+  //esp_log_level_set("wifi",   ESP_LOG_WARN);
+  //esp_log_level_set("ble",    ESP_LOG_DEBUG);
+  esp_log_level_set(LOG_TAG,  ESP_LOG_INFO);
 
   DPRINTLN("Testing EEPROM Library");
   if (!EEPROM.begin(128)) {
@@ -1427,8 +1438,8 @@ void setup()
   SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
 #endif
 
-  // BLE MIDI server advertising
-  BLEMidiStart();
+  // BLE MIDI service advertising
+  ble_midi_start_service();
 
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
@@ -1437,8 +1448,6 @@ void setup()
   // Connect to Blynk
   Blynk.config(blynkAuthToken);
   Blynk.connect();
-
-  SERIALDEBUG.flush();
 
 #ifdef PEDALINO_TELNET_DEBUG
   // Initialize the telnet server of RemoteDebug
