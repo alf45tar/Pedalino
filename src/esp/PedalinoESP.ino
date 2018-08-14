@@ -765,11 +765,18 @@ void OnSerialMidiPitchBend(byte channel, int bend)
 void OnSerialMidiSystemExclusive(byte* array, unsigned size)
 {
   char json[size - 1];
+  byte decodedArray[size];
+  unsigned int decodedSize;
 
+  //decodedSize = midi::decodeSysEx(array, decodedArray, size);
+  
   // Extract JSON string
   //
   memset(json, 0, size - 1);
   memcpy(json, &array[1], size - 2);
+  //memcpy(json, &decodedArray[1], size - 2);
+  //for (int i = 0; i < size; i++)
+  //  DPRINTLN("%2d %0X", i, array[i]);
   DPRINTLN("JSON: %s", json);
 
   // Memory pool for JSON object tree.
@@ -784,8 +791,10 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
   if (root.success()) {
     // Fetch values.
     //
-    const char *lcd1 = root["lcd1"];
-    const char *lcd2 = root["lcd2"];
+    const char *lcdclear = root["lcd.clear"];
+    const char *lcd1     = root["lcd1"];
+    const char *lcd2     = root["lcd2"];
+    if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
     else {
@@ -1293,8 +1302,10 @@ BLYNK_CONNECTED() {
   // This function is called when hardware connects to Blynk Cloud or private server.
   DPRINTLN("Connected to Blynk");
   blynkLCD.clear();
-  Blynk.virtualWrite(V90, (appleMidiConnected) ? 1 : 0);
+  Blynk.virtualWrite(V90, (WiFi.isConnected()) ? 1 : 0);
   Blynk.virtualWrite(V91, 0);
+  Blynk.setProperty(V92, "labels", "");
+  Blynk.virtualWrite(V93, "");
   Blynk.virtualWrite(V95, 0);
 }
 
@@ -1326,7 +1337,7 @@ BLYNK_WRITE(V40) {
 }
 
 BLYNK_READ(V90) {
-  Blynk.virtualWrite(V90, (appleMidiConnected) ? 0 : 1);
+  Blynk.virtualWrite(V90, (WiFi.isConnected()) ? 1 : 0);
 }
 
 BLYNK_WRITE(V90) {
@@ -1359,7 +1370,7 @@ BLYNK_WRITE(V91) {
       DPRINTLN("No networks found");
     } else {
       DPRINTLN("%d networks found", n);
-      BlynkParamAllocated items(128); // list length, in bytes
+      BlynkParamAllocated items(512); // list length, in bytes
       for (int i = 0; i < n; i++) {
         DPRINTLN("%2d. %s %s %d dBm", i + 1, WiFi.BSSIDstr().c_str(), WiFi.SSID(i).c_str(), WiFi.RSSI(i));
         items.add(WiFi.SSID(i).c_str());
