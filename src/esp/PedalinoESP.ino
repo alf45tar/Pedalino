@@ -63,7 +63,7 @@ RemoteDebug Debug;
 
 #ifdef ARDUINO_ARCH_ESP32
 #define SERIALDEBUG       Serial
-#define LOG_TAG           "PedalinoESP";
+#define LOG_TAG           "PedalinoESP"
 #define DPRINT(...)       ESP_LOGI(LOG_TAG, __VA_ARGS__)
 #define DPRINTLN(...)     ESP_LOGI(LOG_TAG, __VA_ARGS__)
 #endif
