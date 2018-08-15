@@ -95,7 +95,7 @@ The rest is not mandatory but it depends of which features you want to support.
   - Any IR Receiver module (like KY-022 or equivalent) supported by [IRremote](https://github.com/z3t0/Arduino-IRremote) library
   - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
   
-- Bluetooth Remote Control (not very useful can be removed in future version)
+- Bluetooth Remote Control
   - ZS-040 breakout board based on HC-08 Bluetooth UART Communication Module (HC-05 or HC-06 may works)
 
 ## Pedalino™ Breadboard Prototype
