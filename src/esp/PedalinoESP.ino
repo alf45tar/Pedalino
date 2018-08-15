@@ -1125,28 +1125,34 @@ bool smart_config()
   }
 }
 
-bool auto_reconnect()
+bool auto_reconnect(String ssid = "", String password = "")
 {
   // Return 'true' if connected to the (last used) access point within WIFI_CONNECT_TIMEOUT seconds
 
-  String ssid;
-  String password;
+  //String ssid;
+  //String password;
+
+  if (ssid.length() == 0) {
+
+    DPRINTLN("Connecting to last used AP");
 
 #ifdef ARDUINO_ARCH_ESP8266
-  ssid = WiFi.SSID();
-  password = WiFi.psk();
+    ssid = WiFi.SSID();
+    password = WiFi.psk();
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-  int address = 0;
-  ssid = EEPROM.readString(address);
-  address += ssid.length() + 1;
-  password = EEPROM.readString(address);
+    int address = 0;
+    ssid = EEPROM.readString(address);
+    address += ssid.length() + 1;
+    password = EEPROM.readString(address);
 #endif
+  }
+  else
+    DPRINTLN("Connecting to");
 
   if (ssid.length() == 0) return false;
 
-  DPRINTLN("Connecting to last used AP");
   DPRINTLN("SSID        : %s", ssid.c_str());
   DPRINTLN("Password    : %s", password.c_str());
 
@@ -1189,10 +1195,8 @@ void wifi_connect()
     WiFi.setHostname(host);
 #endif
 
-#if PEDALINO_DEBUG_SERIAL
-    DPRINTLN("");
+#ifdef SERIALDEBUG
     WiFi.printDiag(SERIALDEBUG);
-    DPRINTLN("");
 #endif
 
     uint8_t macAddr[6];
@@ -1200,6 +1204,7 @@ void wifi_connect()
     DPRINTLN("BSSID       : %s", WiFi.BSSIDstr().c_str());
     DPRINTLN("RSSI        : %d dBm", WiFi.RSSI());
 #ifdef ARDUINO_ARCH_ESP8266
+    DPRINTLN("Channel     : %d", Wifi.getChannel());
     DPRINTLN("Hostname    : %s", WiFi.hostname().c_str());
 #endif
 #ifdef ARDUINO_ARCH_ESP32
@@ -1368,20 +1373,20 @@ BLYNK_READ(V91) {
   Blynk.virtualWrite(90, 0);
 }
 
+
 BLYNK_WRITE(V91) {
   int scan = param.asInt();
   if (scan) {
     DPRINTLN("WiFi Scan started");
-    // WiFi.scanNetworks will return the number of networks found
-    int n = WiFi.scanNetworks();
+    int networksFound = WiFi.scanNetworks();
     DPRINTLN("WiFi Scan done");
-    if (n == 0) {
+    if (networksFound == 0) {
       DPRINTLN("No networks found");
     } else {
-      DPRINTLN("%d networks found", n);
+      DPRINTLN("%d network(s) found", networksFound);
       BlynkParamAllocated items(512); // list length, in bytes
-      for (int i = 0; i < n; i++) {
-        DPRINTLN("%2d. %s %s %d dBm", i + 1, WiFi.BSSIDstr().c_str(), WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+      for (int i = 0; i < networksFound; i++) {
+        DPRINTLN("%2d. %s %s Ch:%d %d dBm", i + 1, WiFi.BSSIDstr(i).c_str(), WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i));
         items.add(WiFi.SSID(i).c_str());
       }
       Blynk.setProperty(V92, "labels", items);
@@ -1389,6 +1394,15 @@ BLYNK_WRITE(V91) {
       DPRINTLN("Blink updated");
     }
   }
+}
+
+BLYNK_WRITE(V92) {
+  int i = param.asInt();
+  auto_reconnect(WiFi.SSID(i), "");
+}
+
+BLYNK_WRITE(V93) {
+
 }
 
 BLYNK_WRITE(V95) {
