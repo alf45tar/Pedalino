@@ -1,11 +1,13 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
+/*
+  //  __________           .___      .__  .__                   ___ ________________    ___
+  //  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \
+  //   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \
+  //   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+  //   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+  //                 \/     \/     \/             \/           \__\                 \/  /__/
+*/
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 
 #include "Pedalino.h"
 #include "Serialize.h"
@@ -14,6 +16,7 @@
 #include "Controller.h"
 #include "Display.h"
 #include "Menu.h"
+#include "BlynkRPC.h"
 
 // Standard setup() and loop()
 
@@ -22,15 +25,15 @@ void setup(void)
 #ifdef DEBUG_PEDALINO
   SERIALDEBUG.begin(115200);
 
-  DPRINTLN("");
-  DPRINTLN("");
-  DPRINTLN("  __________           .___      .__  .__                   ___ ________________    ___");
-  DPRINTLN("  \\______   \\ ____   __| _/____  |  | |__| ____   ____     /  / \\__    ___/     \\   \\  \\");
-  DPRINTLN("   |     ___// __ \\ / __ |\\__  \\ |  | |  |/    \\ /  _ \\   /  /    |    | /  \\ /  \\   \\  \\");
-  DPRINTLN("   |    |   \\  ___// /_/ | / __ \\|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \\   )  )");
-  DPRINTLN("   |____|    \\___  >____ |(____  /____/__|___|  /\\____/   \\  \\    |____|\\____|__  /  /  /");
-  DPRINTLN("                 \\/     \\/     \\/             \\/           \\__\\                 \\/  /__/");
-  DPRINTLN("                                                                       (c) 2018 alf45star");
+  DPRINTLNF("");
+  DPRINTLNF("");
+  DPRINTLNF("  __________           .___      .__  .__                   ___ ________________    ___");
+  DPRINTLNF("  \\______   \\ ____   __| _/____  |  | |__| ____   ____     /  / \\__    ___/     \\   \\  \\");
+  DPRINTLNF("   |     ___// __ \\ / __ |\\__  \\ |  | |  |/    \\ /  _ \\   /  /    |    | /  \\ /  \\   \\  \\");
+  DPRINTLNF("   |    |   \\  ___// /_/ | / __ \\|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \\   )  )");
+  DPRINTLNF("   |____|    \\___  >____ |(____  /____/__|___|  /\\____/   \\  \\    |____|\\____|__  /  /  /");
+  DPRINTLNF("                 \\/     \\/     \\/             \\/           \\__\\                 \\/  /__/");
+  DPRINTLNF("                                                                       (c) 2018 alf45star");
 
 #endif
 
@@ -52,12 +55,12 @@ void setup(void)
   switch (currentMidiTimeCode) {
 
     case PED_MTC_NONE:
-      DPRINTLN("MTC None");
+      DPRINTLNF("MTC None");
       MTC.setMode(MidiTimeCode::SynchroNone);
       break;
 
     case PED_MTC_SLAVE:
-      DPRINTLN("MTC Slave");
+      DPRINTLNF("MTC Slave");
       MTC.setMode(MidiTimeCode::SynchroMTCSlave);
       break;
 
@@ -65,19 +68,19 @@ void setup(void)
     case PED_MTC_MASTER_25:
     case PED_MTC_MASTER_30DF:
     case PED_MTC_MASTER_30:
-      DPRINTLN("MTC Master");
+      DPRINTLNF("MTC Master");
       MTC.setMode(MidiTimeCode::SynchroMTCMaster);
       MTC.sendPosition(0, 0, 0, 0);
       break;
 
     case PED_MIDI_CLOCK_SLAVE:
-      DPRINTLN("MIDI Clock Slave");
+      DPRINTLNF("MIDI Clock Slave");
       MTC.setMode(MidiTimeCode::SynchroClockSlave);
       bpm = 0;
       break;
 
     case PED_MIDI_CLOCK_MASTER:
-      DPRINTLN("MIDI Clock Master");
+      DPRINTLNF("MIDI Clock Master");
       MTC.setMode(MidiTimeCode::SynchroClockMaster);
       MTC.setBpm(bpm);
       break;
@@ -87,10 +90,15 @@ void setup(void)
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
 
-  irrecv.enableIRIn();                        // Start the IR receiver
+  irrecv.enableIRIn();                                // Start the IR receiver
   irrecv.blink13(true);
-  bluetooth.begin(9600);                      // Start the Bluetooth receiver
-  bluetooth.println("AT+NAME=Pedalino(TM)");  // Set bluetooth device name
+
+  bluetooth.begin(9600);                              // Start the Bluetooth receiver
+  bluetooth.println(F("AT+NAME=PedalinoMega"));       // Set bluetooth device name
+  Blynk.begin(bluetooth, blynkAuthToken);
+  //Blynk.config(bluetooth, blynkAuthToken);
+  blynkTimer.setInterval(1000L, myTimerEvent);
+  Blynk.notify("{DEVICE_NAME} is connected!");
 
   display(MD_Menu::DISP_INIT);
   M.begin();
@@ -122,6 +130,9 @@ void loop(void)
   else lcd.noCursor();
 
   M.runMenu();   // just run the menu code
+
+  Blynk.run();
+  blynkTimer.run();
 
   // Check whether the input has changed since last time, if so, send the new value over MIDI
   midi_refresh();

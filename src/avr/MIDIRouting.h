@@ -5,37 +5,37 @@ void midi_routing()
 {
   if (interfaces[PED_USBMIDI].midiIn)
     if (USB_MIDI.read()) {
-      DPRINT(" MIDI IN USB -> STATUS ");
+      DPRINTF(" MIDI IN USB -> STATUS ");
       DPRINT(USB_MIDI.getType());
-      DPRINT(" DATA1 ");
+      DPRINTF(" DATA1 ");
       DPRINT(USB_MIDI.getData1());
-      DPRINT(" DATA2 ");
+      DPRINTF(" DATA2 ");
       DPRINT(USB_MIDI.getData2());
-      DPRINT(" CHANNEL ");
+      DPRINTF(" CHANNEL ");
       DPRINTLN(USB_MIDI.getChannel());
     }
 
   if (interfaces[PED_LEGACYMIDI].midiIn)
     if (DIN_MIDI.read()) {
-      DPRINT(" MIDI IN DIN -> STATUS ");
+      DPRINTF(" MIDI IN DIN -> STATUS ");
       DPRINT(DIN_MIDI.getType());
-      DPRINT(" DATA1 ");
+      DPRINTF(" DATA1 ");
       DPRINT(DIN_MIDI.getData1());
-      DPRINT(" DATA2 ");
+      DPRINTF(" DATA2 ");
       DPRINT(DIN_MIDI.getData2());
-      DPRINT(" CHANNEL ");
+      DPRINTF(" CHANNEL ");
       DPRINTLN(DIN_MIDI.getChannel());
     }
     
   if (interfaces[PED_APPLEMIDI].midiIn)
     if (RTP_MIDI.read()) {
-      DPRINT(" MIDI IN RTP -> STATUS ");
+      DPRINTF(" MIDI IN RTP -> STATUS ");
       DPRINT(RTP_MIDI.getType());
-      DPRINT(" DATA1 ");
+      DPRINTF(" DATA1 ");
       DPRINT(RTP_MIDI.getData1());
-      DPRINT(" DATA2 ");
+      DPRINTF(" DATA2 ");
       DPRINT(RTP_MIDI.getData2());
-      DPRINT(" CHANNEL ");
+      DPRINTF(" CHANNEL ");
       DPRINTLN(RTP_MIDI.getChannel());
     }
 }

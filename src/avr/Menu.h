@@ -512,12 +512,12 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.begin(LCD_COLS, LCD_ROWS);
       lcd.clear();
       lcd.noCursor();
-      serialize_lcd_clear();
+      blynkLCD.clear();
       break;
 
     case MD_Menu::DISP_CLEAR:
       lcd.clear();
-      serialize_lcd_clear();
+      blynkLCD.clear();
       break;
 
     case MD_Menu::DISP_L0:
@@ -525,7 +525,7 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       if (strcmp(msg, "Pedals Setup") == 0)
         sprintf(line, "%s %2d", "Pedal", currentPedal + 1);
       else if (strcmp(msg, "Banks Setup") == 0)
-        sprintf(line, "%s %2d %s %2d", "Bank", currentPedal + 1, "Pedal", currentPedal + 1);
+        sprintf(line, "%s %2d %s %2d", "Bank", currentBank + 1, "Pedal", currentPedal + 1);
       else if (strcmp(msg, "Interface Setup") == 0)
         switch (currentInterface) {
           case PED_USBMIDI:
@@ -547,7 +547,7 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         line[i] = ' ';
       lcd.setCursor(0, 0);
       lcd.print(line);
-      serialize_lcd1(line);
+      blynkLCD.print(0, 0, line);
       break;
 
     case MD_Menu::DISP_L1:
@@ -557,7 +557,7 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         line[i] = ' ';
       lcd.setCursor(0, 1);
       lcd.print(line);
-      serialize_lcd2(line);
+      blynkLCD.print(0, 1, line);
       break;
   }
 
@@ -774,25 +774,25 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
     switch (results.decode_type) {
       default:
-      case UNKNOWN:      DPRINT("UNKNOWN");       break ;
-      case NEC:          DPRINT("NEC");           break ;
-      case SONY:         DPRINT("SONY");          break ;
-      case RC5:          DPRINT("RC5");           break ;
-      case RC6:          DPRINT("RC6");           break ;
-      case DISH:         DPRINT("DISH");          break ;
-      case SHARP:        DPRINT("SHARP");         break ;
-      case JVC:          DPRINT("JVC");           break ;
-      case SANYO:        DPRINT("SANYO");         break ;
-      case MITSUBISHI:   DPRINT("MITSUBISHI");    break ;
-      case SAMSUNG:      DPRINT("SAMSUNG");       break ;
-      case LG:           DPRINT("LG");            break ;
-      case WHYNTER:      DPRINT("WHYNTER");       break ;
-      case AIWA_RC_T501: DPRINT("AIWA_RC_T501");  break ;
-      case PANASONIC:    DPRINT("PANASONIC");     break ;
-      case DENON:        DPRINT("Denon");         break ;
+      case UNKNOWN:      DPRINTF("UNKNOWN");       break ;
+      case NEC:          DPRINTF("NEC");           break ;
+      case SONY:         DPRINTF("SONY");          break ;
+      case RC5:          DPRINTF("RC5");           break ;
+      case RC6:          DPRINTF("RC6");           break ;
+      case DISH:         DPRINTF("DISH");          break ;
+      case SHARP:        DPRINTF("SHARP");         break ;
+      case JVC:          DPRINTF("JVC");           break ;
+      case SANYO:        DPRINTF("SANYO");         break ;
+      case MITSUBISHI:   DPRINTF("MITSUBISHI");    break ;
+      case SAMSUNG:      DPRINTF("SAMSUNG");       break ;
+      case LG:           DPRINTF("LG");            break ;
+      case WHYNTER:      DPRINTF("WHYNTER");       break ;
+      case AIWA_RC_T501: DPRINTF("AIWA_RC_T501");  break ;
+      case PANASONIC:    DPRINTF("PANASONIC");     break ;
+      case DENON:        DPRINTF("Denon");         break ;
     }
-    DPRINT(" IR Code: 0x");
-    DPRINTLN(ircode, HEX);
+    DPRINTF(" IR Code: 0x");
+    DPRINTLN2(ircode, HEX);
 
     if      (ircode == ircustomcode[IRC_ON_OFF])  ircode = IR_ON_OFF;
     else if (ircode == ircustomcode[IRC_OK])      ircode = IR_OK;
@@ -899,20 +899,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
     }
   }
 
-  // Bluetooth navigation
-
-  if (bluetooth.available()) {
-    switch (char(bluetooth.read())) {
-      case 'L':
-        return MD_Menu::NAV_DEC;
-      case 'R':
-        return MD_Menu::NAV_INC;
-      case 'C':
-        return MD_Menu::NAV_SEL;
-      case 'E':
-        return MD_Menu::NAV_ESC;
-    }
-  }
   return MD_Menu::NAV_NULL;
 }
 

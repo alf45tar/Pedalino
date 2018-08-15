@@ -15,7 +15,7 @@ void autosensing_setup()
 
   return;
 
-  DPRINTLN("Pedal autosensing...");
+  DPRINTLNF("Pedal autosensing...");
 
   for (byte p = 0; p < PEDALS; p++) {
     pinMode(PIN_D(p), INPUT_PULLUP);
@@ -25,24 +25,24 @@ void autosensing_setup()
       debouncer.update();
       tip = debouncer.read();
 
-      DPRINT("Pedal ");
-      if (p < 9) DPRINT(" ");
+      DPRINTF("Pedal ");
+      if (p < 9) DPRINTF(" ");
       DPRINT(p + 1);
-      DPRINT("   Tip Pin ");
+      DPRINTF("   Tip Pin ");
       DPRINT(PIN_D(p));
-      DPRINT(" ");
+      DPRINTF(" ");
       switch (tip) {
         case LOW:
-          DPRINT("LOW ");
+          DPRINTF("LOW ");
           break;
         case HIGH:
-          DPRINT("HIGH");
+          DPRINTF("HIGH");
           break;
       }
-      DPRINT("    Ring Pin A");
+      DPRINTF("    Ring Pin A");
       DPRINT(p);
-      if (p < 10) DPRINT(" ");
-      DPRINT(" ");
+      if (p < 10) DPRINTF(" ");
+      DPRINTF(" ");
 
       ring_min = ADC_RESOLUTION;
       ring_max = 0;
@@ -52,7 +52,7 @@ void autosensing_setup()
         ring_max = max(ring, ring_max);
 
         DPRINT(ring);
-        DPRINT(" ");
+        DPRINTF(" ");
 
       }
       if ((ring_max - ring_min) > 1) {
@@ -61,13 +61,13 @@ void autosensing_setup()
           // switch between tip and ring normally closed
           pedals[p].mode = PED_MOMENTARY1;
           pedals[p].invertPolarity = true;
-          DPRINTLN(" MOMENTARY POLARITY-");
+          DPRINTLNF(" MOMENTARY POLARITY-");
         }
         else {
           // not connected
           pedals[p].mode = PED_MOMENTARY1;
           pedals[p].invertPolarity = false;
-          DPRINTLN(" FLOATING PIN - NOT CONNECTED ");
+          DPRINTLNF(" FLOATING PIN - NOT CONNECTED ");
         }
       }
       else if (ring <= 1) {
@@ -75,9 +75,9 @@ void autosensing_setup()
         // switch between tip and ring
         pedals[p].mode = PED_MOMENTARY1;
         if (tip == LOW) pedals[p].invertPolarity = true; // switch normally closed
-        DPRINT(" MOMENTARY");
-        if (pedals[p].invertPolarity) DPRINT(" POLARITY-");
-        DPRINTLN("");
+        DPRINTF(" MOMENTARY");
+        if (pedals[p].invertPolarity) DPRINTF(" POLARITY-");
+        DPRINTLNF("");
       }
       else if (ring > 0) {
         // analog
@@ -86,17 +86,17 @@ void autosensing_setup()
         // inititalize continuos calibration
         pedals[p].expZero = ADC_RESOLUTION - 1;
         pedals[p].expMax = 0;
-        DPRINTLN(" ANALOG POLARITY-");
+        DPRINTLNF(" ANALOG POLARITY-");
       }
     }
     else {
-      DPRINT("Pedal ");
-      if (p < 9) DPRINT(" ");
+      DPRINTF("Pedal ");
+      if (p < 9) DPRINTF(" ");
       DPRINT(p + 1);
-      DPRINTLN("   autosensing disabled");
+      DPRINTLNF("   autosensing disabled");
     }
   }
-  DPRINTLN("");
+  DPRINTLNF("");
 }
 
 byte map_digital(byte p, byte value)
@@ -140,87 +140,88 @@ void controller_setup()
   lastUsedSwitch = 0xFF;
   lastUsedPedal  = 0xFF;
 
-  DPRINT("MIDI Interface ");
+  DPRINTF("MIDI Interface ");
   switch (currentInterface) {
     case PED_USBMIDI:
-      DPRINTLN("USB");
+      DPRINTLNF("USB");
       break;
     case PED_LEGACYMIDI:
-      DPRINTLN("Legacy MIDI");
+      DPRINTLNF("Legacy MIDI");
       break;
     case PED_APPLEMIDI:
-      DPRINTLN("AppleMIDI");
+      DPRINTLNF("AppleMIDI");
       break;
     case PED_BLUETOOTHMIDI:
-      DPRINTLN("Bluetooth");
+      DPRINTLNF("Bluetooth");
       break;
   }
-  DPRINT("Bank ");
+  DPRINTF("Bank ");
   DPRINTLN(currentBank + 1);
 
   // Build new MIDI controllers setup
   for (byte i = 0; i < PEDALS; i++) {
-    DPRINT("Pedal ");
-    if (i < 9) DPRINT(" ");
+    DPRINTF("Pedal ");
+    if (i < 9) DPRINTF(" ");
     DPRINT(i + 1);
-    DPRINT("     ");
+    DPRINTF("     ");
     switch (pedals[i].function) {
-      case PED_MIDI:        DPRINT("MIDI      "); break;
-      case PED_BANK_PLUS:   DPRINT("BANK_PLUS "); break;
-      case PED_BANK_MINUS:  DPRINT("BANK_MINUS"); break;
-      case PED_START:       DPRINT("START     "); break;
-      case PED_STOP:        DPRINT("STOP      "); break;
-      case PED_TAP:         DPRINT("TAP       "); break;
-      case PED_MENU:        DPRINT("MENU      "); break;
-      case PED_CONFIRM:     DPRINT("CONFIRM   "); break;
-      case PED_ESCAPE:      DPRINT("ESCAPE    "); break;
-      case PED_NEXT:        DPRINT("NEXT      "); break;
-      case PED_PREVIOUS:    DPRINT("PREVIOUS  "); break;
+      case PED_MIDI:        DPRINTF("MIDI      "); break;
+      case PED_BANK_PLUS:   DPRINTF("BANK_PLUS "); break;
+      case PED_BANK_MINUS:  DPRINTF("BANK_MINUS"); break;
+      case PED_START:       DPRINTF("START     "); break;
+      case PED_STOP:        DPRINTF("STOP      "); break;
+      case PED_CONTINUE:    DPRINTF("CONTINUE  "); break;
+      case PED_TAP:         DPRINTF("TAP       "); break;
+      case PED_MENU:        DPRINTF("MENU      "); break;
+      case PED_CONFIRM:     DPRINTF("CONFIRM   "); break;
+      case PED_ESCAPE:      DPRINTF("ESCAPE    "); break;
+      case PED_NEXT:        DPRINTF("NEXT      "); break;
+      case PED_PREVIOUS:    DPRINTF("PREVIOUS  "); break;
     }
-    DPRINT("   ");
+    DPRINTF("   ");
     switch (pedals[i].mode) {
-      case PED_MOMENTARY1:  DPRINT("MOMENTARY1"); break;
-      case PED_MOMENTARY2:  DPRINT("MOMENTARY2"); break;
-      case PED_MOMENTARY3:  DPRINT("MOMENTARY3"); break;
-      case PED_LATCH1:      DPRINT("LATCH1    "); break;
-      case PED_LATCH2:      DPRINT("LATCH2    "); break;
-      case PED_ANALOG:      DPRINT("ANALOG    "); break;
-      case PED_JOG_WHEEL:   DPRINT("JOG_WHEEL "); break;
+      case PED_MOMENTARY1:  DPRINTF("MOMENTARY1"); break;
+      case PED_MOMENTARY2:  DPRINTF("MOMENTARY2"); break;
+      case PED_MOMENTARY3:  DPRINTF("MOMENTARY3"); break;
+      case PED_LATCH1:      DPRINTF("LATCH1    "); break;
+      case PED_LATCH2:      DPRINTF("LATCH2    "); break;
+      case PED_ANALOG:      DPRINTF("ANALOG    "); break;
+      case PED_JOG_WHEEL:   DPRINTF("JOG_WHEEL "); break;
     }
-    DPRINT("   ");
+    DPRINTF("   ");
     switch (pedals[i].pressMode) {
-      case PED_PRESS_1:     DPRINT("PRESS_1    "); break;
-      case PED_PRESS_2:     DPRINT("PRESS_2    "); break;
-      case PED_PRESS_L:     DPRINT("PRESS_L    "); break;
-      case PED_PRESS_1_2:   DPRINT("PRESS_1_2  "); break;
-      case PED_PRESS_1_L:   DPRINT("PRESS_1_L  "); break;
-      case PED_PRESS_1_2_L: DPRINT("PRESS_1_2_L"); break;
-      case PED_PRESS_2_L:   DPRINT("PRESS_2_L  "); break;
+      case PED_PRESS_1:     DPRINTF("PRESS_1    "); break;
+      case PED_PRESS_2:     DPRINTF("PRESS_2    "); break;
+      case PED_PRESS_L:     DPRINTF("PRESS_L    "); break;
+      case PED_PRESS_1_2:   DPRINTF("PRESS_1_2  "); break;
+      case PED_PRESS_1_L:   DPRINTF("PRESS_1_L  "); break;
+      case PED_PRESS_1_2_L: DPRINTF("PRESS_1_2_L"); break;
+      case PED_PRESS_2_L:   DPRINTF("PRESS_2_L  "); break;
     }
-    DPRINT("   ");
+    DPRINTF("   ");
     switch (pedals[i].invertPolarity) {
-      case false:           DPRINT("POLARITY+"); break;
-      case true:            DPRINT("POLARITY-"); break;
+      case false:           DPRINTF("POLARITY+"); break;
+      case true:            DPRINTF("POLARITY-"); break;
     }
-    DPRINT("   ");
+    DPRINTF("   ");
     switch (banks[currentBank][i].midiMessage) {
       case PED_PROGRAM_CHANGE:
-        DPRINT("PROGRAM_CHANGE ");
+        DPRINTF("PROGRAM_CHANGE ");
         DPRINT(banks[currentBank][i].midiCode);
         break;
       case PED_CONTROL_CHANGE:
-        DPRINT("CONTROL_CHANGE ");
+        DPRINTF("CONTROL_CHANGE ");
         DPRINT(banks[currentBank][i].midiCode);
         break;
       case PED_NOTE_ON_OFF:
-        DPRINT("NOTE_ON_OFF    ");
+        DPRINTF("NOTE_ON_OFF    ");
         DPRINT(banks[currentBank][i].midiCode);
         break;
       case PED_PITCH_BEND:
-        DPRINT("PITCH_BEND     ");
+        DPRINTF("PITCH_BEND     ");
         break;
     }
-    DPRINT("   Channel ");
+    DPRINTF("   Channel ");
     DPRINT(banks[currentBank][i].midiChannel);
 
     switch (pedals[i].mode) {
@@ -245,7 +246,7 @@ void controller_setup()
 
               // After setting up the button, setup the Bounce instance
               pedals[i].debouncer[0]->attach(PIN_D(i));
-              DPRINT("   Pin D");
+              DPRINTF("   Pin D");
               DPRINT(PIN_D(i));
               break;
             case 1:
@@ -254,7 +255,7 @@ void controller_setup()
 
               // After setting up the button, setup the Bounce instance
               pedals[i].debouncer[1]->attach(PIN_A(i));
-              DPRINT(" A");
+              DPRINTF(" A");
               DPRINT(i);
               break;
           }
@@ -335,7 +336,7 @@ void controller_setup()
       case PED_JOG_WHEEL:
         break;
     }
-    DPRINTLN("");
+    DPRINTLNF("");
   }
 }
 
@@ -348,11 +349,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 
       if (on_off && value > 0) {
 #ifdef DEBUG_PEDALINO
-        DPRINT("     NOTE ON     Note ");
+        DPRINTF("     NOTE ON     Note ");
         DPRINT(code);
-        DPRINT("     Velocity ");
+        DPRINTF("     Velocity ");
         DPRINT(value);
-        DPRINT("     Channel ");
+        DPRINTF("     Channel ");
         DPRINT(channel);
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(code, value, channel);
@@ -363,11 +364,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
       }
       else {
 #ifdef DEBUG_PEDALINO
-        DPRINT("     NOTE OFF    Note ");
+        DPRINTF("     NOTE OFF    Note ");
         DPRINT(code);
-        DPRINT("     Velocity ");
+        DPRINTF("     Velocity ");
         DPRINT(value);
-        DPRINT("     Channel ");
+        DPRINTF("     Channel ");
         DPRINT(channel);
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(code, value, channel);
@@ -382,11 +383,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 
       if (on_off) {
 #ifdef DEBUG_PEDALINO
-        DPRINT("     CONTROL CHANGE     Code ");
+        DPRINTF("     CONTROL CHANGE     Code ");
         DPRINT(code);
-        DPRINT("     Value ");
+        DPRINTF("     Value ");
         DPRINT(value);
-        DPRINT("     Channel ");
+        DPRINTF("     Channel ");
         DPRINT(channel);
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(code, value, channel);
@@ -401,9 +402,9 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 
       if (on_off) {
 #ifdef DEBUG_PEDALINO
-        DPRINT("     PROGRAM CHANGE     Program ");
+        DPRINTF("     PROGRAM CHANGE     Program ");
         DPRINT(code);
-        DPRINT("     Channel ");
+        DPRINTF("     Channel ");
         DPRINT(channel);
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(code, channel);
@@ -419,9 +420,9 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
       if (on_off) {
         int bend = map(value, 0, 127, - 8192, 8191);
 #ifdef DEBUG_PEDALINO
-        DPRINT("     PITCH BEND     Value ");
+        DPRINTF("     PITCH BEND     Value ");
         DPRINT(bend);
-        DPRINT("     Channel ");
+        DPRINTF("     Channel ");
         DPRINT(channel);
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, channel);
@@ -467,13 +468,13 @@ void midi_refresh()
                 if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;        // invert the value
                 value = map_digital(i, input);                                            // apply the digital map function to the value
 
-                DPRINTLN("");
-                DPRINT("Pedal ");
-                if (i < 9) DPRINT(" ");
+                DPRINTLNF("");
+                DPRINTF("Pedal ");
+                if (i < 9) DPRINTF(" ");
                 DPRINT(i + 1);
-                DPRINT("   input ");
+                DPRINTF("   input ");
                 DPRINT(input);
-                DPRINT(" output ");
+                DPRINTF(" output ");
                 DPRINT(value);
 
                 b = (currentBank + 2) % BANKS;
@@ -500,13 +501,13 @@ void midi_refresh()
                   if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
                   value = map_digital(i, input);                                          // apply the digital map function to the value
 
-                  DPRINTLN("");
-                  DPRINT("Pedal ");
-                  if (i < 9) DPRINT(" ");
+                  DPRINTLNF("");
+                  DPRINTF("Pedal ");
+                  if (i < 9) DPRINTF(" ");
                   DPRINT(i + 1);
-                  DPRINT("   input ");
+                  DPRINTF("   input ");
                   DPRINT(input);
-                  DPRINT(" output ");
+                  DPRINTF(" output ");
                   DPRINT(value);
 
                   b = currentBank;
@@ -530,13 +531,13 @@ void midi_refresh()
                   if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
                   value = map_digital(i, input);                                          // apply the digital map function to the value
 
-                  DPRINTLN("");
-                  DPRINT("Pedal ");
-                  if (i < 9) DPRINT(" ");
+                  DPRINTLNF("");
+                  DPRINTF("Pedal ");
+                  if (i < 9) DPRINTF(" ");
                   DPRINT(i + 1);
-                  DPRINT("   input ");
+                  DPRINTF("   input ");
                   DPRINT(input);
-                  DPRINT(" output ");
+                  DPRINTF(" output ");
                   DPRINT(value);
 
                   b = (currentBank + 1) % BANKS;
@@ -589,11 +590,11 @@ void midi_refresh()
 
                   case MD_UISwitch::KEY_PRESS:
 
-                    DPRINTLN("");
-                    DPRINT("Pedal ");
-                    if (i < 9) DPRINT(" ");
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
                     DPRINT(i + 1);
-                    DPRINT("   SINGLE PRESS ");
+                    DPRINTF("   SINGLE PRESS ");
 
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel);
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel, false);
@@ -602,11 +603,11 @@ void midi_refresh()
 
                   case MD_UISwitch::KEY_DPRESS:
 
-                    DPRINTLN("");
-                    DPRINT("Pedal ");
-                    if (i < 9) DPRINT(" ");
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
                     DPRINT(i + 1);
-                    DPRINT("   DOUBLE PRESS ");
+                    DPRINTF("   DOUBLE PRESS ");
 
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel);
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel, false);
@@ -615,11 +616,11 @@ void midi_refresh()
 
                   case MD_UISwitch::KEY_LONGPRESS:
 
-                    DPRINTLN("");
-                    DPRINT("Pedal ");
-                    if (i < 9) DPRINT(" ");
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
                     DPRINT(i + 1);
-                    DPRINT("   LONG   PRESS ");
+                    DPRINTF("   LONG   PRESS ");
 
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel);
                     midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel, false);
@@ -641,20 +642,20 @@ void midi_refresh()
           if (pedals[i].autoSensing) {                              // continuos calibration
 
             if (pedals[i].expZero > round(1.1 * input)) {
-              DPRINT("Pedal ");
-              if (i < 9) DPRINT(" ");
+              DPRINTF("Pedal ");
+              if (i < 9) DPRINTF(" ");
               DPRINT(i + 1);
-              DPRINT(" calibration min ");
+              DPRINTF(" calibration min ");
               DPRINT(round(1.1 * input));
-              DPRINTLN("");
+              DPRINTLNF("");
             }
             if (pedals[i].expMax < round(0.9 * input)) {
-              DPRINT("Pedal ");
-              if (i < 9) DPRINT(" ");
+              DPRINTF("Pedal ");
+              if (i < 9) DPRINTF(" ");
               DPRINT(i + 1);
-              DPRINT(" calibration max ");
+              DPRINTF(" calibration max ");
               DPRINT(round(0.9 * input));
-              DPRINTLN("");
+              DPRINTLNF("");
             }
 
             pedals[i].expZero = min(pedals[i].expZero, round(1.1 * input));
@@ -669,15 +670,15 @@ void midi_refresh()
             value = pedals[i].analogPedal->getValue();              // get the responsive analog average value
             double velocity = ((double)value - pedals[i].pedalValue[0]) / (millis() - pedals[i].lastUpdate[0]);
 
-            DPRINTLN("");
-            DPRINT("Pedal ");
-            if (i < 9) DPRINT(" ");
+            DPRINTLNF("");
+            DPRINTF("Pedal ");
+            if (i < 9) DPRINTF(" ");
             DPRINT(i + 1);
-            DPRINT("   input ");
+            DPRINTF("   input ");
             DPRINT(input);
-            DPRINT(" output ");
+            DPRINTF(" output ");
             DPRINT(value);
-            DPRINT(" velocity ");
+            DPRINTF(" velocity ");
             DPRINT(velocity);
 
             midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);

@@ -1,12 +1,30 @@
-//  __________           .___      .__  .__                   ___ ________________    ___    
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  ) 
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /  
-//                 \/     \/     \/             \/           \__\                 \/  /__/   
-
+/*
+  //  __________           .___      .__  .__                   ___ ________________    ___
+  //  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \
+  //   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \
+  //   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+  //   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+  //                 \/     \/     \/             \/           \__\                 \/  /__/
+*/
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
+
+#ifdef DEBUG_PEDALINO
+#define SERIALDEBUG       Serial
+#define DPRINT(v)         SERIALDEBUG.print(v)
+#define DPRINTF(v)        SERIALDEBUG.print(F(v))
+#define DPRINT2(v, f)     SERIALDEBUG.print(v, f)
+#define DPRINTLN(v)       SERIALDEBUG.println(v)
+#define DPRINTLNF(v)      SERIALDEBUG.println(F(v))
+#define DPRINTLN2(v, f)   SERIALDEBUG.println(v, f)
+#else
+#define DPRINT(...)
+#define DPRINTF(...)
+#define DPRINT2(...)
+#define DPRINTLN(...)
+#define DPRINTLNF(...)
+#define DPRINTLN2(...)
+#endif
 
 #include <EEPROM.h>                     // https://www.arduino.cc/en/Reference/EEPROM
 #include <MIDI.h>                       // https://github.com/FortySevenEffects/arduino_midi_library
@@ -19,6 +37,20 @@
 #define BOUNCE_LOCK_OUT                 // This method is a lot more responsive, but does not cancel noise.
 //#define BOUNCE_WITH_PROMPT_DETECTION  // Report accurate switch time normally with no delay. Use when accurate switch transition timing is important.
 #include <Bounce2.h>                    // https://github.com/thomasfredericks/Bounce2
+
+//  Use Serial BLE modules (HM-10, HC-08) to connect your project to Blynk.
+#define BLYNK_USE_DIRECT_CONNECT
+//#define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
+//#define BLYNK_NO_FLOAT                  // Disable float operations
+#ifdef SERIALDEBUG
+#define BLYNK_DEBUG
+#define BLYNK_PRINT SERIALDEBUG
+#endif
+#include <BlynkSimpleSerialBLE.h>
+
+const char blynkAuthToken[] = "631daecc6f93498c8a6d807da366b698";
+WidgetLCD  blynkLCD(V0);
+BlynkTimer blynkTimer;
 
 #include "MidiTimeCode.h"
 
@@ -90,7 +122,7 @@
 #define PED_MTC_NONE            0
 #define PED_MTC_SLAVE           1
 #define PED_MTC_MASTER_24       2
-#define PED_MTC_MASTER_25       3 
+#define PED_MTC_MASTER_25       3
 #define PED_MTC_MASTER_30DF     4
 #define PED_MTC_MASTER_30       5
 #define PED_MIDI_CLOCK_SLAVE    6
@@ -263,7 +295,8 @@ enum IRCODES {IRC_ON_OFF = 0,
               IRC_KEY_8,
               IRC_KEY_9,
               IRC_KEY_0,
-              IR_CUSTOM_CODES};
+              IR_CUSTOM_CODES
+             };
 
 #define REPEAT_TO_SKIP  4     // Number of REPEAT codes to skip before start repeat
 
@@ -292,15 +325,6 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-
-#ifdef DEBUG_PEDALINO
-#define SERIALDEBUG       Serial
-#define DPRINT(...)       SERIALDEBUG.print(__VA_ARGS__)      //DPRINT is a macro, debug print
-#define DPRINTLN(...)     SERIALDEBUG.println(__VA_ARGS__)    //DPRINTLN is a macro, debug print with new line
-#else
-#define DPRINT(...)     //now defines a blank line
-#define DPRINTLN(...)   //now defines a blank line
-#endif
 
 #endif // _PEDALINO_H
 

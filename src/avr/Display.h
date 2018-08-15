@@ -80,7 +80,7 @@ void screen_update(bool force = false) {
       strncpy(screen1, buf, LCD_COLS);
       lcd.setCursor(0, 0);
       lcd.print(buf);
-      serialize_lcd1(buf);
+      blynkLCD.print(0, 0, buf);
     }
     
     // Line 2
@@ -98,7 +98,7 @@ void screen_update(bool force = false) {
       // replace unprintable chars
       for (byte i = 0; i < LCD_COLS; i++)
         buf[i] = (buf[i] == -1) ? '>' : buf[i];
-      serialize_lcd2(buf);
+      blynkLCD.print(0, 1, buf);
     }
     
     if (selectBank) {

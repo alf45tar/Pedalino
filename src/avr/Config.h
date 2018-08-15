@@ -101,7 +101,7 @@ void update_eeprom() {
 
   int offset = 0;
 
-  DPRINTLN("Updating EEPROM ... ");
+  DPRINTLNF("Updating EEPROM ... ");
 
   EEPROM.put(offset, SIGNATURE);
   offset += sizeof(SIGNATURE);
@@ -156,63 +156,63 @@ void update_eeprom() {
     offset += sizeof(byte);
   }
 
-  DPRINT("[0x");
-  DPRINT(offset, HEX);
-  DPRINT("] ");
+  DPRINTF("[0x");
+  DPRINT2(offset, HEX);
+  DPRINTF("] ");
   EEPROM.put(offset, currentBank);
   offset += sizeof(byte);
-  DPRINT("Current bank:      0x");
-  DPRINTLN(currentBank, HEX);
+  DPRINTF("Current bank:      0x");
+  DPRINTLN2(currentBank, HEX);
 
-  DPRINT("[0x");
-  DPRINT(offset, HEX);
-  DPRINT("] ");
+  DPRINTF("[0x");
+  DPRINT2(offset, HEX);
+  DPRINTF("] ");
   EEPROM.put(offset, currentPedal);
   offset += sizeof(byte);
-  DPRINT("Current pedal:     0x");
-  DPRINTLN(currentPedal, HEX);
+  DPRINTF("Current pedal:     0x");
+  DPRINTLN2(currentPedal, HEX);
 
-  DPRINT("[0x");
-  DPRINT(offset, HEX);
-  DPRINT("] ");
+  DPRINTF("[0x");
+  DPRINT2(offset, HEX);
+  DPRINTF("] ");
   EEPROM.put(offset, currentInterface);
   offset += sizeof(byte);
-  DPRINT("Current interface: 0x");
-  DPRINTLN(currentInterface, HEX);
+  DPRINTF("Current interface: 0x");
+  DPRINTLN2(currentInterface, HEX);
 
-  DPRINT("[0x");
-  DPRINT(offset, HEX);
-  DPRINT("] ");
+  DPRINTF("[0x");
+  DPRINT2(offset, HEX);
+  DPRINTF("] ");
   EEPROM.put(offset, currentMidiTimeCode);
   offset += sizeof(byte);
-  DPRINT("Current MTC:       0x");
-  DPRINTLN(currentMidiTimeCode, HEX);
+  DPRINTF("Current MTC:       0x");
+  DPRINTLN2(currentMidiTimeCode, HEX);
 
-  DPRINT("[0x");
-  DPRINT(offset, HEX);
-  DPRINT("] ");
+  DPRINTF("[0x");
+  DPRINT2(offset, HEX);
+  DPRINTF("] ");
   EEPROM.put(offset, backlight);
   offset += sizeof(byte);
-  DPRINT("Backlight:         0x");
-  DPRINTLN(backlight, HEX);
+  DPRINTF("Backlight:         0x");
+  DPRINTLN2(backlight, HEX);
 
   for (byte c = 0; c < IR_CUSTOM_CODES; c++) {
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.put(offset, ircustomcode[c]);
     offset += sizeof(unsigned long);
-    DPRINT("IR Code ");
-    if (c < 10) DPRINT(" ");
+    DPRINTF("IR Code ");
+    if (c < 10) DPRINTF(" ");
     DPRINT(c);
-    DPRINT(":        0x");
-    DPRINTLN(ircustomcode[c], HEX);
+    DPRINTF(":        0x");
+    DPRINTLN2(ircustomcode[c], HEX);
   }
 
   DPRINT(offset);
-  DPRINT(" bytes of ");
+  DPRINTF(" bytes of ");
   DPRINT(EEPROM.length());
-  DPRINTLN(" updated.");
+  DPRINTLNF(" updated.");
 }
 
 
@@ -232,14 +232,14 @@ void read_eeprom() {
   EEPROM.get(offset, saved_version);
   offset += sizeof(byte);
 
-  DPRINT("EEPROM signature: ");
+  DPRINTF("EEPROM signature: ");
   DPRINTLN(signature);
-  DPRINT("EEPROM version: ");
+  DPRINTF("EEPROM version: ");
   DPRINTLN(saved_version);
 
   if ((strcmp(signature, SIGNATURE) == 0) && (saved_version == EEPROM_VERSION)) {
 
-    DPRINTLN("Reading EEPROM ... ");
+    DPRINTLNF("Reading EEPROM ... ");
 
     for (byte b = 0; b < BANKS; b++)
       for (byte p = 0; p < PEDALS; p++) {
@@ -289,66 +289,66 @@ void read_eeprom() {
       offset += sizeof(byte);
     }
 
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.get(offset, currentBank);
     currentBank = constrain(currentBank, 0, BANKS - 1);
     offset += sizeof(byte);
-    DPRINT("Current bank:      0x");
-    DPRINTLN(currentBank, HEX);
+    DPRINTF("Current bank:      0x");
+    DPRINTLN2(currentBank, HEX);
 
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.get(offset, currentPedal);
     currentPedal = constrain(currentPedal, 0, PEDALS - 1);
     offset += sizeof(byte);
-    DPRINT("Current pedal:     0x");
-    DPRINTLN(currentPedal, HEX);
+    DPRINTF("Current pedal:     0x");
+    DPRINTLN2(currentPedal, HEX);
 
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.get(offset, currentInterface);
     currentInterface = constrain(currentInterface, 0, INTERFACES - 1);
     offset += sizeof(byte);
-    DPRINT("Current interface: 0x");
-    DPRINTLN(currentInterface, HEX);
+    DPRINTF("Current interface: 0x");
+    DPRINTLN2(currentInterface, HEX);
 
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.get(offset, currentMidiTimeCode);
     offset += sizeof(byte);
-    DPRINT("Current MTC:       0x");
-    DPRINTLN(currentMidiTimeCode, HEX);
+    DPRINTF("Current MTC:       0x");
+    DPRINTLN2(currentMidiTimeCode, HEX);
 
-    DPRINT("[0x");
-    DPRINT(offset, HEX);
-    DPRINT("] ");
+    DPRINTF("[0x");
+    DPRINT2(offset, HEX);
+    DPRINTF("] ");
     EEPROM.get(offset, backlight);
     offset += sizeof(byte);
-    DPRINT("Backlight:         0x");
-    DPRINTLN(backlight, HEX);
+    DPRINTF("Backlight:         0x");
+    DPRINTLN2(backlight, HEX);
 
     for (byte c = 0; c < IR_CUSTOM_CODES; c++) {
-      DPRINT("[0x");
-      DPRINT(offset, HEX);
-      DPRINT("] ");
+      DPRINTF("[0x");
+      DPRINT2(offset, HEX);
+      DPRINTF("] ");
       EEPROM.get(offset, ircustomcode[c]);
       offset += sizeof(unsigned long);
-      DPRINT("IR Code ");
-      if (c < 10) DPRINT(" ");
+      DPRINTF("IR Code ");
+      if (c < 10) DPRINTF(" ");
       DPRINT(c);
-      DPRINT(":        0x");
-      DPRINTLN(ircustomcode[c], HEX);
+      DPRINTF(":        0x");
+      DPRINTLN2(ircustomcode[c], HEX);
     }
 
     DPRINT(offset);
-    DPRINT(" bytes of ");
+    DPRINTF(" bytes of ");
     DPRINT(EEPROM.length());
-    DPRINTLN(" read.");
+    DPRINTLNF(" read.");
   }
 }
 
