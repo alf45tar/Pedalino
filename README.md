@@ -8,7 +8,7 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 # Pedalino™
 Smart wireless MIDI foot controller for guitarists and more.
 
-- High customizable
+- High customizable using iOS or Android app
 - Multi purpose
 - Battery operated
 - 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN MIDI IN and MIDI OUT connectors)
