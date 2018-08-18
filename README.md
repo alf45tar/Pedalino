@@ -3,9 +3,7 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 
 **Status:** Working but under active development. Anything can be changed without advance notice.
 
-![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
-
-![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-bank.png) ![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-pedal.png) ![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-interface.png)
+[![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
 # Pedalino™
 Smart wireless MIDI foot controller for guitarists and more.
@@ -56,6 +54,14 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Use any spare IR remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
 - Firmware update via HTTP (http://pedalino.local/update)
+
+## iOS and Android App
+
+The app is on the way. Here some images.
+
+![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-bank.png)
+![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-pedal.png)
+![](https://github.com/alf45tar/Pedalino/blob/master/images/ios-interface.png)
 
 ## Bill of materials
 
