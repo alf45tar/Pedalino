@@ -7,7 +7,7 @@
   //                 \/     \/     \/             \/           \__\                 \/  /__/
 */
 
-#define DEBUG_PEDALINO
+//#define DEBUG_PEDALINO
 
 #include "Pedalino.h"
 #include "Serialize.h"
@@ -95,10 +95,17 @@ void setup(void)
 
   bluetooth.begin(9600);                              // Start the Bluetooth receiver
   bluetooth.println(F("AT+NAME=PedalinoMega"));       // Set bluetooth device name
-  Blynk.begin(bluetooth, blynkAuthToken);
+  //Serial.begin(9600);
+  //Blynk.begin(Serial, blynkAuthToken);
+  //Blynk.begin(bluetooth, blynkAuthToken);
   //Blynk.config(bluetooth, blynkAuthToken);
-  blynkTimer.setInterval(1000L, myTimerEvent);
-  Blynk.notify("{DEVICE_NAME} is connected!");
+
+  Serial1.begin(115200);
+  delay(10);
+
+  Blynk.begin(blynkAuthToken, wifi, "MyGuest", "0123456789");
+  //blynkTimer.setInterval(3000L, myTimerEvent);
+  //Blynk.notify("{DEVICE_NAME} is connected!");
 
   display(MD_Menu::DISP_INIT);
   M.begin();
@@ -132,7 +139,7 @@ void loop(void)
   M.runMenu();   // just run the menu code
 
   Blynk.run();
-  blynkTimer.run();
+  //blynkTimer.run();
 
   // Check whether the input has changed since last time, if so, send the new value over MIDI
   midi_refresh();

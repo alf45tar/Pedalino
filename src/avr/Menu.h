@@ -112,7 +112,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
   // Options
   { 80, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
-  { 81, "Remote Control",  MD_Menu::MNU_INPUT, II_IRLEARN },
+  { 81, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
   { 82, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
   { 83, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
   { 84, "MIDI Time Code",  MD_Menu::MNU_INPUT, II_MIDITIMECODE },

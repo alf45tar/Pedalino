@@ -662,7 +662,7 @@ void midi_refresh()
             pedals[i].expMax  = max(pedals[i].expMax,  round(0.9 * input));
           }
           value = map_analog(i, input);                             // apply the digital map function to the value
-          if (pedals[i].invertPolarity) input = ADC_RESOLUTION - 1 - input;   // invert the scale
+          if (pedals[i].invertPolarity) value = ADC_RESOLUTION - 1 - value;   // invert the scale
           value = value >> 3;                                       // map from 10-bit value [0, 1023] to the 7-bit MIDI value [0, 127]
           pedals[i].analogPedal->update(value);                     // update the responsive analog average
           if (pedals[i].analogPedal->hasChanged())                  // if the value changed since last time
