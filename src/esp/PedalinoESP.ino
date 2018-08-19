@@ -1047,6 +1047,24 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
+String translateEncryptionType(wifi_auth_mode_t encryptionType) {
+
+  switch (encryptionType) {
+    case (WIFI_AUTH_OPEN):
+      return "Open";
+    case (WIFI_AUTH_WEP):
+      return "WEP";
+    case (WIFI_AUTH_WPA_PSK):
+      return "WPA_PSK";
+    case (WIFI_AUTH_WPA2_PSK):
+      return "WPA2_PSK";
+    case (WIFI_AUTH_WPA_WPA2_PSK):
+      return "WPA_WPA2_PSK";
+    case (WIFI_AUTH_WPA2_ENTERPRISE):
+      return "WPA2_ENTERPRISE";
+  }
+}
+
 void status_blink()
 {
   WIFI_LED_ON();
@@ -1125,12 +1143,42 @@ bool smart_config()
   }
 }
 
+bool ap_connect(String ssid = "", String password = "")
+{
+  // Return 'true' if connected to the access point within WIFI_CONNECT_TIMEOUT seconds
+
+  DPRINTLN("Connecting to");
+
+  DPRINTLN("SSID        : %s", ssid.c_str());
+  DPRINTLN("Password    : %s", password.c_str());
+
+  if (ssid.length() == 0) return false;
+
+  WiFi.disconnect();
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid.c_str(), password.c_str());
+  for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
+    status_blink();
+    delay(100);
+    status_blink();
+    delay(300);
+    DPRINT(".");
+  }
+
+  WiFi.status() == WL_CONNECTED ? WIFI_LED_ON() : WIFI_LED_OFF();
+
+  if (WiFi.status() == WL_CONNECTED)
+    DPRINTLN("[SUCCESS]");
+  else
+    DPRINTLN("[TIMEOUT]");
+
+  return WiFi.status() == WL_CONNECTED;
+}
+
+
 bool auto_reconnect(String ssid = "", String password = "")
 {
   // Return 'true' if connected to the (last used) access point within WIFI_CONNECT_TIMEOUT seconds
-
-  //String ssid;
-  //String password;
 
   if (ssid.length() == 0) {
 
@@ -1312,15 +1360,24 @@ void midi_connect()
   AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
 }
 
+#define BLYNK_SCANWIFI      V91
+#define BLYNK_SSID          V92
+#define BLYNK_PASSWORD      V93
+#define BLYNK_WIFICONNECT   V94
+#define BLYNK_SMARTCONFIG   V95
+
+String ssid;
+String password;
+
 BLYNK_CONNECTED() {
   // This function is called when hardware connects to Blynk Cloud or private server.
   DPRINTLN("Connected to Blynk");
   blynkLCD.clear();
-  Blynk.virtualWrite(V90, (WiFi.isConnected()) ? 1 : 0);
-  Blynk.virtualWrite(V91, 0);
-  Blynk.setProperty(V92, "labels", "");
-  Blynk.virtualWrite(V93, "");
-  Blynk.virtualWrite(V95, 0);
+  Blynk.virtualWrite(BLYNK_WIFICONNECT, 0);
+  Blynk.virtualWrite(BLYNK_SCANWIFI, 0);
+  Blynk.setProperty(BLYNK_SSID, "labels", "");
+  Blynk.virtualWrite(BLYNK_PASSWORD, "");
+  Blynk.virtualWrite(BLYNK_SMARTCONFIG, 0);
 }
 
 BLYNK_APP_CONNECTED() {
@@ -1333,28 +1390,18 @@ BLYNK_APP_DISCONNECTED() {
   DPRINTLN("Blink App disconnected");
 }
 
-BLYNK_READ(V40) {
-  Blynk.virtualWrite(41, 4);
+
+BLYNK_WRITE(BLYNK_WIFICONNECT) {
+  WiFi.scanDelete();
+  if (ap_connect(ssid, password))
+    Blynk.connect();
+  else if (auto_reconnect())
+    Blynk.connect();
+  Blynk.virtualWrite(BLYNK_WIFICONNECT, 0);
 }
 
-BLYNK_WRITE(V40) {
-  int interface = param.asInt();
-  switch (interface) {
-    case 1: // USB
-    case 2: // DIN
-    case 3: // RTP
-    case 4: // BLE
-      //currentInterface = interface - 1;
-      DPRINTLN("%d", interface);
-      break;
-  }
-}
-
-BLYNK_READ(V90) {
-  Blynk.virtualWrite(V90, (WiFi.isConnected()) ? 1 : 0);
-}
-
-BLYNK_WRITE(V90) {
+/*
+  BLYNK_WRITE(BLYNK_WIFISTATUS) {
   int wifiOnOff = param.asInt();
   switch (wifiOnOff) {
     case 0: // OFF
@@ -1367,14 +1414,10 @@ BLYNK_WRITE(V90) {
       Blynk.connect();
       break;
   }
-}
+  }
+*/
 
-BLYNK_READ(V91) {
-  Blynk.virtualWrite(90, 0);
-}
-
-
-BLYNK_WRITE(V91) {
+BLYNK_WRITE(BLYNK_SCANWIFI) {
   int scan = param.asInt();
   if (scan) {
     DPRINTLN("WiFi Scan started");
@@ -1386,32 +1429,36 @@ BLYNK_WRITE(V91) {
       DPRINTLN("%d network(s) found", networksFound);
       BlynkParamAllocated items(512); // list length, in bytes
       for (int i = 0; i < networksFound; i++) {
-        DPRINTLN("%2d. %s %s Ch:%d %d dBm", i + 1, WiFi.BSSIDstr(i).c_str(), WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i));
+        DPRINTLN("%2d.\n BSSID: %s\n SSID: %s\n Channel: %d\n Signal: %d dBm\n Auth Mode: %s", i + 1, WiFi.BSSIDstr(i).c_str(), WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i), translateEncryptionType(WiFi.encryptionType(i)).c_str());
         items.add(WiFi.SSID(i).c_str());
       }
-      Blynk.setProperty(V92, "labels", items);
-      Blynk.virtualWrite(V91, 0);
-      DPRINTLN("Blink updated");
+      Blynk.setProperty(BLYNK_SSID, "labels", items);
+      if (networksFound > 0) {
+        Blynk.virtualWrite(BLYNK_SSID, 1);
+        ssid = WiFi.SSID(0);
+      }
+      Blynk.virtualWrite(BLYNK_SCANWIFI, 0);
     }
   }
 }
 
-BLYNK_WRITE(V92) {
+BLYNK_WRITE(BLYNK_SSID) {
   int i = param.asInt();
-  auto_reconnect(WiFi.SSID(i), "");
+  ssid = WiFi.SSID(i - 1);
+  DPRINTLN("SSID     : %s", ssid.c_str());
 }
 
-BLYNK_WRITE(V93) {
-
+BLYNK_WRITE(BLYNK_PASSWORD) {
+  password = param.asStr();
+  DPRINTLN("Password : %s", password.c_str());
 }
 
-BLYNK_WRITE(V95) {
+BLYNK_WRITE(BLYNK_SMARTCONFIG) {
   int smartconfig = param.asInt();
   if (smartconfig) {
     smart_config();
-    if (auto_reconnect()) {
+    if (auto_reconnect())
       Blynk.connect();
-    }
   }
 }
 
