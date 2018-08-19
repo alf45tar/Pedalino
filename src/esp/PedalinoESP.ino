@@ -1047,6 +1047,7 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
+#ifdef ARDUINO_ARCH_ESP32
 String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 
   switch (encryptionType) {
@@ -1064,6 +1065,7 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
       return "WPA2_ENTERPRISE";
   }
 }
+#endif
 
 void status_blink()
 {
@@ -1429,7 +1431,9 @@ BLYNK_WRITE(BLYNK_SCANWIFI) {
       DPRINTLN("%d network(s) found", networksFound);
       BlynkParamAllocated items(512); // list length, in bytes
       for (int i = 0; i < networksFound; i++) {
+#ifdef ARDUINO_ARCH_ESP32
         DPRINTLN("%2d.\n BSSID: %s\n SSID: %s\n Channel: %d\n Signal: %d dBm\n Auth Mode: %s", i + 1, WiFi.BSSIDstr(i).c_str(), WiFi.SSID(i).c_str(), WiFi.channel(i), WiFi.RSSI(i), translateEncryptionType(WiFi.encryptionType(i)).c_str());
+#endif
         items.add(WiFi.SSID(i).c_str());
       }
       Blynk.setProperty(BLYNK_SSID, "labels", items);
