@@ -103,7 +103,7 @@ The rest is not mandatory but it depends of which features you want to support.
   - [IRremore](https://github.com/z3t0/Arduino-IRremote) library
   
 - Bluetooth Remote Control
-  - ZS-040 breakout board based on HM-10 (or copycat HC-08) Bluetooth UART Communication Module
+  - HM-10 (or compatible like HC-08) Bluetooth UART Communication Module
 
 ## Pedalino™ Breadboard Prototype
 
