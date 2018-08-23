@@ -1,3 +1,26 @@
+//  __________           .___      .__  .__                   ___ ________________    ___
+//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+//                 \/     \/     \/             \/           \__\                 \/  /__/
+//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+
+//
+//  Use Serial BLE modules (HM-10, HC-08) to connect your project to Blynk.
+
+#define BLYNK_USE_DIRECT_CONNECT
+//#define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
+//#define BLYNK_NO_FLOAT                  // Disable float operations
+
+#ifdef SERIALDEBUG
+#define BLYNK_PRINT SERIALDEBUG
+#endif
+
+#include <BlynkSimpleSerialBLE.h>
+//#include <ESP8266_Lib.h>
+//#include <BlynkSimpleShieldEsp8266.h>
+
 #define BLYNK_BANK                  V20
 #define BLYNK_MIDIMESSAGE           V21
 #define BLYNK_MIDICHANNEL           V22
@@ -24,6 +47,12 @@
 #define BLINK_INTERFACE_MIDIROUTING V44
 
 #define PRINT_VIRTUAL_PIN(vPin)     { DPRINTF("WRITE VirtualPIN "); DPRINT(vPin); }
+
+//ESP8266 wifi(&Serial1);
+
+const char blynkAuthToken[] = "631daecc6f93498c8a6d807da366b698";
+WidgetLCD  blynkLCD(V0);
+
 
 void blynk_refresh()
 {

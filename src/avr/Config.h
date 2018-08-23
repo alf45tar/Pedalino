@@ -1,5 +1,14 @@
+//  __________           .___      .__  .__                   ___ ________________    ___
+//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+//                 \/     \/     \/             \/           \__\                 \/  /__/
+//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
 
-#define EEPROM_VERSION    5     // Increment each time you change the eeprom structure
+
+#define SIGNATURE         "Pedalino(TM)"
+#define EEPROM_VERSION    5               // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -234,7 +243,7 @@ void read_eeprom() {
 
   DPRINTF("EEPROM signature: ");
   DPRINTLN(signature);
-  DPRINTF("EEPROM version: ");
+  DPRINTF("EEPROM version  : ");
   DPRINTLN(saved_version);
 
   if ((strcmp(signature, SIGNATURE) == 0) && (saved_version == EEPROM_VERSION)) {

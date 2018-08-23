@@ -1,4 +1,13 @@
-const PROGMEM char listMidiControlChange[] = ""
+//  __________           .___      .__  .__                   ___ ________________    ___
+//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+//                 \/     \/     \/             \/           \__\                 \/  /__/
+//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+
+
+const PROGMEM char listMidiControlChange[] =
     "00 Bank Select|"
     "01 Modulation |"
     "02 Breath Cont|"

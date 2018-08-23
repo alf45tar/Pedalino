@@ -1,11 +1,11 @@
-/*
-  //  __________           .___      .__  .__                   ___ ________________    ___
-  //  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \
-  //   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \
-  //   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-  //   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-  //                 \/     \/     \/             \/           \__\                 \/  /__/
-*/
+//  __________           .___      .__  .__                   ___ ________________    ___
+//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+//                 \/     \/     \/             \/           \__\                 \/  /__/
+//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
 
@@ -38,29 +38,7 @@
 //#define BOUNCE_WITH_PROMPT_DETECTION  // Report accurate switch time normally with no delay. Use when accurate switch transition timing is important.
 #include <Bounce2.h>                    // https://github.com/thomasfredericks/Bounce2
 
-//  Use Serial BLE modules (HM-10, HC-08) to connect your project to Blynk.
-//#define BLYNK_USE_DIRECT_CONNECT
-//#define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
-//#define BLYNK_NO_FLOAT                  // Disable float operations
-#ifdef SERIALDEBUG
-//#define BLYNK_DEBUG
-#define BLYNK_PRINT SERIALDEBUG
-#endif
-//#include <BlynkSimpleSerialBLE.h>
-//#include <BlynkSimpleStream.h>
-
-#include <ESP8266_Lib.h>
-#include <BlynkSimpleShieldEsp8266.h>
-
-ESP8266 wifi(&Serial1);
-
-const char blynkAuthToken[] = "631daecc6f93498c8a6d807da366b698";
-WidgetLCD  blynkLCD(V0);
-//BlynkTimer blynkTimer;
-
 #include "MidiTimeCode.h"
-
-#define SIGNATURE "Pedalino(TM)"
 
 #define BANKS             10
 
@@ -245,8 +223,8 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 #define  LCD_BACKLIGHT  44    // PWM works only on 2-13, 44, 45, 46
 #define  LCD_CONTRAST   46    // PWM works only on 2-13, 44, 45, 46
-#define  LCD_RS         48
-#define  LCD_ENA        50
+#define  LCD_RS         50
+#define  LCD_ENA        48
 #define  LCD_D4         42
 #define  LCD_D5         40
 #define  LCD_D6         38
