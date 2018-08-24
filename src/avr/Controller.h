@@ -140,10 +140,10 @@ void controller_setup()
 {
   // Delete previous setup
   for (byte i = 0; i < PEDALS; i++) {
-    delete pedals[i].debouncer[0];
-    delete pedals[i].debouncer[1];
-    delete pedals[i].footSwitch[0];
-    delete pedals[i].footSwitch[1];
+    //delete pedals[i].debouncer[0];
+    //delete pedals[i].debouncer[1];
+    //delete pedals[i].footSwitch[0];
+    //delete pedals[i].footSwitch[1];
     delete pedals[i].analogPedal;
   }
 
