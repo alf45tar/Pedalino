@@ -8,7 +8,6 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-
 #define DEBUG_PEDALINO
 #define BLYNK_DEBUG
 
@@ -20,7 +19,6 @@
 #include "BlynkRPC.h"
 #include "Display.h"
 #include "Menu.h"
-
 
 // Standard setup() and loop()
 
@@ -62,10 +60,10 @@ void setup(void)
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
 
-  irrecv.enableIRIn();                                // Start the IR receiver
+  irrecv.enableIRIn(); // Start the IR receiver
   irrecv.blink13(true);
 
-  bluetooth.begin(9600);                              // Start the Bluetooth receiver
+  bluetooth.begin(9600); // Start the Bluetooth receiver
   //bluetooth.println(F("AT+NAME=PedalinoMega"));       // Set bluetooth device name
   //Serial.begin(9600);
   //Blynk.begin(Serial, blynkAuthToken);
@@ -80,12 +78,11 @@ void setup(void)
   menu_setup();
 }
 
-
 void loop(void)
 {
   // Display menu on request
   menu_run();
-  
+
   // Process Blynk messages
   Blynk.run();
 
@@ -93,4 +90,3 @@ void loop(void)
   midi_refresh();
   midi_routing();
 }
-

@@ -290,7 +290,7 @@ Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashe
 
 Board|Microcontroller|Firmware|Flashing software|Flashing hardware
 -----|-----|-----|-----|-----
-Arduino Mega 2560|ATmega2560<br>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/Pedalino)<br>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)<br>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
+Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/Pedalino)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
 ESP-01S|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|Arduino Mega
 NodeMCU DEVKIT V1.0|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|None
 DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/PedalinoESP)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)|None
