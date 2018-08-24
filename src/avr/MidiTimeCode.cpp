@@ -1,10 +1,12 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
-//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+/*  __________           .___      .__  .__                   ___ ________________    ___
+ *  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+ *   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+ *   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+ *   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+ *                 \/     \/     \/             \/           \__\                 \/  /__/
+ *                                                                (c) 2018 alf45star
+ *                                                        https://github.com/alf45tar/Pedalino
+ */
 
 //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /*
 // Thanks to https://github.com/adanselm/padchokola
@@ -269,7 +271,7 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
   }
 }
 
-void MidiTimeCode::decodeMTCFullFrame(unsigned size, byte* array)
+void MidiTimeCode::decodeMTCFullFrame(unsigned size, const byte* array)
 {
   /// F0 7F cc 01 01 hr mn sc fr F7
   // cc -> channel (0x7f to broadcast)

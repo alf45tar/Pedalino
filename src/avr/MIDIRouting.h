@@ -1,10 +1,12 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
-//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+/*  __________           .___      .__  .__                   ___ ________________    ___
+ *  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+ *   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+ *   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+ *   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+ *                 \/     \/     \/             \/           \__\                 \/  /__/
+ *                                                                (c) 2018 alf45star
+ *                                                        https://github.com/alf45tar/Pedalino
+ */
 
 //
 // Forward messages received from one MIDI interface to the others
@@ -63,8 +65,8 @@ void OnUsbMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OnUsbMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
-  DIN_MIDI.sendPolyPressure(note, pressure, channel);
-  RTP_MIDI.sendPolyPressure(note, pressure, channel);
+  DIN_MIDI.sendAfterTouch(note, pressure, channel);
+  RTP_MIDI.sendAfterTouch(note, pressure, channel);
 }
 
 void OnUsbMidiControlChange(byte channel, byte number, byte value)
@@ -180,8 +182,8 @@ void OnDinMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OnDinMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
-  USB_MIDI.sendPolyPressure(note, pressure, channel);
-  RTP_MIDI.sendPolyPressure(note, pressure, channel);
+  USB_MIDI.sendAfterTouch(note, pressure, channel);
+  RTP_MIDI.sendAfterTouch(note, pressure, channel);
 }
 
 void OnDinMidiControlChange(byte channel, byte number, byte value)
@@ -297,8 +299,8 @@ void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 {
-  USB_MIDI.sendPolyPressure(note, pressure, channel);
-  DIN_MIDI.sendPolyPressure(note, pressure, channel);
+  USB_MIDI.sendAfterTouch(note, pressure, channel);
+  DIN_MIDI.sendAfterTouch(note, pressure, channel);
 }
 
 void OnAppleMidiReceiveControlChange(byte channel, byte number, byte value)
@@ -325,7 +327,7 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
   DIN_MIDI.sendPitchBend(bend, channel);
 }
 
-void OnAppleMidiReceiveSysEx(const byte * data, uint16_t size)
+void OnAppleMidiReceiveSysEx(byte *data, unsigned int size)
 {
   USB_MIDI.sendSysEx(size, data);
   DIN_MIDI.sendSysEx(size, data);
@@ -339,7 +341,7 @@ void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)
   MTC.decodMTCQuarterFrame(data);
 }
 
-void OnAppleMidiReceiveSongPosition(unsigned short beats)
+void OnAppleMidiReceiveSongPosition(unsigned int beats)
 {
   USB_MIDI.sendSongPosition(beats);
   DIN_MIDI.sendSongPosition(beats);

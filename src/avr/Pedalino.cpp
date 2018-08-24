@@ -1,10 +1,12 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
-//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+/*  __________           .___      .__  .__                   ___ ________________    ___
+ *  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+ *   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+ *   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+ *   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+ *                 \/     \/     \/             \/           \__\                 \/  /__/
+ *                                                                (c) 2018 alf45star
+ *                                                        https://github.com/alf45tar/Pedalino
+ */
 
 
 #define DEBUG_PEDALINO
@@ -34,7 +36,8 @@ void setup(void)
   DPRINTLNF("   |    |   \\  ___// /_/ | / __ \\|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \\   )  )");
   DPRINTLNF("   |____|    \\___  >____ |(____  /____/__|___|  /\\____/   \\  \\    |____|\\____|__  /  /  /");
   DPRINTLNF("                 \\/     \\/     \\/             \\/           \\__\\                 \\/  /__/");
-  DPRINTLNF("   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star");
+  DPRINTLNF("                                                                (c) 2018 alf45star");
+  DPRINTLNF("                                                        https://github.com/alf45tar/Pedalino");
   DPRINTLNF("");
 
 #endif
@@ -53,40 +56,7 @@ void setup(void)
 
   autosensing_setup();
   controller_setup();
-  MTC.setup();
-  switch (currentMidiTimeCode) {
-
-    case PED_MTC_NONE:
-      DPRINTLNF("MTC None");
-      MTC.setMode(MidiTimeCode::SynchroNone);
-      break;
-
-    case PED_MTC_SLAVE:
-      DPRINTLNF("MTC Slave");
-      MTC.setMode(MidiTimeCode::SynchroMTCSlave);
-      break;
-
-    case PED_MTC_MASTER_24:
-    case PED_MTC_MASTER_25:
-    case PED_MTC_MASTER_30DF:
-    case PED_MTC_MASTER_30:
-      DPRINTLNF("MTC Master");
-      MTC.setMode(MidiTimeCode::SynchroMTCMaster);
-      MTC.sendPosition(0, 0, 0, 0);
-      break;
-
-    case PED_MIDI_CLOCK_SLAVE:
-      DPRINTLNF("MIDI Clock Slave");
-      MTC.setMode(MidiTimeCode::SynchroClockSlave);
-      bpm = 0;
-      break;
-
-    case PED_MIDI_CLOCK_MASTER:
-      DPRINTLNF("MIDI Clock Master");
-      MTC.setMode(MidiTimeCode::SynchroClockMaster);
-      MTC.setBpm(bpm);
-      break;
-  }
+  mtc_setup();
   midi_routing_start();
 
   pinMode(LCD_BACKLIGHT, OUTPUT);

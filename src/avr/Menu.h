@@ -1,10 +1,12 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
-//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+/*  __________           .___      .__  .__                   ___ ________________    ___
+ *  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+ *   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+ *   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+ *   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+ *                 \/     \/     \/             \/           \__\                 \/  /__/
+ *                                                                (c) 2018 alf45star
+ *                                                        https://github.com/alf45tar/Pedalino
+ */
 
 
 #include "NoteNumbers.h"
@@ -330,35 +332,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = currentMidiTimeCode;
       else {
         currentMidiTimeCode = vBuf.value;
-        switch (currentMidiTimeCode) {
-
-          case PED_MTC_NONE:
-            MTC.setMode(MidiTimeCode::SynchroNone);
-            break;
-
-          case PED_MTC_SLAVE:
-            MTC.setMode(MidiTimeCode::SynchroMTCSlave);
-            break;
-
-          case PED_MTC_MASTER_24:
-          case PED_MTC_MASTER_25:
-          case PED_MTC_MASTER_30DF:
-          case PED_MTC_MASTER_30:
-            MTC.setMode(MidiTimeCode::SynchroMTCMaster);
-            MTC.sendPosition(0, 0, 0, 0);
-            break;
-
-          case PED_MIDI_CLOCK_SLAVE:
-            MTC.setMode(MidiTimeCode::SynchroClockSlave);
-            bpm = 0;
-            break;
-
-          case PED_MIDI_CLOCK_MASTER:
-            MTC.setMode(MidiTimeCode::SynchroClockMaster);
-            bpm = 120;
-            MTC.setBpm(bpm);
-            break;
-        }
+        mtc_setup();
       }
       break;
 
@@ -490,7 +464,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (!bGet) {
         lcd.clear();
         // Sets all of the bytes of the EEPROM to 0.
-        for (int i = 0 ; i < EEPROM.length() ; i++) {
+        for (unsigned int i = 0 ; i < EEPROM.length() ; i++) {
           EEPROM.write(i, 0);
           lcd.setCursor(map(i, 0, EEPROM.length(), 0, LCD_COLS - 1), 0);
           lcd.print(char(B10100101));
@@ -731,6 +705,8 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case MD_UISwitch::KEY_LONGPRESS:
           if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
           break;
+        case MD_UISwitch::KEY_PRESS:
+          break;
       }
 
     if (pedals[i].footSwitch[1] != nullptr)
@@ -754,6 +730,8 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
           break;
         case MD_UISwitch::KEY_LONGPRESS:
           if (pedals[i].function == PED_MENU) return MD_Menu::NAV_ESC;
+          break;
+        case MD_UISwitch::KEY_PRESS:
           break;
       }
 

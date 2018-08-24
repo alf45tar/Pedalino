@@ -1,10 +1,12 @@
-//  __________           .___      .__  .__                   ___ ________________    ___
-//  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
-//   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
-//   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
-//   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
-//                 \/     \/     \/             \/           \__\                 \/  /__/
-//   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star
+/*  __________           .___      .__  .__                   ___ ________________    ___
+ *  \______   \ ____   __| _/____  |  | |__| ____   ____     /  / \__    ___/     \   \  \   
+ *   |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \   /  /    |    | /  \ /  \   \  \  
+ *   |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \   )  )
+ *   |____|    \___  >____ |(____  /____/__|___|  /\____/   \  \    |____|\____|__  /  /  /
+ *                 \/     \/     \/             \/           \__\                 \/  /__/
+ *                                                                (c) 2018 alf45star
+ *                                                        https://github.com/alf45tar/Pedalino
+ */
 
 
 #define LCD_LINE1_PERSISTENCE   1500;
@@ -29,11 +31,14 @@ char foot_char (byte footswitch)
   if (pedals[footswitch].function != PED_MIDI) return ' ';
   if ((footswitch == lastUsedPedal) ||
 
-      (pedals[footswitch].mode == PED_MOMENTARY1 || pedals[footswitch].mode == PED_LATCH1)
-      && pedals[footswitch].pedalValue[0] == LOW ||
+      ((pedals[footswitch].mode == PED_MOMENTARY1 ||
+        pedals[footswitch].mode == PED_LATCH1) && pedals[footswitch].pedalValue[0] == LOW) ||
 
-      (pedals[footswitch].mode == PED_MOMENTARY2 || pedals[footswitch].mode == PED_MOMENTARY3 || pedals[footswitch].mode == PED_LATCH2)
-      && (pedals[footswitch].pedalValue[0] == LOW || pedals[footswitch].pedalValue[1] == LOW)) return bar1[footswitch % 10];
+      ((pedals[footswitch].mode == PED_MOMENTARY2 ||
+        pedals[footswitch].mode == PED_MOMENTARY3 ||
+        pedals[footswitch].mode == PED_LATCH2) && pedals[footswitch].pedalValue[0] == LOW) ||
+        
+        pedals[footswitch].pedalValue[1] == LOW) return bar1[footswitch % 10];
   return ' ';
 }
 
