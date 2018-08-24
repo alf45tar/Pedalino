@@ -10,8 +10,8 @@
 #include "NoteNumbers.h"
 #include "ControlChange.h"
 
-const bool      AUTO_START = true;    // auto start the menu, manual detect and start if false
-const uint16_t  MENU_TIMEOUT = 5000;  // in milliseconds
+const bool      AUTO_START    = true;  // auto start the menu, manual detect and start if false
+const uint16_t  MENU_TIMEOUT  = 5000;  // in milliseconds
 
 
 // Function prototypes for Navigation/Display
@@ -911,3 +911,40 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   return MD_Menu::NAV_NULL;
 }
 
+
+void menu_setup() 
+{
+  display(MD_Menu::DISP_INIT);
+  M.begin();
+  M.setMenuWrap(true);
+  M.setAutoStart(AUTO_START);
+#ifdef MENU_TIMEOUT
+  M.setTimeout(MENU_TIMEOUT);
+#endif
+}
+
+
+void menu_run() 
+{
+  
+  static bool prevMenuRun = true;
+
+  // Detect if we need to initiate running normal user code
+  if (prevMenuRun && !M.isInMenu())
+    screen_update(true);
+  prevMenuRun = M.isInMenu();
+
+  // If we are not running and not autostart
+  // check if there is a reason to start the menu
+  if (!M.isInMenu() && !AUTO_START)
+  {
+    uint16_t dummy;
+
+    if (navigation(dummy) == MD_Menu::NAV_SEL)
+      M.runMenu(true);
+  }
+  if (!M.isInMenu()) screen_update();
+  else lcd.noCursor();
+
+  M.runMenu();   // just run the menu code
+}

@@ -107,37 +107,16 @@ void setup(void)
 
   //Blynk.begin(blynkAuthToken, wifi, "MyGuest", "0123456789");
 
-  display(MD_Menu::DISP_INIT);
-  M.begin();
-  M.setMenuWrap(true);
-  M.setAutoStart(AUTO_START);
-  //M.setTimeout(MENU_TIMEOUT);
+  menu_setup();
 }
 
 
 void loop(void)
 {
-  static bool prevMenuRun = true;
-
-  // Detect if we need to initiate running normal user code
-  if (prevMenuRun && !M.isInMenu())
-    screen_update(true);
-  prevMenuRun = M.isInMenu();
-
-  // If we are not running and not autostart
-  // check if there is a reason to start the menu
-  if (!M.isInMenu() && !AUTO_START)
-  {
-    uint16_t dummy;
-
-    if (navigation(dummy) == MD_Menu::NAV_SEL)
-      M.runMenu(true);
-  }
-  if (!M.isInMenu()) screen_update();
-  else lcd.noCursor();
-
-  M.runMenu();   // just run the menu code
-
+  // Display menu on request
+  menu_run();
+  
+  // Process Blynk messages
   Blynk.run();
 
   // Check whether the input has changed since last time, if so, send the new value over MIDI
