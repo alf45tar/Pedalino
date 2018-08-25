@@ -250,9 +250,7 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
 
     if (i == 7)
     {
-      byte frameType;
-
-      frameType = b[7] & 0x06;
+      //byte frameType = b[7] & 0x06;
 
       byte h = (b[7] & 0x01) << 4 | b[6];
       byte m = b[5] << 4 | b[4];
@@ -404,6 +402,11 @@ const float MidiTimeCode::tapTempo()
         bpm = mTapTempo.tap();
       }
       return bpm;
+
+    case SynchroNone:
+    case SynchroMTCMaster:
+    case SynchroMTCSlave:
+      break;
   }
 
   return 0.0f;
