@@ -454,8 +454,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
     case II_WIFIRESET:
       if (!bGet) {
-        const byte command[4] = {'+', 'R', 'S', 'T'};
-        RTP_MIDI.sendSysEx(4, command);
+        serialize_factory_default();
       }
       r = nullptr;
       break;
@@ -477,7 +476,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       break;
   }
 
-  if (!bGet && id != II_IRLEARN) {
+  if (!bGet && id != II_IRLEARN && id != II_WIFIRESET) {
     update_eeprom();
     controller_setup();
   }

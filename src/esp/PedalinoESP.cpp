@@ -98,7 +98,11 @@ RemoteDebug Debug;
 #endif
 
 #ifndef WIFI_LED
-#define WIFI_LED       LED_BUILTIN  // onboard LED, used as status indicator
+#define WIFI_LED        LED_BUILTIN  // onboard LED, used as status indicator
+#endif
+
+#ifndef BLE_LED
+#define BLE_LED         LED_BUILTIN  // onboard LED, used as status indicator
 #endif
 
 #ifndef DPRINT
@@ -812,9 +816,23 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     const char *lcdclear = root["lcd.clear"];
     const char *lcd1     = root["lcd1"];
     const char *lcd2     = root["lcd2"];
+    const char *factory_default = root["factory.default"];
     if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
+    if (factory_default) {
+#ifdef ARDUINO_ARCH_ESP32
+      int address = 0;
+      EEPROM.writeString(address, "");
+      address += 1;
+      EEPROM.writeString(address, "");
+      EEPROM.commit();
+      DPRINTLN("EEPROM clear");
+      DPRINTLN("ESP restart");
+      delay(1000);
+      ESP.restart();
+#endif
+}
     else {
       BLESendSystemExclusive(array, size);
       AppleMIDI.sysEx(array, size);
@@ -899,17 +917,13 @@ void OnSerialMidiSystemReset(void)
 void OnAppleMidiConnected(uint32_t ssrc, char* name)
 {
   appleMidiConnected  = true;
-#ifdef PEDALINO_TELNET_DEBUG
-  DEBUG("AppleMIDI Connected Session %d %s\n", ssrc, name);
-#endif
+  DPRINTLN("AppleMIDI Connected Session ID: %u Name: %s", ssrc, name);
 }
 
 void OnAppleMidiDisconnected(uint32_t ssrc)
 {
   appleMidiConnected  = false;
-#ifdef PEDALINO_TELNET_DEBUG
-  DEBUG("AppleMIDI Disonnected Session ID %d\n", ssrc);
-#endif
+  DPRINTLN("AppleMIDI Disconnected Session ID %u", ssrc);
 }
 
 void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
@@ -1072,7 +1086,11 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
       return "WPA_WPA2_PSK";
     case (WIFI_AUTH_WPA2_ENTERPRISE):
       return "WPA2_ENTERPRISE";
+    case (WIFI_AUTH_MAX):
+      return "";
   }
+
+  return "";
 }
 #endif
 
@@ -1088,16 +1106,24 @@ void ap_mode_start()
   WIFI_LED_OFF();
 
   WiFi.mode(WIFI_AP);
-  boolean result = WiFi.softAP("Pedalino");
-  DPRINTLN("AP mode started");
-  DPRINTLN("Connect to 'Pedalino' wireless with no password");
+  if (WiFi.softAP("Pedalino")) {
+    DPRINTLN("AP mode started");
+    DPRINTLN("Connect to 'Pedalino' wireless with no password");
+  }
+  else {
+    DPRINTLN("AP mode failed");
+  }
 }
 
 void ap_mode_stop()
 {
+  WIFI_LED_OFF();
+
   if (WiFi.getMode() == WIFI_AP) {
-    WiFi.softAPdisconnect();
-    WIFI_LED_OFF();
+    if (WiFi.softAPdisconnect())
+      DPRINTLN("AP mode disconnected");
+    else 
+      DPRINTLN("AP mode disconnected failed");
   }
 }
 
@@ -1121,7 +1147,7 @@ bool smart_config()
   for (int i = 0; i < SMART_CONFIG_TIMEOUT && !WiFi.smartConfigDone(); i++) {
     status_blink();
     delay(950);
-    DPRINT(".");
+    //DPRINT(".");
   }
 
   if (WiFi.smartConfigDone())
@@ -1159,7 +1185,6 @@ bool ap_connect(String ssid = "", String password = "")
   // Return 'true' if connected to the access point within WIFI_CONNECT_TIMEOUT seconds
 
   DPRINTLN("Connecting to");
-
   DPRINTLN("SSID        : %s", ssid.c_str());
   DPRINTLN("Password    : %s", password.c_str());
 
@@ -1168,22 +1193,22 @@ bool ap_connect(String ssid = "", String password = "")
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid.c_str(), password.c_str());
-  for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
+  for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && !WiFi.isConnected(); i++) {
     status_blink();
     delay(100);
     status_blink();
     delay(300);
-    DPRINT(".");
+    //DPRINT(".");
   }
 
-  WiFi.status() == WL_CONNECTED ? WIFI_LED_ON() : WIFI_LED_OFF();
+  WiFi.isConnected() ? WIFI_LED_ON() : WIFI_LED_OFF();
 
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.isConnected())
     DPRINTLN("[SUCCESS]");
   else
     DPRINTLN("[TIMEOUT]");
 
-  return WiFi.status() == WL_CONNECTED;
+  return WiFi.isConnected();
 }
 
 
@@ -1192,8 +1217,6 @@ bool auto_reconnect(String ssid = "", String password = "")
   // Return 'true' if connected to the (last used) access point within WIFI_CONNECT_TIMEOUT seconds
 
   if (ssid.length() == 0) {
-
-    DPRINTLN("Connecting to last used AP");
 
 #ifdef ARDUINO_ARCH_ESP8266
     ssid = WiFi.SSID();
@@ -1207,32 +1230,31 @@ bool auto_reconnect(String ssid = "", String password = "")
     password = EEPROM.readString(address);
 #endif
   }
-  else
-    DPRINTLN("Connecting to");
 
   if (ssid.length() == 0) return false;
 
+  DPRINTLN("Connecting to");
   DPRINTLN("SSID        : %s", ssid.c_str());
   DPRINTLN("Password    : %s", password.c_str());
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid.c_str(), password.c_str());
-  for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && WiFi.status() != WL_CONNECTED; i++) {
+  for (byte i = 0; i < WIFI_CONNECT_TIMEOUT * 2 && !WiFi.isConnected(); i++) {
     status_blink();
     delay(100);
     status_blink();
     delay(300);
-    DPRINT(".");
+    //DPRINT(".");
   }
 
-  WiFi.status() == WL_CONNECTED ? WIFI_LED_ON() : WIFI_LED_OFF();
+  WiFi.isConnected() ? WIFI_LED_ON() : WIFI_LED_OFF();
 
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.isConnected())
     DPRINTLN("[SUCCESS]");
   else
     DPRINTLN("[TIMEOUT]");
 
-  return WiFi.status() == WL_CONNECTED;
+  return WiFi.isConnected();
 }
 
 void wifi_connect()
@@ -1240,8 +1262,8 @@ void wifi_connect()
   if (!auto_reconnect())       // WIFI_CONNECT_TIMEOUT seconds to reconnect to last used access point
     if (smart_config())        // SMART_CONFIG_TIMEOUT seconds to receive SmartConfig parameters
       auto_reconnect();        // WIFI_CONNECT_TIMEOUT seconds to connect to SmartConfig access point
-  if (WiFi.status() != WL_CONNECTED) {
-    ap_mode_start();          // switch to AP mode until next reboot
+  if (!WiFi.isConnected()) {
+    ap_mode_start();           // switch to AP mode until next reboot
   }
   else
   {
@@ -1255,7 +1277,7 @@ void wifi_connect()
 #endif
 
 #ifdef SERIALDEBUG
-    WiFi.printDiag(SERIALDEBUG);
+    //WiFi.printDiag(SERIALDEBUG);
 #endif
 
     uint8_t macAddr[6];
@@ -1286,8 +1308,10 @@ void wifi_connect()
   // Start mDNS (Multicast DNS) responder (ping pedalino.local)
   if (MDNS.begin(host)) {
     DPRINTLN("mDNS responder started");
-    MDNS.addService("apple-midi", "udp", 5004);
-    MDNS.addService("osc",        "udp", oscLocalPort);
+    // service name is lower case
+    // service name and protocol starts with an '_' e.g. '_udp'
+    MDNS.addService("_apple-midi", "_udp", 5004);
+    MDNS.addService("_osc",        "_udp", oscLocalPort);
   }
 
   // Start firmawre update via HTTP (connect to http://pedalino.local/update)
@@ -1295,9 +1319,9 @@ void wifi_connect()
   httpUpdater.setup(&httpServer);
 #endif
   httpServer.begin();
-  MDNS.addService("http", "tcp", 80);
+  MDNS.addService("_http", "_tcp", 80);
 #ifdef PEDALINO_TELNET_DEBUG
-  MDNS.addService("telnet", "tcp", 23);
+  MDNS.addService("_telnet", "_tcp", 23);
 #endif
   DPRINTLN("HTTP server started");
   DPRINTLN("Connect to http://pedalino.local/update for firmware update");
@@ -1382,7 +1406,7 @@ String password;
 
 BLYNK_CONNECTED() {
   // This function is called when hardware connects to Blynk Cloud or private server.
-  DPRINTLN("Connected to Blynk");
+  DPRINTLN("Connected to Blynk Cloud");
   blynkLCD.clear();
   Blynk.virtualWrite(BLYNK_WIFICONNECT, 0);
   Blynk.virtualWrite(BLYNK_SCANWIFI, 0);
@@ -1488,12 +1512,13 @@ void setup()
   DPRINTLN("   |    |   \\  ___// /_/ | / __ \\|  |_|  |   |  (  <_> ) (  (     |    |/    Y    \\   )  )");
   DPRINTLN("   |____|    \\___  >____ |(____  /____/__|___|  /\\____/   \\  \\    |____|\\____|__  /  /  /");
   DPRINTLN("                 \\/     \\/     \\/             \\/           \\__\\                 \\/  /__/");
-  DPRINTLN("   https://github.com/alf45tar/Pedalino                         (c) 2018 alf45star");
+  DPRINTLN("                                                                (c) 2018 alf45star");
+  DPRINTLN("                                                        https://github.com/alf45tar/Pedalino");
 
 #ifdef ARDUINO_ARCH_ESP32
   esp_log_level_set("*",      ESP_LOG_ERROR);
   //esp_log_level_set("wifi",   ESP_LOG_WARN);
-  //esp_log_level_set("ble",    ESP_LOG_DEBUG);
+  //esp_log_level_set("BLE*",   ESP_LOG_ERROR);
   esp_log_level_set(LOG_TAG,  ESP_LOG_INFO);
 
   DPRINTLN("Testing EEPROM Library");
@@ -1598,7 +1623,8 @@ void loop()
   // Run HTTP Updater
   httpServer.handleClient();
 
-  Blynk.run();
+  if (WiFi.isConnected())
+    Blynk.run();
 
 #ifdef PEDALINO_TELNET_DEBUG
   // Remote debug over telnet

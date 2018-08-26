@@ -64,3 +64,18 @@ void serialize_lcd_clear() {
   Serial3.write(0xF7);
   Serial3.flush();
 }
+
+void serialize_factory_default() {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["factory.default"] = true;
+
+  Serial3.write(0xF0);
+  root.printTo(Serial3);
+  Serial3.write(0xF7);
+  Serial3.flush();
+
+  DPRINTLN("JSON: factory.default");
+}
