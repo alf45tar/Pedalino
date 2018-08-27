@@ -29,6 +29,7 @@
 #define BLYNK_MIDICODE              V23
 #define BLYNK_MIDIVALUE1            V24
 #define BLYNK_MIDIVALUE2            V25
+#define BLYNK_MIDIVALUE3            V26
 
 #define BLYNK_PEDAL                 V30
 #define BLYNK_PEDAL_MODE1           V31
@@ -37,6 +38,7 @@
 #define BLYNK_PEDAL_AUTOSENSING     V34
 #define BLYNK_PEDAL_SINGLEPRESS     V35
 #define BLYNK_PEDAL_DOUBLEPRESS     V36
+#define BLYNK_PEDAL_LONGPRESS       V37
 #define BLYNK_PEDAL_POLARITY        V38
 #define BLYNK_PEDAL_CALIBRATE       V39
 #define BLYNK_PEDAL_ANALOGZERO      V51
@@ -47,12 +49,13 @@
 #define BLINK_INTERFACE_MIDIOUT     V42
 #define BLINK_INTERFACE_MIDITHRU    V43
 #define BLINK_INTERFACE_MIDIROUTING V44
+#define BLINK_INTERFACE_MIDICLOCK   V45
 
 #define PRINT_VIRTUAL_PIN(vPin)     { DPRINTF("WRITE VirtualPIN "); DPRINT(vPin); }
 
 //ESP8266 wifi(&Serial1);
 
-const char blynkAuthToken[] = "631daecc6f93498c8a6d807da366b698";
+const char blynkAuthToken[] = "31795677450a4ac088805d6d914bc747";
 WidgetLCD  blynkLCD(V0);
 
 
@@ -67,6 +70,7 @@ void blynk_refresh()
     Blynk.virtualWrite(BLYNK_MIDICODE,              banks[currentBank][currentPedal].midiCode);
     Blynk.virtualWrite(BLYNK_MIDIVALUE1,            banks[currentBank][currentPedal].midiValue1);
     Blynk.virtualWrite(BLYNK_MIDIVALUE2,            banks[currentBank][currentPedal].midiValue2);
+    Blynk.virtualWrite(BLYNK_MIDIVALUE3,            banks[currentBank][currentPedal].midiValue3);
 
     Blynk.virtualWrite(BLYNK_PEDAL_FUNCTION,        pedals[currentPedal].function + 1);
     switch (pedals[currentPedal].mode) {
@@ -102,12 +106,12 @@ void blynk_refresh()
     Blynk.virtualWrite(BLYNK_PEDAL_AUTOSENSING,     pedals[currentPedal].autoSensing);
     Blynk.virtualWrite(BLYNK_PEDAL_POLARITY,        pedals[currentPedal].invertPolarity);
     if (pedals[currentPedal].mode == PED_ANALOG) {
-      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGZERO,      pedals[currentPedal].expZero);
-      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,       pedals[currentPedal].expMax);
+      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGZERO,    pedals[currentPedal].expZero);
+      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,     pedals[currentPedal].expMax);
     }
     else {
-      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGZERO,      0);
-      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,       1023);
+      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGZERO,    0);
+      Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,     1023);
     }
 
     Blynk.virtualWrite(BLINK_INTERFACE,             currentInterface + 1);
@@ -115,6 +119,7 @@ void blynk_refresh()
     Blynk.virtualWrite(BLINK_INTERFACE_MIDIOUT,     interfaces[currentInterface].midiOut);
     Blynk.virtualWrite(BLINK_INTERFACE_MIDITHRU,    interfaces[currentInterface].midiThru);
     Blynk.virtualWrite(BLINK_INTERFACE_MIDIROUTING, interfaces[currentInterface].midiRouting);
+    Blynk.virtualWrite(BLINK_INTERFACE_MIDICLOCK,   interfaces[currentInterface].midiClock);
   }
 }
 
@@ -180,7 +185,7 @@ BLYNK_WRITE(BLYNK_MIDICODE) {
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI Code ");
   DPRINTLN(code);
-  banks[currentBank][currentPedal].midiCode = constrain(code, 0, 255);
+  banks[currentBank][currentPedal].midiCode = constrain(code, 0, 127);
 }
 
 BLYNK_WRITE(BLYNK_MIDIVALUE1) {
@@ -188,7 +193,7 @@ BLYNK_WRITE(BLYNK_MIDIVALUE1) {
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI Single Press ");
   DPRINTLN(code);
-  banks[currentBank][currentPedal].midiValue1 = constrain(code, 0, 255);
+  banks[currentBank][currentPedal].midiValue1 = constrain(code, 0, 127);
 }
 
 BLYNK_WRITE(BLYNK_MIDIVALUE2) {
@@ -196,9 +201,16 @@ BLYNK_WRITE(BLYNK_MIDIVALUE2) {
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI Double Press ");
   DPRINTLN(code);
-  banks[currentBank][currentPedal].midiValue2 = constrain(code, 0, 255);
+  banks[currentBank][currentPedal].midiValue2 = constrain(code, 0, 127);
 }
 
+BLYNK_WRITE(BLYNK_MIDIVALUE3) {
+  int code = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - MIDI Long Press ");
+  DPRINTLN(code);
+  banks[currentBank][currentPedal].midiValue3 = constrain(code, 0, 127);
+}
 
 
 BLYNK_WRITE(BLYNK_PEDAL) {

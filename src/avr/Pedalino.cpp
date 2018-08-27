@@ -8,15 +8,15 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-#define DEBUG_PEDALINO
-#define BLYNK_DEBUG
+//#define DEBUG_PEDALINO
+//#define BLYNK_DEBUG
 
 #include "Pedalino.h"
 #include "Serialize.h"
-#include "Config.h"
-#include "MIDIRouting.h"
 #include "Controller.h"
 #include "BlynkRPC.h"
+#include "Config.h"
+#include "MIDIRouting.h"
 #include "Display.h"
 #include "Menu.h"
 

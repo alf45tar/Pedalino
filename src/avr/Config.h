@@ -224,6 +224,8 @@ void update_eeprom() {
   DPRINTF(" bytes of ");
   DPRINT(EEPROM.length());
   DPRINTLNF(" updated.");
+
+  blynk_refresh();
 }
 
 
@@ -360,6 +362,8 @@ void read_eeprom() {
     DPRINTF(" bytes of ");
     DPRINT(EEPROM.length());
     DPRINTLNF(" read.");
+
+    blynk_refresh();
   }
 }
 
