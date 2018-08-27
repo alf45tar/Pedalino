@@ -747,28 +747,8 @@ void calibrate()
 }
 
 //
-// Send MIDI clock
+// MIDI Time Code/MIDI Clock setup
 //
-void midi_clock_()
-{
-  static unsigned long startMillis = micros();
-
-  unsigned long elapsedTime = micros() - startMillis;
-  
-  const long bpm = 120;                     // beats per minute
-  const long tempo = 1000000 / (bpm / 60);  // milliseconds between beats
-  const long interval = tempo / 24;         // milliseconds between MIDI clock messages (24 messages every beat)
-  
-  if (elapsedTime >= interval) {
-#ifndef DEBUG_PEDALINO
-    if (interfaces[PED_USBMIDI].midiClock)    USB_MIDI.sendRealTime(midi::Clock);
-#endif
-    if (interfaces[PED_LEGACYMIDI].midiClock) DIN_MIDI.sendRealTime(midi::Clock);
-    if (interfaces[PED_APPLEMIDI].midiClock)  RTP_MIDI.sendRealTime(midi::Clock);
-    startMillis = micros();
-  }
-}
-
 void mtc_setup() {
 
   MTC.setup();
