@@ -32,7 +32,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #include <EEPROM.h>
 #include <WiFi.h>
-#include <WebServer.h>
+//#include <WebServer.h>
 #include <ESPmDNS.h>
 #include <Update.h>
 #include <BLEDevice.h>
@@ -123,8 +123,8 @@ ESP8266HTTPUpdateServer httpUpdater;
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-WebServer               httpServer(80);
-HTTPUpload              httpUpdater;
+//WebServer               httpServer(80);
+//HTTPUpload              httpUpdater;
 #endif
 
 // Bluetooth LE MIDI interface
@@ -202,7 +202,7 @@ class MyBLECharateristicCallbacks: public BLECharacteristicCallbacks {
       std::string rxValue = pCharacteristic->getValue();
       if (rxValue.length() > 0) {
         BLEMidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
-        DPRINT("Received %2d bytes: %2H %2H %2H", rxValue.length(), rxValue[2], rxValue[3], rxValue[4]);
+        DPRINT("Received %2d bytes: %2h %2h %2h", rxValue.length(), rxValue[2], rxValue[3], rxValue[4]);
       }
     }
 };
@@ -1317,14 +1317,15 @@ void wifi_connect()
   // Start firmawre update via HTTP (connect to http://pedalino.local/update)
 #ifdef ARDUINO_ARCH_ESP8266
   httpUpdater.setup(&httpServer);
-#endif
   httpServer.begin();
   MDNS.addService("_http", "_tcp", 80);
+  DPRINTLN("HTTP server started");
+  DPRINTLN("Connect to http://pedalino.local/update for firmware update");
+#endif
+
 #ifdef PEDALINO_TELNET_DEBUG
   MDNS.addService("_telnet", "_tcp", 23);
 #endif
-  DPRINTLN("HTTP server started");
-  DPRINTLN("Connect to http://pedalino.local/update for firmware update");
 
   // Calculate the broadcast address of local WiFi to broadcast OSC messages
   oscRemoteIp = WiFi.localIP();
@@ -1620,8 +1621,10 @@ void loop()
     }
   }
 
+#ifdef ARDUINO_ARCH_ESP8266
   // Run HTTP Updater
   httpServer.handleClient();
+#endif
 
   if (WiFi.isConnected())
     Blynk.run();

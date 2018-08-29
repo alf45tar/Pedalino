@@ -57,7 +57,7 @@
 
 const char blynkAuthToken[] = "31795677450a4ac088805d6d914bc747";
 WidgetLCD  blynkLCD(V0);
-
+void screen_update(boolean);
 
 void blynk_refresh()
 {
@@ -126,13 +126,14 @@ void blynk_refresh()
 BLYNK_CONNECTED() {
   // This function is called when hardware connects to Blynk Cloud or private server.
   DPRINTLNF("Connected to Blynk");
-  //blynkLCD.clear();
   blynk_refresh();
 }
 
 BLYNK_APP_CONNECTED() {
   //  This function is called every time Blynk app client connects to Blynk server.
   DPRINTLNF("Blink App connected");
+  blynkLCD.clear();
+  screen_update(true);
   blynk_refresh();
 }
 
