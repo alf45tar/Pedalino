@@ -23,9 +23,13 @@
 //#include <ESP8266_Lib.h>
 //#include <BlynkSimpleShieldEsp8266.h>
 
-#define BLYNK_CLOCKMASTER           V14
-#define BLYNK_MIDITIMECODE          V15
+#define BLYNK_CLOCK_START           V11
+#define BLYNK_CLOCK_STOP            V12
+#define BLYNK_CLOCK_CONTINUE        V13
+#define BLYNK_MIDI_TIME_CODE        V14
+#define BLYNK_CLOCK_MASTER_SLAVE    V15
 #define BLYNK_BPM                   V16
+#define BLYNK_TAP_TEMPO             V17
 
 #define BLYNK_BANK                  V20
 #define BLYNK_MIDIMESSAGE           V21
@@ -70,31 +74,31 @@ void blynk_refresh()
     switch (currentMidiTimeCode) {
 
     case PED_MTC_NONE:
-      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
-      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          1);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
       break;
 
-    case PED_MTC_SLAVE:
-      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
-      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    1);
+    case PED_MIDI_CLOCK_MASTER:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
+      break;
+
+    case PED_MIDI_CLOCK_SLAVE:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
       break;
 
     case PED_MTC_MASTER_24:
     case PED_MTC_MASTER_25:
     case PED_MTC_MASTER_30DF:
     case PED_MTC_MASTER_30:
-      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     1);
-      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    1);
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
       break;
 
-    case PED_MIDI_CLOCK_SLAVE:
-      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
-      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
-      break;
-
-    case PED_MIDI_CLOCK_MASTER:
-      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     1);
-      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
+    case PED_MTC_SLAVE:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
       break;
     }
     Blynk.virtualWrite(BLYNK_BPM,                   bpm);
@@ -179,22 +183,74 @@ BLYNK_APP_DISCONNECTED() {
 }
 
 
-BLYNK_WRITE(BLYNK_CLOCKMASTER) {
-  int master = param.asInt();
+BLYNK_WRITE(BLYNK_MIDI_TIME_CODE) {
+  int mtc = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
-  DPRINTF(" - CLOCK ");
-  DPRINTLN(master);
+  DPRINTF(" - MTC ");
+  DPRINTLN(mtc);
   switch (currentMidiTimeCode) {
 
     case PED_MTC_NONE:
+    case PED_MTC_MASTER_24:
+    case PED_MTC_MASTER_25:
+    case PED_MTC_MASTER_30DF:
+    case PED_MTC_MASTER_30:
+    case PED_MIDI_CLOCK_MASTER:
+      switch (mtc) {
+        case 1:
+          MTC.setMode(MidiTimeCode::SynchroNone);
+          currentMidiTimeCode = PED_MTC_NONE;
+          break;
+        case 2:
+          MTC.setMode(MidiTimeCode::SynchroClockMaster);
+          bpm = (bpm == 0) ? 120 : bpm;
+          MTC.setBpm(bpm);
+          currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
+          Blynk.virtualWrite(BLYNK_BPM, bpm);
+          break;
+        case 3:
+          MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+          MTC.sendPosition(0, 0, 0, 0);
+          currentMidiTimeCode = PED_MTC_MASTER_24;
+          break;
+      }
       break;
+
+    case PED_MTC_SLAVE:
+    case PED_MIDI_CLOCK_SLAVE:
+      switch (mtc) {
+        case 1:
+          MTC.setMode(MidiTimeCode::SynchroNone);
+          currentMidiTimeCode = PED_MTC_NONE;
+          break;
+        case 2:
+          MTC.setMode(MidiTimeCode::SynchroClockSlave);
+          currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
+          bpm = 0;
+          Blynk.virtualWrite(BLYNK_BPM, bpm);
+          break;
+        case 3:
+          MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+          currentMidiTimeCode = PED_MTC_SLAVE;
+          break;
+      }
+      break;
+  }
+}
+
+BLYNK_WRITE(BLYNK_CLOCK_MASTER_SLAVE) {
+  int master_slave = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - CLOCK ");
+  DPRINTLN(master_slave);
+  switch (currentMidiTimeCode) {
 
     case PED_MTC_SLAVE:
     case PED_MTC_MASTER_24:
     case PED_MTC_MASTER_25:
     case PED_MTC_MASTER_30DF:
     case PED_MTC_MASTER_30:
-      if (master) {
+      if (master_slave == 1) {
         MTC.setMode(MidiTimeCode::SynchroMTCMaster);
         MTC.sendPosition(0, 0, 0, 0);
         currentMidiTimeCode = PED_MTC_MASTER_24;
@@ -206,8 +262,9 @@ BLYNK_WRITE(BLYNK_CLOCKMASTER) {
 
     case PED_MIDI_CLOCK_SLAVE:
     case PED_MIDI_CLOCK_MASTER:
-      if (master) {
+      if (master_slave == 1) {
         MTC.setMode(MidiTimeCode::SynchroClockMaster);
+        bpm = (bpm == 0) ? 120 : bpm;
         MTC.setBpm(bpm);
         currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
       }
@@ -216,48 +273,7 @@ BLYNK_WRITE(BLYNK_CLOCKMASTER) {
         bpm = 0;
         currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
       }
-      break;
-  }
-}
-
-BLYNK_WRITE(BLYNK_MIDITIMECLOCK) {
-  int mtc = param.asInt();
-  PRINT_VIRTUAL_PIN(request.pin);
-  DPRINTF(" - MTC ");
-  DPRINTLN(mtc);
-  switch (currentMidiTimeCode) {
-
-    case PED_MTC_NONE:
-      break;
-
-    case PED_MTC_MASTER_24:
-    case PED_MTC_MASTER_25:
-    case PED_MTC_MASTER_30DF:
-    case PED_MTC_MASTER_30:
-    case PED_MIDI_CLOCK_MASTER:
-      if (mtc) {
-        MTC.setMode(MidiTimeCode::SynchroMTCMaster);
-        MTC.sendPosition(0, 0, 0, 0);
-        currentMidiTimeCode = PED_MTC_MASTER_24;
-      }
-      else {
-        MTC.setMode(MidiTimeCode::SynchroClockMaster);
-        MTC.setBpm(bpm);
-        currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
-      }
-      break;
-
-    case PED_MTC_SLAVE:
-    case PED_MIDI_CLOCK_SLAVE:
-      if (mtc) {
-        MTC.setMode(MidiTimeCode::SynchroMTCSlave);
-        currentMidiTimeCode = PED_MTC_SLAVE;
-      }
-      else {
-        MTC.setMode(MidiTimeCode::SynchroClockSlave);
-        currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
-        bpm = 0;
-      }
+      Blynk.virtualWrite(BLYNK_BPM, bpm);
       break;
   }
 }
@@ -272,6 +288,47 @@ BLYNK_WRITE(BLYNK_BPM) {
       bpm = constrain(beatperminute, 40, 300);
       MTC.setBpm(bpm);
       break;   
+  }
+}
+
+BLYNK_WRITE(BLYNK_CLOCK_START) {
+  int pressed = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Clock Start ");
+  DPRINTLN(pressed);
+  if (pressed) {
+    MTC.sendPosition(0, 0, 0, 0);
+    MTC.sendPlay();
+  }
+}
+
+BLYNK_WRITE(BLYNK_CLOCK_STOP) {
+  int pressed = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Clock Stop ");
+  DPRINTLN(pressed);
+  if (pressed) MTC.sendStop();
+}
+
+BLYNK_WRITE(BLYNK_CLOCK_CONTINUE) {
+  int pressed = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Clock Continue ");
+  DPRINTLN(pressed);
+  if (pressed) MTC.sendContinue();
+}
+
+BLYNK_WRITE(BLYNK_TAP_TEMPO) {
+  int pressed = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Tap Tempo ");
+  DPRINTLN(pressed);
+  if (pressed) {
+    bpm = MTC.tapTempo();
+    if (bpm > 0) {
+      MTC.setBpm(bpm);
+      Blynk.virtualWrite(BLYNK_BPM, bpm);
+    }
   }
 }
 

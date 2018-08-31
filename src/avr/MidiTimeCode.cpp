@@ -135,6 +135,8 @@ void MidiTimeCode::sendPlay()
 {
   noInterrupts();
   mNextEvent = Start;
+  mClick = 0;
+  mBeat = 0;
   interrupts();
 }
 
@@ -381,7 +383,7 @@ void MidiTimeCode::setBpm(const float iBpm)
 {
   if ( mMode == SynchroClockMaster )
   {
-    const double midiClockPerSec = mMidiClockPpqn * iBpm / 60;
+    const double midiClockPerSec = mMidiClockPpqn * constrain(iBpm, 40, 300) / 60;
     setTimer(midiClockPerSec);
   }
 }
