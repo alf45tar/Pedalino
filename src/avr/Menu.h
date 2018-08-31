@@ -27,8 +27,9 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define M_BANKSETUP       11
 #define M_PEDALSETUP      12
 #define M_INTERFACESETUP  13
-#define M_PROFILE         14
-#define M_OPTIONS         15
+#define M_TEMPO           14
+#define M_PROFILE         15
+#define M_OPTIONS         16
 
 #define II_BANK           20
 #define II_PEDAL          21
@@ -64,7 +65,9 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_IRCLEAR        52
 #define II_WIFIRESET      53
 #define II_MIDITIMECODE   54
-#define II_DEFAULT        55
+#define II_BPM            55
+#define II_TIMESIGNATURE  56
+#define II_DEFAULT        57
 
 // Global menu data and definitions
 
@@ -73,12 +76,13 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { M_ROOT,           SIGNATURE,         10, 14, 0 },
+  { M_ROOT,           SIGNATURE,         10, 16, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 37, 0 },
   { M_PEDALSETUP,     "Pedals Setup",    40, 49, 0 },
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
-  { M_PROFILE,        "Profiles",        70, 71, 0 },
-  { M_OPTIONS,        "Options",         80, 85, 0 }
+  { M_TEMPO,          "Tempo",           70, 72, 0 },
+  { M_PROFILE,        "Profiles",        80, 81, 0 },
+  { M_OPTIONS,        "Options",         90, 94, 0 }
 };
 
 // Menu Items ----------
@@ -88,28 +92,29 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 10, "Banks Setup",     MD_Menu::MNU_MENU,  M_BANKSETUP },
   { 11, "Pedals Setup",    MD_Menu::MNU_MENU,  M_PEDALSETUP },
   { 12, "Interface Setup", MD_Menu::MNU_MENU,  M_INTERFACESETUP },
-  { 13, "Profiles",        MD_Menu::MNU_MENU,  M_PROFILE },
-  { 14, "Options",         MD_Menu::MNU_MENU,  M_OPTIONS },
+  { 13, "Tempo",           MD_Menu::MNU_MENU,  M_TEMPO },
+  { 14, "Profiles",        MD_Menu::MNU_MENU,  M_PROFILE },
+  { 15, "Options",         MD_Menu::MNU_MENU,  M_OPTIONS },
   // Banks Setup
   { 20, "Select Bank",     MD_Menu::MNU_INPUT, II_BANK },
   { 30, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
-  { 31, "SetMIDIChannel",  MD_Menu::MNU_INPUT, II_MIDICHANNEL },
-  { 32, "SetMIDIMessage",  MD_Menu::MNU_INPUT, II_MIDIMESSAGE },
-  { 33, "Set MIDI Code",   MD_Menu::MNU_INPUT, II_MIDICODE },
-  { 34, "Set MIDI Note",   MD_Menu::MNU_INPUT, II_MIDINOTE },
-  { 35, "Set Value 1",     MD_Menu::MNU_INPUT, II_MIDIVALUE1 },
-  { 36, "Set Value 2",     MD_Menu::MNU_INPUT, II_MIDIVALUE2 },
-  { 37, "Set Value 3",     MD_Menu::MNU_INPUT, II_MIDIVALUE3 },
+  { 31, "MIDI Channel",    MD_Menu::MNU_INPUT, II_MIDICHANNEL },
+  { 32, "MIDI Message",    MD_Menu::MNU_INPUT, II_MIDIMESSAGE },
+  { 33, "MIDI Code",       MD_Menu::MNU_INPUT, II_MIDICODE },
+  { 34, "MIDI Note",       MD_Menu::MNU_INPUT, II_MIDINOTE },
+  { 35, "Value 1",         MD_Menu::MNU_INPUT, II_MIDIVALUE1 },
+  { 36, "Value 2",         MD_Menu::MNU_INPUT, II_MIDIVALUE2 },
+  { 37, "Value 3",         MD_Menu::MNU_INPUT, II_MIDIVALUE3 },
   // Pedals Setup
   { 40, "Select Pedal",    MD_Menu::MNU_INPUT, II_PEDAL },
   { 41, "Auto Sensing",    MD_Menu::MNU_INPUT, II_AUTOSENSING },
-  { 42, "Set Mode",        MD_Menu::MNU_INPUT, II_MODE },
-  { 43, "Set Function",    MD_Menu::MNU_INPUT, II_FUNCTION },
-  { 44, "Set Press Mode",  MD_Menu::MNU_INPUT, II_PRESS_MODE },
-  { 45, "Set Polarity",    MD_Menu::MNU_INPUT, II_POLARITY },
+  { 42, "Mode",            MD_Menu::MNU_INPUT, II_MODE },
+  { 43, "Function",        MD_Menu::MNU_INPUT, II_FUNCTION },
+  { 44, "Press Mode",      MD_Menu::MNU_INPUT, II_PRESS_MODE },
+  { 45, "Polarity",        MD_Menu::MNU_INPUT, II_POLARITY },
   { 46, "Calibrate",       MD_Menu::MNU_INPUT, II_CALIBRATE },
-  { 47, "Set Zero",        MD_Menu::MNU_INPUT, II_ZERO },
-  { 48, "Set Max",         MD_Menu::MNU_INPUT, II_MAX },
+  { 47, "Zero",            MD_Menu::MNU_INPUT, II_ZERO },
+  { 48, "Max",             MD_Menu::MNU_INPUT, II_MAX },
   { 49, "Response Curve",  MD_Menu::MNU_INPUT, II_RESPONSECURVE },
   // Interface Setup
   { 60, "Select Interf.",  MD_Menu::MNU_INPUT, II_INTERFACE },
@@ -118,16 +123,19 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 63, "MIDI THRU",       MD_Menu::MNU_INPUT, II_MIDI_THRU },
   { 64, "MIDI Routing",    MD_Menu::MNU_INPUT, II_MIDI_ROUTING },
   { 65, "MIDI Clock",      MD_Menu::MNU_INPUT, II_MIDI_CLOCK },
+  // Tempo
+  { 70, "MIDI Time Code",  MD_Menu::MNU_INPUT, II_MIDITIMECODE },
+  { 71, "Time Signature",  MD_Menu::MNU_INPUT, II_TIMESIGNATURE },
+  { 72, "BPM",             MD_Menu::MNU_INPUT, II_BPM },
   // Profiles Setup
-  { 70, "Load Profile",    MD_Menu::MNU_INPUT, II_INTERFACE },
-  { 71, "Save Profile",    MD_Menu::MNU_INPUT, II_MIDI_OUT },
+  { 80, "Load Profile",    MD_Menu::MNU_INPUT, II_PROFILE_LOAD },
+  { 81, "Save Profile",    MD_Menu::MNU_INPUT, II_PROFILE_SAVE },
   // Options
-  { 80, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
-  { 81, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
-  { 82, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
-  { 83, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
-  { 84, "MIDI Time Code",  MD_Menu::MNU_INPUT, II_MIDITIMECODE },
-  { 85, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 90, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
+  { 91, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
+  { 92, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
+  { 93, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
+  { 94, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -140,6 +148,7 @@ const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Ant
 const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |   Bluetooth  ";
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
 const PROGMEM char listMidiTimeCode[]    = "    None      |   MTC Slave  |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  Clock Slave | Clock Master ";
+const PROGMEM char listTimeSignature[]   = "     2/4      |     4/4      |     3/4      |     3/8      |     6/8      |     9/8      |     12/8     ";
 
 const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
@@ -181,6 +190,8 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_IRCLEAR,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_WIFIRESET,     "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_MIDITIMECODE,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiTimeCode },
+  { II_BPM,           ">40-300:   " , MD_Menu::INP_INT,   mnuValueRqst,  3, 1, 0,                300, 40, 10, nullptr },
+  { II_TIMESIGNATURE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listTimeSignature },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
 
@@ -333,6 +344,44 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       else {
         currentMidiTimeCode = vBuf.value;
         mtc_setup();
+      }
+      break;
+    
+    case II_BPM:
+      if (bGet) vBuf.value = bpm;
+      else bpm = vBuf.value;
+      break;
+
+    case II_TIMESIGNATURE:
+      if (bGet) vBuf.value = timeSignature;
+      else {
+        timeSignature = vBuf.value;
+        switch (timeSignature) {
+          case PED_TIMESIGNATURE_2_4:
+            MTC.setBeat(2);
+            break;
+          case PED_TIMESIGNATURE_4_4:
+            MTC.setBeat(4);
+            break;
+          case PED_TIMESIGNATURE_3_4:
+            MTC.setBeat(3);
+            break;
+          case PED_TIMESIGNATURE_3_8:
+            MTC.setBeat(3);
+            break;
+          case PED_TIMESIGNATURE_6_8:
+            MTC.setBeat(6);
+            break;
+          case PED_TIMESIGNATURE_9_8:
+            MTC.setBeat(9);
+            break;
+          case PED_TIMESIGNATURE_12_8:
+            MTC.setBeat(12);
+            break;
+          default:
+            MTC.setBeat(4);
+            break;
+        }
       }
       break;
 

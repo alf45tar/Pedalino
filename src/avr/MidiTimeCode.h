@@ -64,6 +64,7 @@ class MidiTimeCode
     void        setBpm(const float iBpm);
     const float tapTempo();
     byte        getBeat();
+    void        setBeat(byte signature);
     //
 
     static void setMode(MidiSynchro newMode);
@@ -161,6 +162,7 @@ class MidiTimeCode
     static unsigned char              mSelectBits;
     static volatile byte              mClick;
     static volatile byte              mBeat;
+    static volatile byte              mTimeSignature;
     static volatile bool              mPlaying;
 
     // MTC stuff

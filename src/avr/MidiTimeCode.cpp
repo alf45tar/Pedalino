@@ -127,7 +127,7 @@ void MidiTimeCode::doSendMidiClock()
     Serial2.write(Clock);
     Serial3.write(Clock);
     mClick = (mClick + 1) % MidiTimeCode::mMidiClockPpqn;
-    if (mClick == 0) mBeat = (mBeat + 1) % 4;
+    if (mClick == 0) mBeat = (mBeat + 1) % mTimeSignature;
   }
 }
 
@@ -398,7 +398,7 @@ const float MidiTimeCode::tapTempo()
     case SynchroClockSlave:
       mClick = (mClick + 1) % MidiTimeCode::mMidiClockPpqn;
       if (mClick == 0) {
-        mBeat = (mBeat + 1) % 4;
+        mBeat = (mBeat + 1) % mTimeSignature;
         bpm = mTapTempo.tap();
       }
       return bpm;
@@ -415,6 +415,11 @@ const float MidiTimeCode::tapTempo()
 byte MidiTimeCode::getBeat()
 {
   return mBeat;
+}
+
+void MidiTimeCode::setBeat(byte signature)
+{
+  mTimeSignature = signature;
 }
 
 void MidiTimeCode::setTimer(const double frequency)
@@ -467,6 +472,7 @@ volatile unsigned long  MidiTimeCode::mEventTime = 0;
 volatile MidiTimeCode::MidiType MidiTimeCode::mNextEvent = InvalidType;
 volatile byte           MidiTimeCode::mClick = 0;
 volatile byte           MidiTimeCode::mBeat = 0;
+volatile byte           MidiTimeCode::mTimeSignature = 4;
 volatile bool           MidiTimeCode::mPlaying = false;
 
 

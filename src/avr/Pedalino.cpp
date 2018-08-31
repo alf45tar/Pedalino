@@ -8,7 +8,7 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-//#define DEBUG_PEDALINO
+#define DEBUG_PEDALINO
 //#define BLYNK_DEBUG
 
 #include "Pedalino.h"

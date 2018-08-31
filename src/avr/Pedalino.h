@@ -115,6 +115,14 @@
 #define PED_MIDI_CLOCK_SLAVE    6
 #define PED_MIDI_CLOCK_MASTER   7
 
+#define PED_TIMESIGNATURE_2_4   0
+#define PED_TIMESIGNATURE_4_4   1
+#define PED_TIMESIGNATURE_3_4   2
+#define PED_TIMESIGNATURE_3_8   3
+#define PED_TIMESIGNATURE_6_8   4
+#define PED_TIMESIGNATURE_9_8   5
+#define PED_TIMESIGNATURE_12_8  6
+
 #define MIDI_RESOLUTION         128       // MIDI 7-bit CC resolution
 #define ADC_RESOLUTION         1024       // 10-bit ADC converter resolution
 #define CALIBRATION_DURATION   8000       // milliseconds
@@ -183,7 +191,11 @@ byte   currentInterface       = PED_USBMIDI;
 byte   lastUsedSwitch         = 0xFF;
 byte   lastUsedPedal          = 0xFF;
 bool   selectBank             = true;
+byte   currentMidiTimeCode    = PED_MTC_MASTER_24;
+byte   timeSignature          = PED_TIMESIGNATURE_4_4;
 
+MidiTimeCode  MTC;
+unsigned int  bpm             = 120;
 
 // MIDI interfaces definition
 
@@ -201,9 +213,6 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISett
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
 
-MidiTimeCode  MTC;
-byte          currentMidiTimeCode = PED_MTC_MASTER_24;
-unsigned int  bpm = 120;
 
 //
 MD_UISwitch_Analog::uiAnalogKeys_t kt[] =

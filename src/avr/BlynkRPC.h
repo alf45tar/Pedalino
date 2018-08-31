@@ -23,6 +23,10 @@
 //#include <ESP8266_Lib.h>
 //#include <BlynkSimpleShieldEsp8266.h>
 
+#define BLYNK_CLOCKMASTER           V14
+#define BLYNK_MIDITIMECODE          V15
+#define BLYNK_BPM                   V16
+
 #define BLYNK_BANK                  V20
 #define BLYNK_MIDIMESSAGE           V21
 #define BLYNK_MIDICHANNEL           V22
@@ -44,12 +48,12 @@
 #define BLYNK_PEDAL_ANALOGZERO      V51
 #define BLYNK_PEDAL_ANALOGMAX       V52
 
-#define BLINK_INTERFACE             V40
-#define BLINK_INTERFACE_MIDIIN      V41
-#define BLINK_INTERFACE_MIDIOUT     V42
-#define BLINK_INTERFACE_MIDITHRU    V43
-#define BLINK_INTERFACE_MIDIROUTING V44
-#define BLINK_INTERFACE_MIDICLOCK   V45
+#define BLYNK_INTERFACE             V40
+#define BLYNK_INTERFACE_MIDIIN      V41
+#define BLYNK_INTERFACE_MIDIOUT     V42
+#define BLYNK_INTERFACE_MIDITHRU    V43
+#define BLYNK_INTERFACE_MIDIROUTING V44
+#define BLYNK_INTERFACE_MIDICLOCK   V45
 
 #define PRINT_VIRTUAL_PIN(vPin)     { DPRINTF("WRITE VirtualPIN "); DPRINT(vPin); }
 
@@ -61,8 +65,40 @@ void screen_update(boolean);
 
 void blynk_refresh()
 {
-  if (Blynk.connected())
+  //if (Blynk.connected())
   {
+    switch (currentMidiTimeCode) {
+
+    case PED_MTC_NONE:
+      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
+      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
+      break;
+
+    case PED_MTC_SLAVE:
+      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
+      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    1);
+      break;
+
+    case PED_MTC_MASTER_24:
+    case PED_MTC_MASTER_25:
+    case PED_MTC_MASTER_30DF:
+    case PED_MTC_MASTER_30:
+      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     1);
+      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    1);
+      break;
+
+    case PED_MIDI_CLOCK_SLAVE:
+      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     0);
+      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
+      break;
+
+    case PED_MIDI_CLOCK_MASTER:
+      Blynk.virtualWrite(BLYNK_CLOCKMASTER,     1);
+      Blynk.virtualWrite(BLYNK_MIDITIMECODE,    0);
+      break;
+    }
+    Blynk.virtualWrite(BLYNK_BPM,                   bpm);
+
     Blynk.virtualWrite(BLYNK_BANK,                  currentBank + 1);
     Blynk.virtualWrite(BLYNK_PEDAL,                 currentPedal + 1);
     Blynk.virtualWrite(BLYNK_MIDIMESSAGE,           banks[currentBank][currentPedal].midiMessage + 1);
@@ -114,12 +150,12 @@ void blynk_refresh()
       Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,     1023);
     }
 
-    Blynk.virtualWrite(BLINK_INTERFACE,             currentInterface + 1);
-    Blynk.virtualWrite(BLINK_INTERFACE_MIDIIN,      interfaces[currentInterface].midiIn);
-    Blynk.virtualWrite(BLINK_INTERFACE_MIDIOUT,     interfaces[currentInterface].midiOut);
-    Blynk.virtualWrite(BLINK_INTERFACE_MIDITHRU,    interfaces[currentInterface].midiThru);
-    Blynk.virtualWrite(BLINK_INTERFACE_MIDIROUTING, interfaces[currentInterface].midiRouting);
-    Blynk.virtualWrite(BLINK_INTERFACE_MIDICLOCK,   interfaces[currentInterface].midiClock);
+    Blynk.virtualWrite(BLYNK_INTERFACE,             currentInterface + 1);
+    Blynk.virtualWrite(BLYNK_INTERFACE_MIDIIN,      interfaces[currentInterface].midiIn);
+    Blynk.virtualWrite(BLYNK_INTERFACE_MIDIOUT,     interfaces[currentInterface].midiOut);
+    Blynk.virtualWrite(BLYNK_INTERFACE_MIDITHRU,    interfaces[currentInterface].midiThru);
+    Blynk.virtualWrite(BLYNK_INTERFACE_MIDIROUTING, interfaces[currentInterface].midiRouting);
+    Blynk.virtualWrite(BLYNK_INTERFACE_MIDICLOCK,   interfaces[currentInterface].midiClock);
   }
 }
 
@@ -142,6 +178,102 @@ BLYNK_APP_DISCONNECTED() {
   DPRINTLNF("Blink App disconnected");
 }
 
+
+BLYNK_WRITE(BLYNK_CLOCKMASTER) {
+  int master = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - CLOCK ");
+  DPRINTLN(master);
+  switch (currentMidiTimeCode) {
+
+    case PED_MTC_NONE:
+      break;
+
+    case PED_MTC_SLAVE:
+    case PED_MTC_MASTER_24:
+    case PED_MTC_MASTER_25:
+    case PED_MTC_MASTER_30DF:
+    case PED_MTC_MASTER_30:
+      if (master) {
+        MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+        MTC.sendPosition(0, 0, 0, 0);
+        currentMidiTimeCode = PED_MTC_MASTER_24;
+      }
+      else
+        MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+        currentMidiTimeCode = PED_MTC_SLAVE;
+      break;
+
+    case PED_MIDI_CLOCK_SLAVE:
+    case PED_MIDI_CLOCK_MASTER:
+      if (master) {
+        MTC.setMode(MidiTimeCode::SynchroClockMaster);
+        MTC.setBpm(bpm);
+        currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
+      }
+      else {        
+        MTC.setMode(MidiTimeCode::SynchroClockSlave);
+        bpm = 0;
+        currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
+      }
+      break;
+  }
+}
+
+BLYNK_WRITE(BLYNK_MIDITIMECLOCK) {
+  int mtc = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - MTC ");
+  DPRINTLN(mtc);
+  switch (currentMidiTimeCode) {
+
+    case PED_MTC_NONE:
+      break;
+
+    case PED_MTC_MASTER_24:
+    case PED_MTC_MASTER_25:
+    case PED_MTC_MASTER_30DF:
+    case PED_MTC_MASTER_30:
+    case PED_MIDI_CLOCK_MASTER:
+      if (mtc) {
+        MTC.setMode(MidiTimeCode::SynchroMTCMaster);
+        MTC.sendPosition(0, 0, 0, 0);
+        currentMidiTimeCode = PED_MTC_MASTER_24;
+      }
+      else {
+        MTC.setMode(MidiTimeCode::SynchroClockMaster);
+        MTC.setBpm(bpm);
+        currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
+      }
+      break;
+
+    case PED_MTC_SLAVE:
+    case PED_MIDI_CLOCK_SLAVE:
+      if (mtc) {
+        MTC.setMode(MidiTimeCode::SynchroMTCSlave);
+        currentMidiTimeCode = PED_MTC_SLAVE;
+      }
+      else {
+        MTC.setMode(MidiTimeCode::SynchroClockSlave);
+        currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
+        bpm = 0;
+      }
+      break;
+  }
+}
+
+BLYNK_WRITE(BLYNK_BPM) {
+  int beatperminute = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - BPM ");
+  DPRINTLN(beatperminute);
+  switch (currentMidiTimeCode) {
+    case PED_MIDI_CLOCK_MASTER:
+      bpm = constrain(beatperminute, 40, 300);
+      MTC.setBpm(bpm);
+      break;   
+  }
+}
 
 BLYNK_WRITE(BLYNK_BANK) {
   int bank = param.asInt();
