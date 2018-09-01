@@ -97,8 +97,9 @@ MidiTimeCode::~MidiTimeCode()
 {
 }
 
-void MidiTimeCode::setup()
+void MidiTimeCode::setup(void (*midi_send_callback)(byte))
 {
+  mMidiSendCallback = midi_send_callback;
   // Timer needed in setup even if no synchro occurring
   setTimer(1.0f);
 }
@@ -114,18 +115,14 @@ void MidiTimeCode::doSendMidiClock()
   if ( mNextEvent != InvalidType )
   {
     mEventTime = millis();
-    Serial.write(mNextEvent);
-    Serial2.write(mNextEvent);
-    Serial3.write(mNextEvent);
+    mMidiSendCallback(mNextEvent);
     mPlaying = (mNextEvent == Start) || (mNextEvent == Continue);
     mNextEvent = InvalidType;
   }
 
   if ( mEventTime == 0 )
   {
-    Serial.write(Clock);
-    Serial2.write(Clock);
-    Serial3.write(Clock);
+    mMidiSendCallback(Clock);
     mClick = (mClick + 1) % MidiTimeCode::mMidiClockPpqn;
     if (mClick == 0) mBeat = (mBeat + 1) % mTimeSignature;
   }
@@ -283,9 +280,7 @@ void MidiTimeCode::decodeMTCFullFrame(unsigned size, const byte* array)
 
 void MidiTimeCode::sendMTCQuarterFrame(int index)
 {
-  Serial.write(TimeCodeQuarterFrame);
-  Serial2.write(TimeCodeQuarterFrame);
-  Serial3.write(TimeCodeQuarterFrame);
+  mMidiSendCallback(TimeCodeQuarterFrame);
 
   byte MTCData = 0;
   switch (mMTCQuarterFrameTypes[index])
@@ -315,9 +310,7 @@ void MidiTimeCode::sendMTCQuarterFrame(int index)
       MTCData = (mPlayhead.hours & 0xf0) >> 4 | mCurrentSmpteType;
       break;
   }
-  Serial.write( mMTCQuarterFrameTypes[index] | MTCData );
-  Serial2.write( mMTCQuarterFrameTypes[index] | MTCData );
-  Serial3.write( mMTCQuarterFrameTypes[index] | MTCData );
+  mMidiSendCallback(mMTCQuarterFrameTypes[index] | MTCData);
 }
 
 void MidiTimeCode::sendMTCFullFrame()
@@ -326,26 +319,16 @@ void MidiTimeCode::sendMTCFullFrame()
   // cc -> channel (0x7f to broadcast)
   // hr -> hour, mn -> minutes, sc -> seconds, fr -> frames
   static byte header[5] = { 0xf0, 0x7f, 0x7f, 0x01, 0x01 };
-  Serial.write(header, 5);
-  Serial.write(mPlayhead.hours);
-  Serial.write(mPlayhead.minutes);
-  Serial.write(mPlayhead.seconds);
-  Serial.write(mPlayhead.frames);
-  Serial.write(0xf7);
-
-  Serial2.write(header, 5);
-  Serial2.write(mPlayhead.hours);
-  Serial2.write(mPlayhead.minutes);
-  Serial2.write(mPlayhead.seconds);
-  Serial2.write(mPlayhead.frames);
-  Serial2.write(0xf7);
-
-  Serial3.write(header, 5);
-  Serial3.write(mPlayhead.hours);
-  Serial3.write(mPlayhead.minutes);
-  Serial3.write(mPlayhead.seconds);
-  Serial3.write(mPlayhead.frames);
-  Serial3.write(0xf7);
+  mMidiSendCallback(header[0]);
+  mMidiSendCallback(header[1]);
+  mMidiSendCallback(header[2]);
+  mMidiSendCallback(header[3]);
+  mMidiSendCallback(header[4]);
+  mMidiSendCallback(mPlayhead.hours);
+  mMidiSendCallback(mPlayhead.minutes);
+  mMidiSendCallback(mPlayhead.seconds);
+  mMidiSendCallback(mPlayhead.frames);
+  mMidiSendCallback(0xf7);
 }
 
 // To be called every two frames (so once a complete cycle of quarter frame messages have passed)
@@ -487,3 +470,4 @@ const         MidiTimeCode::MTCQuarterFrameType MidiTimeCode::mMTCQuarterFrameTy
                                                                                            HoursLow, HoursHighAndSmpte
                                                                                          };
 MidiTimeCode::MidiSynchro MidiTimeCode::mMode = MidiTimeCode::SynchroNone;
+static void (*MidiTimeCode::mMidiSendCallback)(byte b) = 0;

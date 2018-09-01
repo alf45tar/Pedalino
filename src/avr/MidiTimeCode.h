@@ -58,7 +58,7 @@ class MidiTimeCode
     ~MidiTimeCode();
 
     // To be called on main program setup
-    void setup();
+    void setup(void (*midi_send_callback)(byte b));
 
     // Only active in Midi Clock mode
     void        setBpm(const float iBpm);
@@ -152,6 +152,7 @@ class MidiTimeCode
 
   private:
     static MidiSynchro                mMode;
+    static void (*mMidiSendCallback)(byte b);
 
     // Midi Clock Stuff
     TapTempo                          mTapTempo;
@@ -173,4 +174,3 @@ class MidiTimeCode
 };
 
 #endif
-

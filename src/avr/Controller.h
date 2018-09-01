@@ -747,11 +747,21 @@ void calibrate()
 }
 
 //
+//
+//
+void mtc_midi_send(byte b)
+{
+  if (interfaces[0].midiClock) Serial.write(b);                               // USB
+  if (interfaces[1].midiClock) Serial2.write(b);                              // DIN
+  if (interfaces[2].midiClock || interfaces[3].midiClock) Serial3.write(b);   // AppleMIDI - BLE
+}
+
+//
 // MIDI Time Code/MIDI Clock setup
 //
 void mtc_setup() {
 
-  MTC.setup();
+  MTC.setup(mtc_midi_send);
   
   switch (currentMidiTimeCode) {
 
