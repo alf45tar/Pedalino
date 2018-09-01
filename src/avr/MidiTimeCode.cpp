@@ -156,7 +156,7 @@ void MidiTimeCode::sendPosition(byte hours, byte minutes, byte seconds, byte fra
   noInterrupts();
   setPlayhead(hours, minutes, seconds, frames);
   if (mMode == MidiTimeCode::SynchroMTCMaster) mNextEvent = SongPosition;
-  //mCurrentQFrame = 0;
+  mCurrentQFrame = 0;
   interrupts();
 }
 
@@ -239,6 +239,45 @@ MidiTimeCode::MidiSynchro MidiTimeCode::getMode()
 
 void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
 {
+  /*
+  
+  Quarter-frame messages
+
+  When the time is running continuously, the 32-bit time code is broken into 8 4-bit pieces,
+  and one piece is transmitted each quarter frame. I.e. 96—120 times per second, depending on the frame rate.
+  Since it takes eight quarter frames for a complete time code message, the complete SMPTE time
+  is updated every two frames.
+  A quarter-frame messages consists of a status byte of 0xF1, followed by a single 7-bit data value:
+  3 bits to identify the piece, and 4 bits of partial time code.
+  
+  When time is running forward, the piece numbers increment from 0–7; with the time that piece 0
+  is transmitted is the coded instant, and the remaining pieces are transmitted later.
+
+  If the MIDI data stream is being rewound, the piece numbers count backward. Again, piece 0
+  is transmitted at the coded moment.
+
+  The time code is divided little-endian as follows:
+
+  MIDI time code pieces
+
+  Piece #	Data byte	Significance
+      0   0000 ffff	Frame number lsbits
+      1  	0001 000f	Frame number msbit
+      2   0010 ssss	Second lsbits
+      3   0011 00ss	Second msbits
+      4   0100 mmmm	Minute lsbits
+      5   0101 00mm	Minute msbits
+      6   0110 hhhh	Hour lsbits
+      7   0111 0rrh	Rate and hour msbit
+
+  Rate (0-3)
+      rr  Frames/s
+      00    24
+      01    25
+      10    29.97 (SMPTE drop-frame timecode)
+      11    30
+
+  */
   static byte b[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   if (mMode == MidiTimeCode::SynchroMTCSlave) {
@@ -252,9 +291,9 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
       //byte frameType = b[7] & 0x06;
 
       byte h = (b[7] & 0x01) << 4 | b[6];
-      byte m = b[5] << 4 | b[4];
-      byte s = b[3] << 4 | b[2];
-      byte f = b[1] << 4 | b[0];
+      byte m = (b[5] & 0x03) << 4 | b[4];
+      byte s = (b[3] & 0x03) << 4 | b[2];
+      byte f = (b[1] & 0x01) << 4 | b[0];
 
       if (h > 23)  h = 23;
       if (m > 59)  m = 59;
@@ -270,12 +309,25 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
 
 void MidiTimeCode::decodeMTCFullFrame(unsigned size, const byte* array)
 {
-  /// F0 7F cc 01 01 hr mn sc fr F7
-  // cc -> channel (0x7f to broadcast)
-  // hr -> hour, mn -> minutes, sc -> seconds, fr -> frames
-  if (mMode == MidiTimeCode::SynchroMTCSlave && size == 10)
-    if (array[0] == 0xF0 && array[1] == 0x7F && array[2] == 0x7F && array[3] == 0x01 && array[4] == 0x01 && array[9] == 0xF7)
-      sendPosition(array[5], array[6], array[7], array[8]);
+  /*
+    Full time code
+
+    When there is a jump in the time code, a single full-time code is sent to synchronize attached equipment. This takes the form of a special global system exclusive message:
+
+    F0 7F 7F 01 01 hh mm ss ff F7
+
+    The manufacturer ID of 7F indicates a real-time universal message, the channel of 7F indicates
+    it is a global broadcast. The following ID of 01 identifies this is a time code type message,
+    and the second 01 indicates it is a full-time code message. The 4 bytes of time code follow.
+    Although MIDI is generally little-endian, the 4 time code bytes follow in big-endian order,
+    followed by a F7 "end of exclusive" byte.
+
+    After a jump, the time clock stops until the first following quarter-frame message is received.
+  */
+  
+  if (mMode == MidiTimeCode::SynchroMTCSlave && size == 11)
+    if (array[1] == 0xf0 && array[2] == 0x7f && array[3] == 0x7f && array[4] == 0x01 && array[5] == 0x01 && array[10] == 0xf7)
+      sendPosition(array[6], array[7], array[8], array[9]);
 }
 
 void MidiTimeCode::sendMTCQuarterFrame(int index)
@@ -315,15 +367,11 @@ void MidiTimeCode::sendMTCQuarterFrame(int index)
 
 void MidiTimeCode::sendMTCFullFrame()
 {
-  /// F0 7F cc 01 01 hr mn sc fr F7
-  // cc -> channel (0x7f to broadcast)
-  // hr -> hour, mn -> minutes, sc -> seconds, fr -> frames
-  static byte header[5] = { 0xf0, 0x7f, 0x7f, 0x01, 0x01 };
-  mMidiSendCallback(header[0]);
-  mMidiSendCallback(header[1]);
-  mMidiSendCallback(header[2]);
-  mMidiSendCallback(header[3]);
-  mMidiSendCallback(header[4]);
+  mMidiSendCallback(0xf0);
+  mMidiSendCallback(0x7f);
+  mMidiSendCallback(0x7f);
+  mMidiSendCallback(0x01);
+  mMidiSendCallback(0x01);
   mMidiSendCallback(mPlayhead.hours);
   mMidiSendCallback(mPlayhead.minutes);
   mMidiSendCallback(mPlayhead.seconds);
@@ -348,18 +396,18 @@ void MidiTimeCode::updatePlayhead()
 
 void MidiTimeCode::resetPlayhead()
 {
-  mPlayhead.frames = 0;
+  mPlayhead.frames  = 0;
   mPlayhead.seconds = 0;
   mPlayhead.minutes = 0;
-  mPlayhead.hours = 0;
+  mPlayhead.hours   = 0;
 }
 
 void MidiTimeCode::setPlayhead(byte hours, byte minutes, byte seconds, byte frames)
 {
-  mPlayhead.frames = frames;
+  mPlayhead.frames  = frames;
   mPlayhead.seconds = seconds;
   mPlayhead.minutes = minutes;
-  mPlayhead.hours = hours;
+  mPlayhead.hours   = hours;
 }
 
 void MidiTimeCode::setBpm(const float iBpm)

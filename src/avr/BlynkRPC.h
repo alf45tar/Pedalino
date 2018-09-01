@@ -12,8 +12,8 @@
 //  Use Serial BLE modules (HM-10, HC-08) to connect your project to Blynk.
 
 #define BLYNK_USE_DIRECT_CONNECT
-//#define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
-//#define BLYNK_NO_FLOAT                  // Disable float operations
+#define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
+#define BLYNK_NO_FLOAT                  // Disable float operations
 
 #ifdef SERIALDEBUG
 #define BLYNK_PRINT SERIALDEBUG
@@ -562,4 +562,3 @@ BLYNK_WRITE(BLINK_INTERFACE_MIDIROUTING) {
   DPRINTLN(onoff);
   interfaces[currentInterface].midiRouting = onoff;
 }
-

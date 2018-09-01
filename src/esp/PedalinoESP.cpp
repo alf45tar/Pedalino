@@ -26,6 +26,9 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266LLMNR.h>
 #include <ESP8266HTTPUpdateServer.h>
+#endif
+
+#if defined(BLYNK) && defined(ARDUINO_ARCH_ESP8266)
 #include <BlynkSimpleEsp8266.h>
 #endif
 
@@ -41,6 +44,9 @@
 #include <BLE2902.h>
 #include <esp_log.h>
 #include <string>
+#endif
+
+#if defined(BLYNK) && defined(ARDUINO_ARCH_ESP32)
 #include <BlynkSimpleEsp32.h>
 #endif
 
@@ -114,8 +120,11 @@ RemoteDebug Debug;
 #endif
 
 const char host[]           = "pedalino";
+
+#ifdef BLYNK
 const char blynkAuthToken[] = "63c670c13d334b059b9dbc9a0b690f4b";
 WidgetLCD  blynkLCD(V0);
+#endif
 
 #ifdef ARDUINO_ARCH_ESP8266
 ESP8266WebServer        httpServer(80);
@@ -817,9 +826,11 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     const char *lcd1     = root["lcd1"];
     const char *lcd2     = root["lcd2"];
     const char *factory_default = root["factory.default"];
+#ifdef BLYNK
     if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
+#endif
     if (factory_default) {
 #ifdef ARDUINO_ARCH_ESP32
       int address = 0;
@@ -1396,6 +1407,7 @@ void midi_connect()
   AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
 }
 
+#ifdef BLYNK
 #define BLYNK_SCANWIFI      V91
 #define BLYNK_SSID          V92
 #define BLYNK_PASSWORD      V93
@@ -1499,6 +1511,7 @@ BLYNK_WRITE(BLYNK_SMARTCONFIG) {
       Blynk.connect();
   }
 }
+#endif
 
 void setup()
 {
@@ -1545,9 +1558,11 @@ void setup()
   WiFi.persistent(false);
   wifi_connect();
 
+#ifdef BLYNK
   // Connect to Blynk
   Blynk.config(blynkAuthToken);
   Blynk.connect();
+#endif
 
 #ifdef PEDALINO_TELNET_DEBUG
   // Initialize the telnet server of RemoteDebug
@@ -1626,8 +1641,10 @@ void loop()
   httpServer.handleClient();
 #endif
 
+#ifdef BLYNK
   if (WiFi.isConnected())
     Blynk.run();
+#endif
 
 #ifdef PEDALINO_TELNET_DEBUG
   // Remote debug over telnet
