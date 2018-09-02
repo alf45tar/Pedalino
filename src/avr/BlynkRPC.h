@@ -67,42 +67,10 @@ const char blynkAuthToken[] = "31795677450a4ac088805d6d914bc747";
 WidgetLCD  blynkLCD(V0);
 void screen_update(boolean);
 
-void blynk_refresh()
+void blynk_refresh_bank()
 {
   //if (Blynk.connected())
-  {
-    switch (currentMidiTimeCode) {
-
-    case PED_MTC_NONE:
-      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          1);
-      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
-      break;
-
-    case PED_MIDI_CLOCK_MASTER:
-      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
-      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
-      break;
-
-    case PED_MIDI_CLOCK_SLAVE:
-      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
-      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
-      break;
-
-    case PED_MTC_MASTER_24:
-    case PED_MTC_MASTER_25:
-    case PED_MTC_MASTER_30DF:
-    case PED_MTC_MASTER_30:
-      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
-      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
-      break;
-
-    case PED_MTC_SLAVE:
-      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
-      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
-      break;
-    }
-    Blynk.virtualWrite(BLYNK_BPM,                   bpm);
-
+  { 
     Blynk.virtualWrite(BLYNK_BANK,                  currentBank + 1);
     Blynk.virtualWrite(BLYNK_PEDAL,                 currentPedal + 1);
     Blynk.virtualWrite(BLYNK_MIDIMESSAGE,           banks[currentBank][currentPedal].midiMessage + 1);
@@ -111,7 +79,13 @@ void blynk_refresh()
     Blynk.virtualWrite(BLYNK_MIDIVALUE1,            banks[currentBank][currentPedal].midiValue1);
     Blynk.virtualWrite(BLYNK_MIDIVALUE2,            banks[currentBank][currentPedal].midiValue2);
     Blynk.virtualWrite(BLYNK_MIDIVALUE3,            banks[currentBank][currentPedal].midiValue3);
+  }
+}
 
+void blynk_refresh_pedal()
+{
+  //if (Blynk.connected())
+  { 
     Blynk.virtualWrite(BLYNK_PEDAL_FUNCTION,        pedals[currentPedal].function + 1);
     switch (pedals[currentPedal].mode) {
       case PED_MOMENTARY1:
@@ -153,13 +127,68 @@ void blynk_refresh()
       Blynk.virtualWrite(BLYNK_PEDAL_ANALOGZERO,    0);
       Blynk.virtualWrite(BLYNK_PEDAL_ANALOGMAX,     1023);
     }
+  }
+}
 
+void blynk_refresh_interface()
+{
+  //if (Blynk.connected())
+  {
     Blynk.virtualWrite(BLYNK_INTERFACE,             currentInterface + 1);
     Blynk.virtualWrite(BLYNK_INTERFACE_MIDIIN,      interfaces[currentInterface].midiIn);
     Blynk.virtualWrite(BLYNK_INTERFACE_MIDIOUT,     interfaces[currentInterface].midiOut);
     Blynk.virtualWrite(BLYNK_INTERFACE_MIDITHRU,    interfaces[currentInterface].midiThru);
     Blynk.virtualWrite(BLYNK_INTERFACE_MIDIROUTING, interfaces[currentInterface].midiRouting);
     Blynk.virtualWrite(BLYNK_INTERFACE_MIDICLOCK,   interfaces[currentInterface].midiClock);
+  }
+}
+
+void blynk_refresh_tempo()
+{
+  //if (Blynk.connected())
+  {
+    switch (currentMidiTimeCode) {
+
+    case PED_MTC_NONE:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          1);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
+      break;
+
+    case PED_MIDI_CLOCK_MASTER:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
+      break;
+
+    case PED_MIDI_CLOCK_SLAVE:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          2);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
+      break;
+
+    case PED_MTC_MASTER_24:
+    case PED_MTC_MASTER_25:
+    case PED_MTC_MASTER_30DF:
+    case PED_MTC_MASTER_30:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      1);
+      break;
+
+    case PED_MTC_SLAVE:
+      Blynk.virtualWrite(BLYNK_MIDI_TIME_CODE,          3);
+      Blynk.virtualWrite(BLYNK_CLOCK_MASTER_SLAVE,      2);
+      break;
+    }
+    Blynk.virtualWrite(BLYNK_BPM,                   bpm);
+  }
+}
+
+void blynk_refresh()
+{
+  //if (Blynk.connected())
+  { 
+    blynk_refresh_bank();
+    blynk_refresh_pedal();
+    blynk_refresh_interface();
+    blynk_refresh_tempo();
   }
 }
 
@@ -338,7 +367,7 @@ BLYNK_WRITE(BLYNK_BANK) {
   DPRINTF(" - Bank ");
   DPRINTLN(bank);
   currentBank = constrain(bank - 1, 0, BANKS - 1);
-  blynk_refresh();
+  blynk_refresh_bank();
 }
 
 BLYNK_WRITE(BLYNK_MIDIMESSAGE) {
@@ -409,7 +438,8 @@ BLYNK_WRITE(BLYNK_PEDAL) {
   DPRINTF(" - Pedal ");
   DPRINTLN(pedal);
   currentPedal = constrain(pedal - 1, 0, PEDALS - 1);
-  blynk_refresh();
+  blynk_refresh_bank();
+  blynk_refresh_pedal();
 }
 
 BLYNK_WRITE(BLYNK_PEDAL_MODE1) {
@@ -484,7 +514,7 @@ BLYNK_WRITE(BLYNK_PEDAL_CALIBRATE) {
   DPRINTF(" - Calibrate ");
   DPRINTLN(calibration);
   if (calibration && pedals[currentPedal].mode == PED_ANALOG) calibrate();
-  blynk_refresh();
+  blynk_refresh_pedal();
 }
 
 BLYNK_WRITE(BLYNK_PEDAL_ANALOGZERO) {
@@ -508,7 +538,7 @@ BLYNK_WRITE(BLYNK_PEDAL_ANALOGMAX) {
 }
 
 
-BLYNK_WRITE(BLINK_INTERFACE) {
+BLYNK_WRITE(BLYNK_INTERFACE) {
   int interface = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - ");
@@ -528,10 +558,10 @@ BLYNK_WRITE(BLINK_INTERFACE) {
   }
   DPRINTLNF(" MIDI interface");
   currentInterface = constrain(interface - 1, 0, INTERFACES);
-  blynk_refresh();
+  blynk_refresh_interface();
 }
 
-BLYNK_WRITE(BLINK_INTERFACE_MIDIIN) {
+BLYNK_WRITE(BLYNK_INTERFACE_MIDIIN) {
   int onoff = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI IN ");
@@ -539,7 +569,7 @@ BLYNK_WRITE(BLINK_INTERFACE_MIDIIN) {
   interfaces[currentInterface].midiIn = onoff;
 }
 
-BLYNK_WRITE(BLINK_INTERFACE_MIDIOUT) {
+BLYNK_WRITE(BLYNK_INTERFACE_MIDIOUT) {
   int onoff = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI OUT ");
@@ -547,7 +577,7 @@ BLYNK_WRITE(BLINK_INTERFACE_MIDIOUT) {
   interfaces[currentInterface].midiOut = onoff;
 }
 
-BLYNK_WRITE(BLINK_INTERFACE_MIDITHRU) {
+BLYNK_WRITE(BLYNK_INTERFACE_MIDITHRU) {
   int onoff = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI THRU ");
@@ -555,7 +585,7 @@ BLYNK_WRITE(BLINK_INTERFACE_MIDITHRU) {
   interfaces[currentInterface].midiThru = onoff;
 }
 
-BLYNK_WRITE(BLINK_INTERFACE_MIDIROUTING) {
+BLYNK_WRITE(BLYNK_INTERFACE_MIDIROUTING) {
   int onoff = param.asInt();
   PRINT_VIRTUAL_PIN(request.pin);
   DPRINTF(" - MIDI Routing ");

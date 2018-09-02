@@ -60,14 +60,11 @@ void setup(void)
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
 
-  irrecv.enableIRIn(); // Start the IR receiver
+  irrecv.enableIRIn();                            // Start the IR receiver
   irrecv.blink13(true);
 
-  bluetooth.begin(9600); // Start the Bluetooth receiver
-  //bluetooth.println(F("AT+NAME=PedalinoMega"));       // Set bluetooth device name
-  //Serial.begin(9600);
-  //Blynk.begin(Serial, blynkAuthToken);
-  //Blynk.begin(bluetooth, blynkAuthToken);
+  bluetooth.begin(9600);                          // Start the Bluetooth receiver
+  bluetooth.println(F("AT+NAME=Pedalino™"));      // Set bluetooth device name
   Blynk.config(bluetooth, blynkAuthToken);
 
   //Serial1.begin(115200);

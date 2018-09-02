@@ -300,7 +300,7 @@ void MidiTimeCode::decodMTCQuarterFrame(byte MTCData)
       if (s > 59)  s = 59;
       if (f > 30)  f = 30;
 
-      sendPosition(h, m, s, f);
+      setPlayhead(h, m, s, f);
       for (i = 0; i < 8; i++)
         b[i] = 0;
     }
@@ -327,7 +327,7 @@ void MidiTimeCode::decodeMTCFullFrame(unsigned size, const byte* array)
   
   if (mMode == MidiTimeCode::SynchroMTCSlave && size == 11)
     if (array[1] == 0xf0 && array[2] == 0x7f && array[3] == 0x7f && array[4] == 0x01 && array[5] == 0x01 && array[10] == 0xf7)
-      sendPosition(array[6], array[7], array[8], array[9]);
+      setPlayhead(array[6], array[7], array[8], array[9]);
 }
 
 void MidiTimeCode::sendMTCQuarterFrame(int index)
