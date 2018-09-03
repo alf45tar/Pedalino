@@ -179,6 +179,11 @@ HardwareSerial                SerialMIDI(2);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SerialMIDI, MIDI, SerialMIDISettings);
 #endif
 
+// ipMIDI
+
+WiFiUDP                 ipMIDI;
+IPAddress               ipMIDImulticast(225, 0, 0, 37);
+unsigned int            ipMIDIdestPort = 21928;
 
 // WiFi OSC comunication
 
@@ -1081,6 +1086,103 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
+
+// ipMIDI
+
+void ipMIDIlisten() {
+  
+  int  packetSize;
+  byte status, type;
+  byte data[2];
+  byte channel, note, velocity, number, value;
+  
+  packetSize = ipMIDI.parsePacket();
+
+  while(ipMIDI.available() > 0) {
+    
+    ipMIDI.read(&status, 1);
+    type    = status & 0xf0;
+    channel = status & 0x0f;
+
+    switch(type) {
+     
+      case midi::NoteOff:
+        ipMIDI.read(data, 2);
+        note     = data[0];
+        velocity = data[1];
+        DPRINTLN("Received from %s  NoteOff 0x%X   Velocity 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
+        MIDI.sendNoteOff(note, velocity, channel);
+        BLESendNoteOff(note, velocity, channel);
+        AppleMIDI.noteOff(note, velocity, channel);
+        OSCSendNoteOff(note, velocity, channel);
+        break;
+
+      case midi::NoteOn:
+        ipMIDI.read(data, 2);
+        note     = data[0];
+        velocity = data[1];
+        DPRINTLN("Received from %s  NoteOn  0x%X   Velocity 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
+        MIDI.sendNoteOn(note, velocity, channel);
+        BLESendNoteOn(note, velocity, channel);
+        AppleMIDI.noteOn(note, velocity, channel);
+        OSCSendNoteOn(note, velocity, channel);
+        break;
+
+      case 0xA0:    //Polyphonic Key Press
+        ipMIDI.read(data,2);
+        break;
+
+      case midi::ControlChange:
+        ipMIDI.read(data, 2);
+        number  = data[0];
+        value   = data[1];
+        DPRINTLN("Received from %s  ControlChange 0x%X   Value 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), number, value, channel);
+        MIDI.sendControlChange(number, value, channel);
+        BLESendControlChange(number, value, channel);
+        AppleMIDI.controlChange(number, value, channel);
+        OSCSendControlChange(number, value, channel);
+        break;
+
+      case midi::ProgramChange:
+        ipMIDI.read(data, 1);
+          //Process byte 2 only (packetBuffer[1]) as program change message, change light bulb mode?)
+        break;
+
+      case 0xD0:    //Channel Pressure (after-touch)
+        ipMIDI.read(data,1);
+        break;
+      case 0xE0:    //Pitch Wheel
+        ipMIDI.read(data,2);
+        break;
+      case 0xF0:    //System
+     
+       switch(status) {
+        case 0xF0:    //Sysex, hopefully this never gets sent...
+        break;
+        case 0xF1:    //MIDI Time Code Quarter Frame.
+          ipMIDI.read(data,1); 
+          break;
+        case 0xF2:    //Song Position Pointer. 
+          ipMIDI.read(data,2);
+          break;
+        case 0xF3:    //Song Select
+          ipMIDI.read(data,1);
+          break;
+        case 0xF8:    //Timing Clock
+                      //Do something here if you want....
+          break;
+        default:
+          break;
+        
+       }
+       break;
+     default:
+       ipMIDI.read(data,2);
+    }
+  }
+}
+
+
 #ifdef ARDUINO_ARCH_ESP32
 String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 
@@ -1337,6 +1439,14 @@ void wifi_connect()
 #ifdef PEDALINO_TELNET_DEBUG
   MDNS.addService("_telnet", "_tcp", 23);
 #endif
+
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginMulti(ipMIDImulticast, ipMIDIdestPort);
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticast(ipMIDImulticast, ipMIDIdestPort);
+#endif
+  DPRINTLN("ipMIDI server started");
 
   // Calculate the broadcast address of local WiFi to broadcast OSC messages
   oscRemoteIp = WiFi.localIP();
@@ -1616,6 +1726,9 @@ void loop()
 
   // Listen to incoming AppleMIDI messages from WiFi
   AppleMIDI.run();
+
+  // Listen to incoming ipMIDI messages from WiFi
+  ipMIDIlisten();
 
   // Listen to incoming OSC messages from WiFi
   int size = oscUDP.parsePacket();
