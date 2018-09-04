@@ -13,6 +13,7 @@
 
       - Serial MIDI
       - WiFi AppleMIDI a.k.a. RTP-MIDI a.k.a. Network MIDI
+      - ipMIDI
       - Bluetooth LE MIDI
       - WiFi OSC
 */
@@ -192,7 +193,6 @@ IPAddress               oscRemoteIp;             // remote IP of an external OSC
 const unsigned int      oscRemotePort = 9000;    // remote port of an external OSC device
 const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
 OSCMessage              oscMsg;
-OSCErrorCode            oscError;
 
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -1086,6 +1086,25 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
+void oscUPDlisten() {
+  
+  if (!WiFi.isConnected()) return;
+
+  // Listen to incoming OSC messages from WiFi
+  int size = oscUDP.parsePacket();
+
+  if (size > 0) {
+    while (size--) oscMsg.fill(oscUDP.read());
+    if (!oscMsg.hasError()) {
+      oscMsg.dispatch(" / pedalino / midi / noteOn",        OnOscNoteOn);
+      oscMsg.dispatch(" / pedalino / midi / noteOff",       OnOscNoteOff);
+      oscMsg.dispatch(" / pedalino / midi / controlChange", OnOscControlChange);
+    } else {
+      DPRINTLN("OSC error: %d", oscMsg.getError());
+    }
+  }
+}
+
 
 // ipMIDI
 
@@ -1094,11 +1113,15 @@ void ipMIDIlisten() {
   int  packetSize;
   byte status, type;
   byte data[2];
-  byte channel, note, velocity, number, value;
+  byte channel, note, velocity, pressure, number, value;
+  int  bend;
+  unsigned int beats;
   
+  if (!WiFi.isConnected()) return;
+
   packetSize = ipMIDI.parsePacket();
 
-  while(ipMIDI.available() > 0) {
+  while (ipMIDI.available() > 0) {
     
     ipMIDI.read(&status, 1);
     type    = status & 0xf0;
@@ -1110,7 +1133,7 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOff 0x%X   Velocity 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
+        DPRINTLN("Received from %s  NoteOff 0x%02X   Velocity 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
         MIDI.sendNoteOff(note, velocity, channel);
         BLESendNoteOff(note, velocity, channel);
         AppleMIDI.noteOff(note, velocity, channel);
@@ -1121,22 +1144,29 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOn  0x%X   Velocity 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
+        DPRINTLN("Received from %s  NoteOn  0x%02X   Velocity 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
         MIDI.sendNoteOn(note, velocity, channel);
         BLESendNoteOn(note, velocity, channel);
         AppleMIDI.noteOn(note, velocity, channel);
         OSCSendNoteOn(note, velocity, channel);
         break;
 
-      case 0xA0:    //Polyphonic Key Press
-        ipMIDI.read(data,2);
+      case midi::AfterTouchPoly:
+        ipMIDI.read(data, 2);
+        note     = data[0];
+        pressure = data[1];
+        DPRINTLN("Received from %s  AfterTouchPoly   Note 0x%02X   Pressure 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, pressure, channel);
+        MIDI.sendAfterTouch(note, pressure, channel);
+        BLESendAfterTouchPoly(note, pressure, channel);
+        AppleMIDI.polyPressure(note, pressure, channel);
+        OSCSendAfterTouchPoly(note, pressure, channel);
         break;
 
       case midi::ControlChange:
         ipMIDI.read(data, 2);
         number  = data[0];
         value   = data[1];
-        DPRINTLN("Received from %s  ControlChange 0x%X   Value 0x%X   Channel 0x%X", ipMIDI.remoteIP().toString().c_str(), number, value, channel);
+        DPRINTLN("Received from %s  ControlChange 0x%02X   Value 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), number, value, channel);
         MIDI.sendControlChange(number, value, channel);
         BLESendControlChange(number, value, channel);
         AppleMIDI.controlChange(number, value, channel);
@@ -1145,39 +1175,121 @@ void ipMIDIlisten() {
 
       case midi::ProgramChange:
         ipMIDI.read(data, 1);
-          //Process byte 2 only (packetBuffer[1]) as program change message, change light bulb mode?)
+        number  = data[0];
+        DPRINTLN("Received from %s  ProgramChange 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), number, channel);
+        MIDI.sendProgramChange(number, channel);
+        BLESendProgramChange(number, channel);
+        AppleMIDI.programChange(number, channel);
+        OSCSendProgramChange(number, channel);
         break;
 
-      case 0xD0:    //Channel Pressure (after-touch)
-        ipMIDI.read(data,1);
+      case midi::AfterTouchChannel:    
+        ipMIDI.read(data, 1);
+        pressure = data[0];
+        DPRINTLN("Received from %s  AfterTouchChannel   Pressure 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), pressure, channel);
+        MIDI.sendAfterTouch(pressure, channel);
+        BLESendAfterTouch(pressure, channel);
+        AppleMIDI.afterTouch(pressure, channel);
+        OSCSendAfterTouch(pressure, channel);
         break;
-      case 0xE0:    //Pitch Wheel
+
+      case midi::PitchBend:
+        ipMIDI.read(data, 2);
+        bend = data[1] << 7 | data[0];
+        DPRINTLN("Received from %s  PitchBend   Bend 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), bend, channel);
+        MIDI.sendPitchBend(bend, channel);
+        BLESendPitchBend(bend, channel);
+        AppleMIDI.pitchBend(bend, channel);
+        OSCSendPitchBend(bend, channel);
+        break;
+
+      case 0xf0:
+        switch(status) {
+
+          case midi::SystemExclusive:
+            while (ipMIDI.read(data, 1) && data[0] != 0xf7);
+            break;
+
+          case midi::TimeCodeQuarterFrame:
+            ipMIDI.read(data, 1);
+            value = data[0];
+            MIDI.sendTimeCodeQuarterFrame(value);
+            BLESendTimeCodeQuarterFrame(value);
+            AppleMIDI.timeCodeQuarterFrame(value);
+            OSCSendTimeCodeQuarterFrame(value);
+            break;
+
+          case midi::SongPosition:
+            ipMIDI.read(data, 2);
+            beats = data[1] << 7 | data[0];
+            MIDI.sendSongPosition(beats);
+            BLESendSongPosition(beats);
+            AppleMIDI.songPosition(beats);
+            OSCSendSongPosition(beats);
+            break;
+
+          case midi::SongSelect:
+            ipMIDI.read(data, 1);
+            number = data[0];
+            MIDI.sendSongSelect(number);
+            BLESendSongSelect(number);
+            AppleMIDI.songSelect(number);
+            OSCSendSongSelect(number);
+            break;
+
+          case midi::TuneRequest:
+            MIDI.sendRealTime(midi::TuneRequest);
+            BLESendTuneRequest();
+            AppleMIDI.tuneRequest();
+            OSCSendTuneRequest();
+            break;
+
+          case midi::Clock:
+            MIDI.sendRealTime(midi::Clock);
+            BLESendClock();
+            AppleMIDI.clock();
+            OSCSendClock();
+            break;
+
+          case midi::Start:
+            MIDI.sendRealTime(midi::Start);
+            BLESendStart();
+            AppleMIDI.start();
+            OSCSendStart();
+            break;
+          
+          case midi::Continue:
+            MIDI.sendRealTime(midi::Continue);
+            BLESendContinue();
+            AppleMIDI._continue();
+            OSCSendContinue();
+            break;
+
+          case midi::Stop:
+            MIDI.sendRealTime(midi::Stop);
+            BLESendStop();
+            AppleMIDI.stop();
+            OSCSendStop();
+            break;
+
+          case midi::ActiveSensing:
+            MIDI.sendRealTime(midi::Stop);
+            BLESendStop();
+            AppleMIDI.stop();
+            OSCSendStop();
+            break;
+
+          case midi::SystemReset:
+            MIDI.sendRealTime(midi::SystemReset);
+            BLESendSystemReset();
+            AppleMIDI.reset();
+            OSCSendSystemReset();
+            break;
+        }
+        break;
+
+      default:
         ipMIDI.read(data,2);
-        break;
-      case 0xF0:    //System
-     
-       switch(status) {
-        case 0xF0:    //Sysex, hopefully this never gets sent...
-        break;
-        case 0xF1:    //MIDI Time Code Quarter Frame.
-          ipMIDI.read(data,1); 
-          break;
-        case 0xF2:    //Song Position Pointer. 
-          ipMIDI.read(data,2);
-          break;
-        case 0xF3:    //Song Select
-          ipMIDI.read(data,1);
-          break;
-        case 0xF8:    //Timing Clock
-                      //Do something here if you want....
-          break;
-        default:
-          break;
-        
-       }
-       break;
-     default:
-       ipMIDI.read(data,2);
     }
   }
 }
@@ -1206,6 +1318,242 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
   return "";
 }
 #endif
+
+
+void WiFiEvent(WiFiEvent_t event) {
+
+  IPAddress localMask;
+
+/*
+    ESP8266 events
+
+typedef enum WiFiEvent 
+{
+    WIFI_EVENT_STAMODE_CONNECTED = 0,
+    WIFI_EVENT_STAMODE_DISCONNECTED,
+    WIFI_EVENT_STAMODE_AUTHMODE_CHANGE,
+    WIFI_EVENT_STAMODE_GOT_IP,
+    WIFI_EVENT_STAMODE_DHCP_TIMEOUT,
+    WIFI_EVENT_SOFTAPMODE_STACONNECTED,
+    WIFI_EVENT_SOFTAPMODE_STADISCONNECTED,
+    WIFI_EVENT_SOFTAPMODE_PROBEREQRECVED,
+    WIFI_EVENT_MAX,
+    WIFI_EVENT_ANY = WIFI_EVENT_MAX,
+    WIFI_EVENT_MODE_CHANGE
+} WiFiEvent_t;
+*/
+
+#ifdef ARDUINO_ARCH_ESP8266
+    switch(event) {
+        case WIFI_EVENT_STAMODE_CONNECTED:
+          uint8_t macAddr[6];
+          WiFi.macAddress(macAddr);
+          DPRINTLN("BSSID       : %s", WiFi.BSSIDstr().c_str());
+          DPRINTLN("RSSI        : %d dBm", WiFi.RSSI());
+          DPRINTLN("Channel     : %d", WiFi.channel());
+          DPRINTLN("STA         : %02X:%02X:%02X:%02X:%02X:%02X", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+          WiFi.hostname(host);
+          break;
+
+        case WIFI_EVENT_STAMODE_GOT_IP:
+          DPRINTLN("Hostname    : %s", WiFi.hostname().c_str());
+          DPRINTLN("IP address  : %s", WiFi.localIP().toString().c_str());
+          DPRINTLN("Subnet mask : %s", WiFi.subnetMask().toString().c_str());
+          DPRINTLN("Gataway IP  : %s", WiFi.gatewayIP().toString().c_str());
+          DPRINTLN("DNS 1       : %s", WiFi.dnsIP(0).toString().c_str());
+          DPRINTLN("DNS 2       : %s", WiFi.dnsIP(1).toString().c_str());
+
+          // Start LLMNR (Link-Local Multicast Name Resolution) responder
+          LLMNR.begin(host);
+          DPRINT("LLMNR responder started\n");
+
+          // Start mDNS (Multicast DNS) responder (ping pedalino.local)
+          if (MDNS.begin(host)) {
+            DPRINTLN("mDNS responder started");
+            // service name is lower case
+            // service name and protocol starts with an '_' e.g. '_udp'
+            MDNS.addService("_apple-midi", "_udp", 5004);
+            MDNS.addService("_osc",        "_udp", oscLocalPort);
+#ifdef PEDALINO_TELNET_DEBUG
+            MDNS.addService("_telnet", "_tcp", 23);
+#endif
+          }
+
+          // Start firmawre update via HTTP (connect to http://pedalino.local/update)
+          httpUpdater.setup(&httpServer);
+          httpServer.begin();
+          MDNS.addService("_http", "_tcp", 80);
+          DPRINTLN("HTTP server started");
+          DPRINTLN("Connect to http://pedalino.local/update for firmware update");
+
+          // ipMIDI
+          ipMIDI.beginMulticast(WiFi.localIP(), ipMIDImulticast, ipMIDIdestPort);
+          DPRINTLN("ipMIDI server started");
+
+          // Calculate the broadcast address of local WiFi to broadcast OSC messages
+          oscRemoteIp = WiFi.localIP();
+          localMask = WiFi.subnetMask();
+          for (int i = 0; i < 4; i++)
+            oscRemoteIp[i] |= (localMask[i] ^ B11111111);
+
+          // Set incoming OSC messages port
+          oscUDP.begin(oscLocalPort);
+          DPRINTLN("OSC server started");
+          break;
+
+        case WIFI_EVENT_STAMODE_DHCP_TIMEOUT:
+          DPRINTLN("WIFI_EVENT_STAMODE_DHCP_TIMEOUT");  
+          break;
+
+        case WIFI_EVENT_STAMODE_DISCONNECTED:
+          DPRINTLN("WIFI_EVENT_STAMODE_DISCONNECTED");
+          httpServer.stop();
+          ipMIDI.stop();
+          oscUDP.stop();   
+          break;
+        
+        case WIFI_EVENT_SOFTAPMODE_STACONNECTED:
+          break;
+
+        case WIFI_EVENT_SOFTAPMODE_STADISCONNECTED:
+          break;
+
+        default:
+          DPRINTLN("Event: %d", event);
+          break;
+    }
+#endif
+
+/* 
+    ESP32 events
+
+SYSTEM_EVENT_WIFI_READY               < ESP32 WiFi ready
+SYSTEM_EVENT_SCAN_DONE                < ESP32 finish scanning AP
+SYSTEM_EVENT_STA_START                < ESP32 station start
+SYSTEM_EVENT_STA_STOP                 < ESP32 station stop
+SYSTEM_EVENT_STA_CONNECTED            < ESP32 station connected to AP
+SYSTEM_EVENT_STA_DISCONNECTED         < ESP32 station disconnected from AP
+SYSTEM_EVENT_STA_AUTHMODE_CHANGE      < the auth mode of AP connected by ESP32 station changed
+SYSTEM_EVENT_STA_GOT_IP               < ESP32 station got IP from connected AP
+SYSTEM_EVENT_STA_LOST_IP              < ESP32 station lost IP and the IP is reset to 0
+SYSTEM_EVENT_STA_WPS_ER_SUCCESS       < ESP32 station wps succeeds in enrollee mode
+SYSTEM_EVENT_STA_WPS_ER_FAILED        < ESP32 station wps fails in enrollee mode
+SYSTEM_EVENT_STA_WPS_ER_TIMEOUT       < ESP32 station wps timeout in enrollee mode
+SYSTEM_EVENT_STA_WPS_ER_PIN           < ESP32 station wps pin code in enrollee mode
+SYSTEM_EVENT_AP_START                 < ESP32 soft-AP start
+SYSTEM_EVENT_AP_STOP                  < ESP32 soft-AP stop
+SYSTEM_EVENT_AP_STACONNECTED          < a station connected to ESP32 soft-AP
+SYSTEM_EVENT_AP_STADISCONNECTED       < a station disconnected from ESP32 soft-AP
+SYSTEM_EVENT_AP_PROBEREQRECVED        < Receive probe request packet in soft-AP interface
+SYSTEM_EVENT_GOT_IP6                  < ESP32 station or ap or ethernet interface v6IP addr is preferred
+SYSTEM_EVENT_ETH_START                < ESP32 ethernet start
+SYSTEM_EVENT_ETH_STOP                 < ESP32 ethernet stop
+SYSTEM_EVENT_ETH_CONNECTED            < ESP32 ethernet phy link up
+SYSTEM_EVENT_ETH_DISCONNECTED         < ESP32 ethernet phy link down
+SYSTEM_EVENT_ETH_GOT_IP               < ESP32 ethernet got IP from connected AP
+SYSTEM_EVENT_MAX
+*/
+#ifdef ARDUINO_ARCH_ESP32
+    switch(event) {
+        case SYSTEM_EVENT_STA_START:
+          DPRINTLN("SYSTEM_EVENT_STA_START");
+          break;
+
+        case SYSTEM_EVENT_STA_STOP:
+          DPRINTLN("SYSTEM_EVENT_STA_STOP");
+          break;
+
+        case SYSTEM_EVENT_WIFI_READY:
+          DPRINTLN("SYSTEM_EVENT_WIFI_READY");
+          break;
+
+        case SYSTEM_EVENT_STA_CONNECTED:
+          DPRINTLN("SYSTEM_EVENT_STA_CONNECTED");
+          uint8_t macAddr[6];
+          WiFi.macAddress(macAddr);
+          DPRINTLN("BSSID       : %s", WiFi.BSSIDstr().c_str());
+          DPRINTLN("RSSI        : %d dBm", WiFi.RSSI());
+          DPRINTLN("Channel     : %d", WiFi.channel());
+          DPRINTLN("STA         : %02X:%02X:%02X:%02X:%02X:%02X", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+          WiFi.setHostname(host);
+          break;
+
+        case SYSTEM_EVENT_STA_GOT_IP:
+          DPRINTLN("SYSTEM_EVENT_STA_GOT_IP");
+          DPRINTLN("Hostname    : %s", WiFi.getHostname());   
+          DPRINTLN("IP address  : %s", WiFi.localIP().toString().c_str());
+          DPRINTLN("Subnet mask : %s", WiFi.subnetMask().toString().c_str());
+          DPRINTLN("Gataway IP  : %s", WiFi.gatewayIP().toString().c_str());
+          DPRINTLN("DNS 1       : %s", WiFi.dnsIP(0).toString().c_str());
+          DPRINTLN("DNS 2       : %s", WiFi.dnsIP(1).toString().c_str());
+
+          // Start mDNS (Multicast DNS) responder (ping pedalino.local)
+          if (MDNS.begin(host)) {
+            DPRINTLN("mDNS responder started");
+            // service name is lower case
+            // service name and protocol starts with an '_' e.g. '_udp'
+            MDNS.addService("_apple-midi", "_udp", 5004);
+            MDNS.addService("_osc",        "_udp", oscLocalPort);
+#ifdef PEDALINO_TELNET_DEBUG
+            MDNS.addService("_telnet", "_tcp", 23);
+#endif            
+          }
+
+          ipMIDI.beginMulticast(ipMIDImulticast, ipMIDIdestPort);
+          DPRINTLN("ipMIDI server started");
+
+          // Calculate the broadcast address of local WiFi to broadcast OSC messages
+          oscRemoteIp = WiFi.localIP();
+          localMask = WiFi.subnetMask();
+          for (int i = 0; i < 4; i++)
+            oscRemoteIp[i] |= (localMask[i] ^ B11111111);
+
+          // Set incoming OSC messages port
+          oscUDP.begin(oscLocalPort);
+          DPRINTLN("OSC server started");
+          break;
+
+        case SYSTEM_EVENT_STA_LOST_IP:
+          DPRINTLN("SYSTEM_EVENT_STA_LOST_IP");
+          MDNS.end();
+          ipMIDI.stop();
+          oscUDP.stop();  
+          break;
+
+        case SYSTEM_EVENT_STA_DISCONNECTED:
+          DPRINTLN("SYSTEM_EVENT_STA_DISCONNECTED");
+          MDNS.end();
+          ipMIDI.stop();
+          oscUDP.stop();   
+          break;
+        
+        case SYSTEM_EVENT_AP_START:
+          DPRINTLN("SYSTEM_EVENT_AP_START");
+          break;
+
+        case SYSTEM_EVENT_AP_STOP:
+          DPRINTLN("SYSTEM_EVENT_AP_STOP");
+          break;
+
+        case SYSTEM_EVENT_AP_STACONNECTED:
+          DPRINTLN("SYSTEM_EVENT_AP_STACONNECTED");
+          break;
+
+        case SYSTEM_EVENT_AP_STADISCONNECTED:
+          DPRINTLN("SYSTEM_EVENT_AP_STADISCONNECTED");
+          break;
+
+        case SYSTEM_EVENT_AP_PROBEREQRECVED:
+          DPRINTLN("SYSTEM_EVENT_AP_PROBEREQRECVED");
+          break;
+
+        default:
+          DPRINTLN("Event: %d", event);
+          break;
+    }
+#endif
+}
+
 
 void status_blink()
 {
@@ -1260,12 +1608,10 @@ bool smart_config()
   for (int i = 0; i < SMART_CONFIG_TIMEOUT && !WiFi.smartConfigDone(); i++) {
     status_blink();
     delay(950);
-    //DPRINT(".");
   }
 
   if (WiFi.smartConfigDone())
   {
-    DPRINT("[SUCCESS]");
     DPRINTLN("SSID        : %s", WiFi.SSID().c_str());
     DPRINTLN("Password    : %s", WiFi.psk().c_str());
 
@@ -1279,7 +1625,7 @@ bool smart_config()
 #endif
   }
   else
-    DPRINT("[TIMEOUT]");
+    DPRINT("SmartConfig timeout");
 
   if (WiFi.smartConfigDone())
   {
@@ -1311,15 +1657,9 @@ bool ap_connect(String ssid = "", String password = "")
     delay(100);
     status_blink();
     delay(300);
-    //DPRINT(".");
   }
 
   WiFi.isConnected() ? WIFI_LED_ON() : WIFI_LED_OFF();
-
-  if (WiFi.isConnected())
-    DPRINTLN("[SUCCESS]");
-  else
-    DPRINTLN("[TIMEOUT]");
 
   return WiFi.isConnected();
 }
@@ -1357,15 +1697,9 @@ bool auto_reconnect(String ssid = "", String password = "")
     delay(100);
     status_blink();
     delay(300);
-    //DPRINT(".");
   }
 
   WiFi.isConnected() ? WIFI_LED_ON() : WIFI_LED_OFF();
-
-  if (WiFi.isConnected())
-    DPRINTLN("[SUCCESS]");
-  else
-    DPRINTLN("[TIMEOUT]");
 
   return WiFi.isConnected();
 }
@@ -1381,85 +1715,7 @@ void wifi_connect()
   else
   {
     // connected to an AP
-
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFi.hostname(host);
-#endif
-#ifdef ARDUINO_ARCH_ESP32
-    WiFi.setHostname(host);
-#endif
-
-#ifdef SERIALDEBUG
-    //WiFi.printDiag(SERIALDEBUG);
-#endif
-
-    uint8_t macAddr[6];
-    WiFi.macAddress(macAddr);
-    DPRINTLN("BSSID       : %s", WiFi.BSSIDstr().c_str());
-    DPRINTLN("RSSI        : %d dBm", WiFi.RSSI());
-#ifdef ARDUINO_ARCH_ESP8266
-    //DPRINTLN("Channel     : %d", WiFi.getChannel());
-    DPRINTLN("Hostname    : %s", WiFi.hostname().c_str());
-#endif
-#ifdef ARDUINO_ARCH_ESP32
-    DPRINTLN("Hostname    : %s", WiFi.getHostname());
-#endif
-    DPRINTLN("STA         : %02X:%02X:%02X:%02X:%02X:%02X", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
-    DPRINTLN("IP address  : %s", WiFi.localIP().toString().c_str());
-    DPRINTLN("Subnet mask : %s", WiFi.subnetMask().toString().c_str());
-    DPRINTLN("Gataway IP  : %s", WiFi.gatewayIP().toString().c_str());
-    DPRINTLN("DNS 1       : %s", WiFi.dnsIP(0).toString().c_str());
-    DPRINTLN("DNS 2       : %s", WiFi.dnsIP(1).toString().c_str());
   }
-
-#ifdef ARDUINO_ARCH_ESP8266
-  // Start LLMNR (Link-Local Multicast Name Resolution) responder
-  LLMNR.begin(host);
-  DPRINT("LLMNR responder started\n");
-#endif
-
-  // Start mDNS (Multicast DNS) responder (ping pedalino.local)
-  if (MDNS.begin(host)) {
-    DPRINTLN("mDNS responder started");
-    // service name is lower case
-    // service name and protocol starts with an '_' e.g. '_udp'
-    MDNS.addService("_apple-midi", "_udp", 5004);
-    MDNS.addService("_osc",        "_udp", oscLocalPort);
-  }
-
-  // Start firmawre update via HTTP (connect to http://pedalino.local/update)
-#ifdef ARDUINO_ARCH_ESP8266
-  httpUpdater.setup(&httpServer);
-  httpServer.begin();
-  MDNS.addService("_http", "_tcp", 80);
-  DPRINTLN("HTTP server started");
-  DPRINTLN("Connect to http://pedalino.local/update for firmware update");
-#endif
-
-#ifdef PEDALINO_TELNET_DEBUG
-  MDNS.addService("_telnet", "_tcp", 23);
-#endif
-
-#ifdef ARDUINO_ARCH_ESP8266
-  ipMIDI.beginMulticast(WiFi.localIP(), ipMIDImulticast, ipMIDIdestPort);
-#endif
-#ifdef ARDUINO_ARCH_ESP32
-  ipMIDI.beginMulticast(ipMIDImulticast, ipMIDIdestPort);
-#endif
-  DPRINTLN("ipMIDI server started");
-
-  // Calculate the broadcast address of local WiFi to broadcast OSC messages
-  oscRemoteIp = WiFi.localIP();
-  IPAddress localMask = WiFi.subnetMask();
-  for (int i = 0; i < 4; i++)
-    oscRemoteIp[i] |= (localMask[i] ^ B11111111);
-
-  // Set incoming OSC messages port
-  oscUDP.begin(oscLocalPort);
-  DPRINTLN("OSC server started");
-#ifdef ARDUINO_ARCH_ESP8266
-  DPRINTLN("Local port: %d", oscUDP.localPort());
-#endif
 }
 
 
@@ -1665,6 +1921,7 @@ void setup()
 
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
+  WiFi.onEvent(WiFiEvent);
   wifi_connect();
 
 #ifdef BLYNK
@@ -1729,24 +1986,8 @@ void loop()
   // Listen to incoming ipMIDI messages from WiFi
   ipMIDIlisten();
 
-  // Listen to incoming OSC messages from WiFi
-  int size = oscUDP.parsePacket();
-
-  if (size > 0) {
-    while (size--) oscMsg.fill(oscUDP.read());
-    if (!oscMsg.hasError()) {
-      oscMsg.dispatch(" / pedalino / midi / noteOn",        OnOscNoteOn);
-      oscMsg.dispatch(" / pedalino / midi / noteOff",       OnOscNoteOff);
-      oscMsg.dispatch(" / pedalino / midi / controlChange", OnOscControlChange);
-    } else {
-      oscError = oscMsg.getError();
-#ifdef PEDALINO_TELNET_DEBUG
-      DEBUG("OSC error: ");
-      //DEBUG(oscError);
-      DEBUG("\n");
-#endif
-    }
-  }
+  // Listen to incoming OSC UDP messages from WiFi
+  oscUPDlisten();
 
 #ifdef ARDUINO_ARCH_ESP8266
   // Run HTTP Updater
@@ -1763,4 +2004,3 @@ void loop()
   Debug.handle();
 #endif
 }
-
