@@ -1398,7 +1398,7 @@ void wifi_connect()
     DPRINTLN("BSSID       : %s", WiFi.BSSIDstr().c_str());
     DPRINTLN("RSSI        : %d dBm", WiFi.RSSI());
 #ifdef ARDUINO_ARCH_ESP8266
-    DPRINTLN("Channel     : %d", Wifi.getChannel());
+    //DPRINTLN("Channel     : %d", WiFi.getChannel());
     DPRINTLN("Hostname    : %s", WiFi.hostname().c_str());
 #endif
 #ifdef ARDUINO_ARCH_ESP32
@@ -1441,7 +1441,7 @@ void wifi_connect()
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
-  ipMIDI.beginMulti(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.beginMulticast(WiFi.localIP(), ipMIDImulticast, ipMIDIdestPort);
 #endif
 #ifdef ARDUINO_ARCH_ESP32
   ipMIDI.beginMulticast(ipMIDImulticast, ipMIDIdestPort);
@@ -1458,8 +1458,7 @@ void wifi_connect()
   oscUDP.begin(oscLocalPort);
   DPRINTLN("OSC server started");
 #ifdef ARDUINO_ARCH_ESP8266
-  DPRINT("Local port: ");
-  DPRINTLN(oscUDP.localPort());
+  DPRINTLN("Local port: %d", oscUDP.localPort());
 #endif
 }
 
