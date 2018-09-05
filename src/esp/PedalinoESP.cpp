@@ -2064,6 +2064,7 @@ BLYNK_WRITE(BLYNK_SMARTCONFIG) {
 }
 #endif
 
+
 void setup()
 {
 #ifdef SERIALDEBUG
@@ -2125,6 +2126,7 @@ void setup()
   // On receiving MIDI data callbacks setup
   midi_connect();
 }
+
 
 void loop()
 {
