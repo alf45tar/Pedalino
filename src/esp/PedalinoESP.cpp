@@ -594,6 +594,157 @@ void BLESendSystemReset(void)
 #endif
 
 
+// Send messages to WiFI ipMIDI interface
+
+void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
+{
+  byte midiPacket[2];
+
+  midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[1] = data1;
+  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.write(midiPacket, 2);
+  ipMIDI.endPacket();
+}
+
+void ipMIDISendChannelMessage2(byte type, byte channel, byte data1, byte data2)
+{
+  byte midiPacket[3];
+
+  midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[1] = data1;
+  midiPacket[2] = data2;
+  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.write(midiPacket, 3);
+  ipMIDI.endPacket();
+}
+
+void ipMIDISendSystemCommonMessage1(byte type, byte data1)
+{
+  byte midiPacket[2];
+
+  midiPacket[0] = type;
+  midiPacket[1] = data1;
+  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.write(midiPacket, 2);
+  ipMIDI.endPacket();
+}
+
+void ipMIDISendSystemCommonMessage2(byte type, byte data1, byte data2)
+{
+  byte  midiPacket[3];
+
+  midiPacket[0] = type;
+  midiPacket[1] = data1;
+  midiPacket[2] = data2;
+  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.write(midiPacket, 3);
+  ipMIDI.endPacket();
+}
+
+void ipMIDISendRealTimeMessage(byte type)
+{
+  byte midiPacket[1];
+
+  midiPacket[0] = type;
+  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+  ipMIDI.write(midiPacket, 1);
+  ipMIDI.endPacket();
+}
+
+void ipMIDISendNoteOn(byte note, byte velocity, byte channel)
+{
+  ipMIDISendChannelMessage2(midi::NoteOn, channel, note, velocity);
+}
+
+void ipMIDISendNoteOff(byte note, byte velocity, byte channel)
+{
+  ipMIDISendChannelMessage2(midi::NoteOff, channel, note, velocity);
+}
+
+void ipMIDISendAfterTouchPoly(byte note, byte pressure, byte channel)
+{
+  ipMIDISendChannelMessage2(midi::AfterTouchPoly, channel, note, pressure);
+}
+
+void ipMIDISendControlChange(byte number, byte value, byte channel)
+{
+  ipMIDISendChannelMessage2(midi::ControlChange, channel, number, value);
+}
+
+void ipMIDISendProgramChange(byte number, byte channel)
+{
+  ipMIDISendChannelMessage1(midi::ProgramChange, channel, number);
+}
+
+void ipMIDISendAfterTouch(byte pressure, byte channel)
+{
+  ipMIDISendChannelMessage1(midi::AfterTouchChannel, channel, pressure);
+}
+
+void ipMIDISendPitchBend(int bend, byte channel)
+{
+  ipMIDISendChannelMessage1(midi::PitchBend, channel, bend);
+}
+
+void ipMIDISendSystemExclusive(const byte* array, unsigned size)
+{
+  //
+  //  to be implemented
+  //
+}
+
+void ipMIDISendTimeCodeQuarterFrame(byte data)
+{
+  ipMIDISendSystemCommonMessage1(midi::TimeCodeQuarterFrame, data);
+}
+
+void ipMIDISendSongPosition(unsigned int beats)
+{
+  ipMIDISendSystemCommonMessage2(midi::SongPosition, beats >> 4, beats & 0x0f);
+}
+
+void ipMIDISendSongSelect(byte songnumber)
+{
+  ipMIDISendSystemCommonMessage1(midi::SongSelect, songnumber);
+}
+
+void ipMIDISendTuneRequest(void)
+{
+  ipMIDISendRealTimeMessage(midi::TuneRequest);
+}
+
+void ipMIDISendClock(void)
+{
+  ipMIDISendRealTimeMessage(midi::Clock);
+}
+
+void ipMIDISendStart(void)
+{
+  ipMIDISendRealTimeMessage(midi::Start);
+}
+
+void ipMIDISendContinue(void)
+{
+  ipMIDISendRealTimeMessage(midi::Continue);
+}
+
+void ipMIDISendStop(void)
+{
+  ipMIDISendRealTimeMessage(midi::Stop);
+}
+
+void ipMIDISendActiveSensing(void)
+{
+  ipMIDISendRealTimeMessage(midi::ActiveSensing);
+}
+
+void ipMIDISendSystemReset(void)
+{
+  ipMIDISendRealTimeMessage(midi::SystemReset);
+}
+
+
 // Send messages to WiFI OSC interface
 
 void OSCSendNoteOn(byte note, byte velocity, byte channel)
@@ -752,6 +903,7 @@ void OSCSendSystemReset(void)
 void OnSerialMidiNoteOn(byte channel, byte note, byte velocity)
 {
   BLESendNoteOn(note, velocity, channel);
+  ipMIDISendNoteOn(note, velocity, channel);
   AppleMIDI.noteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
@@ -759,6 +911,7 @@ void OnSerialMidiNoteOn(byte channel, byte note, byte velocity)
 void OnSerialMidiNoteOff(byte channel, byte note, byte velocity)
 {
   BLESendNoteOff(note, velocity, channel);
+  ipMIDISendNoteOff(note, velocity, channel);
   AppleMIDI.noteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
@@ -766,6 +919,7 @@ void OnSerialMidiNoteOff(byte channel, byte note, byte velocity)
 void OnSerialMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   BLESendAfterTouchPoly(note, pressure, channel);
+  ipMIDISendAfterTouchPoly(note, pressure, channel);
   AppleMIDI.polyPressure(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
@@ -773,6 +927,7 @@ void OnSerialMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 void OnSerialMidiControlChange(byte channel, byte number, byte value)
 {
   BLESendControlChange(number, value, channel);
+  ipMIDISendControlChange(number, value, channel);
   AppleMIDI.controlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
@@ -780,6 +935,7 @@ void OnSerialMidiControlChange(byte channel, byte number, byte value)
 void OnSerialMidiProgramChange(byte channel, byte number)
 {
   BLESendProgramChange(number, channel);
+  ipMIDISendProgramChange(number, channel);
   AppleMIDI.programChange(number, channel);
   OSCSendProgramChange(number, channel);
 }
@@ -787,6 +943,7 @@ void OnSerialMidiProgramChange(byte channel, byte number)
 void OnSerialMidiAfterTouchChannel(byte channel, byte pressure)
 {
   BLESendAfterTouch(pressure, channel);
+  ipMIDISendAfterTouch(pressure, channel);
   AppleMIDI.afterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
@@ -794,6 +951,7 @@ void OnSerialMidiAfterTouchChannel(byte channel, byte pressure)
 void OnSerialMidiPitchBend(byte channel, int bend)
 {
   BLESendPitchBend(bend, channel);
+  ipMIDISendPitchBend(bend, channel);
   AppleMIDI.pitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
@@ -851,6 +1009,7 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
 }
     else {
       BLESendSystemExclusive(array, size);
+      ipMIDISendSystemExclusive(array, size);
       AppleMIDI.sysEx(array, size);
       OSCSendSystemExclusive(array, size);
     }
@@ -860,6 +1019,7 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
 void OnSerialMidiTimeCodeQuarterFrame(byte data)
 {
   BLESendTimeCodeQuarterFrame(data);
+  ipMIDISendTimeCodeQuarterFrame(data);
   AppleMIDI.timeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
@@ -867,6 +1027,7 @@ void OnSerialMidiTimeCodeQuarterFrame(byte data)
 void OnSerialMidiSongPosition(unsigned int beats)
 {
   BLESendSongPosition(beats);
+  ipMIDISendSongPosition(beats);
   AppleMIDI.songPosition(beats);
   OSCSendSongPosition(beats);
 }
@@ -874,6 +1035,7 @@ void OnSerialMidiSongPosition(unsigned int beats)
 void OnSerialMidiSongSelect(byte songnumber)
 {
   BLESendSongSelect(songnumber);
+  ipMIDISendSongSelect(songnumber);
   AppleMIDI.songSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
@@ -881,6 +1043,7 @@ void OnSerialMidiSongSelect(byte songnumber)
 void OnSerialMidiTuneRequest(void)
 {
   BLESendTuneRequest();
+  ipMIDISendTuneRequest();
   AppleMIDI.tuneRequest();
   OSCSendTuneRequest();
 }
@@ -888,6 +1051,7 @@ void OnSerialMidiTuneRequest(void)
 void OnSerialMidiClock(void)
 {
   BLESendClock();
+  ipMIDISendClock();
   AppleMIDI.clock();
   OSCSendClock();
 }
@@ -895,6 +1059,7 @@ void OnSerialMidiClock(void)
 void OnSerialMidiStart(void)
 {
   BLESendStart();
+  ipMIDISendStart();
   AppleMIDI.start();
   OSCSendStart();
 }
@@ -902,6 +1067,7 @@ void OnSerialMidiStart(void)
 void OnSerialMidiContinue(void)
 {
   BLESendContinue();
+  ipMIDISendContinue();
   AppleMIDI._continue();
   OSCSendContinue();
 }
@@ -909,6 +1075,7 @@ void OnSerialMidiContinue(void)
 void OnSerialMidiStop(void)
 {
   BLESendStop();
+  ipMIDISendStop();
   AppleMIDI.stop();
   OSCSendStop();
 }
@@ -916,6 +1083,7 @@ void OnSerialMidiStop(void)
 void OnSerialMidiActiveSensing(void)
 {
   BLESendActiveSensing();
+  ipMIDISendActiveSensing();
   AppleMIDI.activeSensing();
   OSCSendActiveSensing();
 }
@@ -923,6 +1091,7 @@ void OnSerialMidiActiveSensing(void)
 void OnSerialMidiSystemReset(void)
 {
   BLESendSystemReset();
+  ipMIDISendSystemReset();
   AppleMIDI.reset();
   OSCSendSystemReset();
 }
@@ -946,6 +1115,7 @@ void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
 {
   MIDI.sendNoteOn(note, velocity, channel);
   BLESendNoteOn(note, velocity, channel);
+  ipMIDISendNoteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
 
@@ -953,6 +1123,7 @@ void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 {
   MIDI.sendNoteOff(note, velocity, channel);
   BLESendNoteOff(note, velocity, channel);
+  ipMIDISendNoteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
 
@@ -960,6 +1131,7 @@ void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   MIDI.sendAfterTouch(note, pressure, channel);
   BLESendAfterTouchPoly(note, pressure, channel);
+  ipMIDISendAfterTouchPoly(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
@@ -967,6 +1139,7 @@ void OnAppleMidiReceiveControlChange(byte channel, byte number, byte value)
 {
   MIDI.sendControlChange(number, value, channel);
   BLESendControlChange(number, value, channel);
+  ipMIDISendControlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
 
@@ -981,6 +1154,7 @@ void OnAppleMidiReceiveAfterTouchChannel(byte channel, byte pressure)
 {
   MIDI.sendAfterTouch(pressure, channel);
   BLESendAfterTouch(pressure, channel);
+  ipMIDISendAfterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
 
@@ -988,6 +1162,7 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
 {
   MIDI.sendPitchBend(bend, channel);
   BLESendPitchBend(bend, channel);
+  ipMIDISendPitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
 
@@ -995,6 +1170,7 @@ void OnAppleMidiReceiveSysEx(const byte * data, uint16_t size)
 {
   MIDI.sendSysEx(size, data);
   BLESendSystemExclusive(data, size);
+  ipMIDISendSystemExclusive(data, size);
   OSCSendSystemExclusive(data, size);
 }
 
@@ -1002,6 +1178,7 @@ void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)
 {
   MIDI.sendTimeCodeQuarterFrame(data);
   BLESendTimeCodeQuarterFrame(data);
+  ipMIDISendTimeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
 
@@ -1009,6 +1186,7 @@ void OnAppleMidiReceiveSongPosition(unsigned short beats)
 {
   MIDI.sendSongPosition(beats);
   BLESendSongPosition(beats);
+  ipMIDISendSongPosition(beats);
   OSCSendSongPosition(beats);
 }
 
@@ -1016,6 +1194,7 @@ void OnAppleMidiReceiveSongSelect(byte songnumber)
 {
   MIDI.sendSongSelect(songnumber);
   BLESendSongSelect(songnumber);
+  ipMIDISendSongSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
 
@@ -1023,6 +1202,7 @@ void OnAppleMidiReceiveTuneRequest(void)
 {
   MIDI.sendTuneRequest();
   BLESendTuneRequest();
+  ipMIDISendTuneRequest();
   OSCSendTuneRequest();
 }
 
@@ -1030,6 +1210,7 @@ void OnAppleMidiReceiveClock(void)
 {
   MIDI.sendRealTime(midi::Clock);
   BLESendClock();
+  ipMIDISendClock();
   OSCSendClock();
 }
 
@@ -1037,6 +1218,7 @@ void OnAppleMidiReceiveStart(void)
 {
   MIDI.sendRealTime(midi::Start);
   BLESendStart();
+  ipMIDISendStart();
   OSCSendStart();
 }
 
@@ -1044,6 +1226,7 @@ void OnAppleMidiReceiveContinue(void)
 {
   MIDI.sendRealTime(midi::Continue);
   BLESendContinue();
+  ipMIDISendContinue();
   OSCSendContinue();
 }
 
@@ -1051,6 +1234,7 @@ void OnAppleMidiReceiveStop(void)
 {
   MIDI.sendRealTime(midi::Stop);
   BLESendStop();
+  ipMIDISendStop();
   OSCSendStop();
 }
 
@@ -1058,6 +1242,7 @@ void OnAppleMidiReceiveActiveSensing(void)
 {
   MIDI.sendRealTime(midi::ActiveSensing);
   BLESendActiveSensing();
+  ipMIDISendActiveSensing();
   OSCSendActiveSensing();
 }
 
@@ -1065,6 +1250,7 @@ void OnAppleMidiReceiveReset(void)
 {
   MIDI.sendRealTime(midi::SystemReset);
   BLESendSystemReset();
+  ipMIDISendSystemReset();
   OSCSendSystemReset();
 }
 
@@ -1124,8 +1310,8 @@ void ipMIDIlisten() {
   while (ipMIDI.available() > 0) {
     
     ipMIDI.read(&status, 1);
-    type    = status & 0xf0;
-    channel = status & 0x0f;
+    type    = MIDI.getTypeFromStatusByte(status);
+    channel = MIDI.getChannelFromStatusByte(status);
 
     switch(type) {
      
