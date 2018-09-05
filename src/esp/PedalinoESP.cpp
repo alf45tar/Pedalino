@@ -350,7 +350,7 @@ void BLEMidiReceive(uint8_t *buffer, uint8_t bufferSize)
       return;
     }
     command = MIDI.getTypeFromStatusByte(lastStatus);
-    channel = MIDI.getChannelFromStatusByte(lastStatus);
+    channel = MIDI.getChannelFromStatusByte(lastStatus) - 1;
     //Point to next non-data byte
     rPtr = lPtr;
     while ( (buffer[rPtr + 1] < 0x80) && (rPtr < (bufferSize - 1)) ) {
@@ -602,7 +602,12 @@ void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
 
   midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
   midiPacket[1] = data1;
-  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticastPacket();
+#endif
   ipMIDI.write(midiPacket, 2);
   ipMIDI.endPacket();
 }
@@ -614,7 +619,12 @@ void ipMIDISendChannelMessage2(byte type, byte channel, byte data1, byte data2)
   midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
   midiPacket[1] = data1;
   midiPacket[2] = data2;
-  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticastPacket();
+#endif
   ipMIDI.write(midiPacket, 3);
   ipMIDI.endPacket();
 }
@@ -625,7 +635,12 @@ void ipMIDISendSystemCommonMessage1(byte type, byte data1)
 
   midiPacket[0] = type;
   midiPacket[1] = data1;
-  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticastPacket();
+#endif
   ipMIDI.write(midiPacket, 2);
   ipMIDI.endPacket();
 }
@@ -637,7 +652,12 @@ void ipMIDISendSystemCommonMessage2(byte type, byte data1, byte data2)
   midiPacket[0] = type;
   midiPacket[1] = data1;
   midiPacket[2] = data2;
-  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticastPacket();
+#endif
   ipMIDI.write(midiPacket, 3);
   ipMIDI.endPacket();
 }
@@ -647,7 +667,12 @@ void ipMIDISendRealTimeMessage(byte type)
   byte midiPacket[1];
 
   midiPacket[0] = type;
-  ipMIDI.beginPacket(ipMIDImulticast, ipMIDIdestPort);
+#ifdef ARDUINO_ARCH_ESP8266
+  ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  ipMIDI.beginMulticastPacket();
+#endif
   ipMIDI.write(midiPacket, 1);
   ipMIDI.endPacket();
 }
@@ -1297,9 +1322,9 @@ void oscUPDlisten() {
 void ipMIDIlisten() {
   
   int  packetSize;
-  byte status, type;
+  byte status, type, channel;
   byte data[2];
-  byte channel, note, velocity, pressure, number, value;
+  byte note, velocity, pressure, number, value;
   int  bend;
   unsigned int beats;
   
@@ -1311,7 +1336,7 @@ void ipMIDIlisten() {
     
     ipMIDI.read(&status, 1);
     type    = MIDI.getTypeFromStatusByte(status);
-    channel = MIDI.getChannelFromStatusByte(status);
+    channel = MIDI.getChannelFromStatusByte(status) - 1;
 
     switch(type) {
      
