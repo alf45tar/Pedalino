@@ -118,6 +118,9 @@ RemoteDebug Debug;
 
 #ifndef DPRINTLN
 #define DPRINTLN(...)
+#define DPRINTMIDI(...)
+#else
+#define DPRINTMIDI(...)   printMIDI(__VA_ARGS__)
 #endif
 
 const char host[]           = "pedalino";
@@ -194,6 +197,123 @@ const unsigned int      oscRemotePort = 9000;    // remote port of an external O
 const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
 OSCMessage              oscMsg;
 
+
+void printMIDI(const char *interface, midi::StatusByte status, const byte *data) {
+  
+  midi::MidiType  type;
+  midi::Channel   channel;
+  byte            note, velocity, pressure, number, value;
+  int             bend;
+  unsigned int    beats;
+
+    type    = MIDI.getTypeFromStatusByte(status);
+    channel = MIDI.getChannelFromStatusByte(status) - 1;
+
+    switch(type) {
+     
+      case midi::NoteOff:
+        note     = data[0];
+        velocity = data[1];
+        DPRINTLN("Received from %s  NoteOff 0x%02X   Velocity 0x%02X   Channel 0x%02X", interface, note, velocity, channel);
+        break;
+
+      case midi::NoteOn:
+        note     = data[0];
+        velocity = data[1];
+        DPRINTLN("Received from %s  NoteOn  0x%02X   Velocity 0x%02X   Channel 0x%02X", interface, note, velocity, channel);
+        break;
+
+      case midi::AfterTouchPoly:
+        note     = data[0];
+        pressure = data[1];
+        DPRINTLN("Received from %s  AfterTouchPoly   Note 0x%02X   Pressure 0x%02X   Channel 0x%02X", interface, note, pressure, channel);
+        break;
+
+      case midi::ControlChange:
+        number  = data[0];
+        value   = data[1];
+        DPRINTLN("Received from %s  ControlChange 0x%02X   Value 0x%02X   Channel 0x%02X", interface, number, value, channel);
+        break;
+
+      case midi::ProgramChange:
+        number  = data[0];
+        DPRINTLN("Received from %s  ProgramChange 0x%02X   Channel 0x%02X", interface, number, channel);
+        break;
+
+      case midi::AfterTouchChannel:    
+        pressure = data[0];
+        DPRINTLN("Received from %s  AfterTouchChannel   Pressure 0x%02X   Channel 0x%02X", interface, pressure, channel);
+        break;
+
+      case midi::PitchBend:
+        bend = data[1] << 7 | data[0];
+        DPRINTLN("Received from %s  PitchBend   Bend 0x%02X   Channel 0x%02X", interface, bend, channel);
+        break;
+
+      case 0xf0:
+        switch(status) {
+
+          case midi::SystemExclusive:
+            DPRINTLN("Received from %s  SystemExclusive 0x%02X", interface, data[0]);
+            break;
+
+          case midi::TimeCodeQuarterFrame:
+            value = data[0];
+            DPRINTLN("Received from %s  TimeCodeQuarterFrame 0x%02X", interface, value);
+            break;
+
+          case midi::SongPosition:
+            beats = data[1] << 7 | data[0];
+            DPRINTLN("Received from %s  SongPosition Beats 0x%04X", interface, beats);
+            break;
+
+          case midi::SongSelect:
+            number = data[0];
+            DPRINTLN("Received from %s  SongSelect 0x%02X", interface, number);
+            break;
+
+          case midi::TuneRequest:
+            DPRINTLN("Received from %s  TuneRequest", interface);
+            break;
+
+          case midi::Clock:
+            //DPRINTLN("Received from %s  Clock", interface);
+            break;
+
+          case midi::Start:
+            DPRINTLN("Received from %s  Start", interface);
+            break;
+          
+          case midi::Continue:
+            DPRINTLN("Received from %s  Continue", interface);
+            break;
+
+          case midi::Stop:
+            DPRINTLN("Received from %s  Stop", interface);
+            break;
+
+          case midi::ActiveSensing:
+            DPRINTLN("Received from %s  ActiveSensing", interface);
+            break;
+
+          case midi::SystemReset:
+            DPRINTLN("Received from %s  SystemReset", interface);
+            break;
+        }
+        break;
+    }
+}
+
+void printMIDI (const char *interface, const midi::MidiType type, const midi::Channel channel, const byte data1, const byte data2){
+  
+  midi::StatusByte  status;
+  byte              data[2];
+
+  status = type | channel & 0x0f;
+  data[0] = data1;
+  data[1] = data2;
+  printMIDI(interface, status, data);
+}
 
 #ifdef ARDUINO_ARCH_ESP32
 
@@ -1344,7 +1464,6 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOff 0x%02X   Velocity 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
         MIDI.sendNoteOff(note, velocity, channel);
         BLESendNoteOff(note, velocity, channel);
         AppleMIDI.noteOff(note, velocity, channel);
@@ -1355,7 +1474,6 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOn  0x%02X   Velocity 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, velocity, channel);
         MIDI.sendNoteOn(note, velocity, channel);
         BLESendNoteOn(note, velocity, channel);
         AppleMIDI.noteOn(note, velocity, channel);
@@ -1366,7 +1484,6 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         note     = data[0];
         pressure = data[1];
-        DPRINTLN("Received from %s  AfterTouchPoly   Note 0x%02X   Pressure 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), note, pressure, channel);
         MIDI.sendAfterTouch(note, pressure, channel);
         BLESendAfterTouchPoly(note, pressure, channel);
         AppleMIDI.polyPressure(note, pressure, channel);
@@ -1377,7 +1494,6 @@ void ipMIDIlisten() {
         ipMIDI.read(data, 2);
         number  = data[0];
         value   = data[1];
-        DPRINTLN("Received from %s  ControlChange 0x%02X   Value 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), number, value, channel);
         MIDI.sendControlChange(number, value, channel);
         BLESendControlChange(number, value, channel);
         AppleMIDI.controlChange(number, value, channel);
@@ -1387,17 +1503,15 @@ void ipMIDIlisten() {
       case midi::ProgramChange:
         ipMIDI.read(data, 1);
         number  = data[0];
-        DPRINTLN("Received from %s  ProgramChange 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), number, channel);
         MIDI.sendProgramChange(number, channel);
         BLESendProgramChange(number, channel);
         AppleMIDI.programChange(number, channel);
         OSCSendProgramChange(number, channel);
         break;
 
-      case midi::AfterTouchChannel:    
+      case midi::AfterTouchChannel: 
         ipMIDI.read(data, 1);
         pressure = data[0];
-        DPRINTLN("Received from %s  AfterTouchChannel   Pressure 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), pressure, channel);
         MIDI.sendAfterTouch(pressure, channel);
         BLESendAfterTouch(pressure, channel);
         AppleMIDI.afterTouch(pressure, channel);
@@ -1407,7 +1521,6 @@ void ipMIDIlisten() {
       case midi::PitchBend:
         ipMIDI.read(data, 2);
         bend = data[1] << 7 | data[0];
-        DPRINTLN("Received from %s  PitchBend   Bend 0x%02X   Channel 0x%02X", ipMIDI.remoteIP().toString().c_str(), bend, channel);
         MIDI.sendPitchBend(bend, channel);
         BLESendPitchBend(bend, channel);
         AppleMIDI.pitchBend(bend, channel);
@@ -1502,6 +1615,7 @@ void ipMIDIlisten() {
       default:
         ipMIDI.read(data,2);
     }
+    DPRINTMIDI(ipMIDI.remoteIP().toString().c_str(), status, data);
   }
 }
 
@@ -2184,14 +2298,7 @@ void loop()
     }
 
   // Listen to incoming messages from Arduino
-
-#ifdef PEDALINO_TELNET_DEBUG
-  if (MIDI.read()) {
-    DEBUG("Received MIDI message:   Type 0x % 02x   Data1 0x % 02x   Data2 0x % 02x   Channel 0x % 02x\n", MIDI.getType(), MIDI.getData1(), MIDI.getData2(), MIDI.getChannel());
-  }
-#else
-  MIDI.read();
-#endif
+  if (MIDI.read()) DPRINTMIDI("Serial MIDI", MIDI.getType(), MIDI.getChannel(), MIDI.getData1(), MIDI.getData2());
 
   // Listen to incoming AppleMIDI messages from WiFi
   AppleMIDI.run();
