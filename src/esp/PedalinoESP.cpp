@@ -304,8 +304,8 @@ void printMIDI(const char *interface, midi::StatusByte status, const byte *data)
     }
 }
 
-void printMIDI (const char *interface, const midi::MidiType type, const midi::Channel channel, const byte data1, const byte data2){
-  
+void printMIDI (const char *interface, const midi::MidiType type, const midi::Channel channel, const byte data1, const byte data2)
+{ 
   midi::StatusByte  status;
   byte              data[2];
 
@@ -714,7 +714,7 @@ void BLESendSystemReset(void)
 #endif
 
 
-// Send messages to WiFI ipMIDI interface
+// Send messages to WiFi ipMIDI interface
 
 void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
 {
@@ -1417,11 +1417,12 @@ void OnOscControlChange(OSCMessage &msg)
   MIDI.sendControlChange(msg.getInt(1), msg.getInt(2), msg.getInt(0));
 }
 
-void oscUPDlisten() {
+// Listen to incoming OSC messages from WiFi
+
+void oscUPD_listen() {
   
   if (!WiFi.isConnected()) return;
 
-  // Listen to incoming OSC messages from WiFi
   int size = oscUDP.parsePacket();
 
   if (size > 0) {
@@ -1437,9 +1438,9 @@ void oscUPDlisten() {
 }
 
 
-// ipMIDI
+// Listen to incoming ipMIDI messages from WiFi
 
-void ipMIDIlisten() {
+void ipMIDI_listen() {
   
   int  packetSize;
   byte status, type, channel;
@@ -2299,10 +2300,10 @@ void loop()
   AppleMIDI.run();
 
   // Listen to incoming ipMIDI messages from WiFi
-  ipMIDIlisten();
+  ipMIDI_listen();
 
   // Listen to incoming OSC UDP messages from WiFi
-  oscUPDlisten();
+  oscUPD_listen();
 
 #ifdef ARDUINO_ARCH_ESP8266
   // Run HTTP Updater
