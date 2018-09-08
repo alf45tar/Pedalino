@@ -209,9 +209,9 @@ mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in t
 
 ## How to connect Pedalino to a WiFi network
 
-AppleMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
+AppleMIDI, ipMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n WiFi with WPA/WPA2 authentication (only 2.4 GHz).
 
-Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
+Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a WiFi network through simple configuration on a smartphone.
 
 Tested apps for configure SSID and password are:
 - [ESP8266 SmartConfig](https://play.google.com/store/apps/details?id=com.cmmakerclub.iot.esptouch) for Android
