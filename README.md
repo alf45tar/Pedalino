@@ -34,7 +34,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform legacy MIDI equipment to OSC control surface
 - Connect Windows PC to macOS and iOS devices via AppleMIDI or Bluetooth LE
 - Hands-free way to control your audio parameters during live performance
-- Dramatically expanded audio system parameter control via WIFI, Bluetooth, USB, MIDI or OSC.
+- Dramatically expanded audio system parameter control via WiFi, Bluetooth, USB, MIDI or OSC.
 - Set your music free with wireless MIDI connectivity
 - Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
 
@@ -42,7 +42,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
-- MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
+- MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector, AppleMIDI (also known as RTP-MIDI) or ipMIDI via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
