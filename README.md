@@ -1,8 +1,6 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._<br>
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives._
 
-**Status:** Working but under active development. Anything can be changed without advance notice.
-
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
 # Pedalino™
@@ -15,9 +13,9 @@ Smart wireless MIDI foot controller for guitarists and more.
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - USB MIDI class-compliant device
 - Bluetooth LE MIDI (iOS compatible)
-- Network MIDI (aka AppleMIDI or RTP-MIDI) via Wi-Fi
+- Network MIDI (aka AppleMIDI or RTP-MIDI)
 - ipMIDI
-- Open Sound Control (OSC) via Wi-Fi
+- Open Sound Control (OSC)
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
 - MIDI clock master and slave
@@ -34,7 +32,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Transform legacy MIDI equipment to OSC control surface
 - Connect Windows PC to macOS and iOS devices via AppleMIDI or Bluetooth LE
 - Hands-free way to control your audio parameters during live performance
-- Dramatically expanded audio system parameter control via WIFI, Bluetooth, USB, MIDI or OSC.
+- Dramatically expanded audio system parameter control via WiFi, Bluetooth, USB, MIDI or OSC.
 - Set your music free with wireless MIDI connectivity
 - Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
 
@@ -42,7 +40,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
-- MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector or AppleMIDI (also known as RTP-MIDI) via Wi-Fi
+- MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector, AppleMIDI (also known as RTP-MIDI) or ipMIDI via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
 - MIDI channel, MIDI note, MIDI control code, MIDI program change can be configured by each pedal and by each bank
 - Switch debouncing and analog noise suppression without decreasing responsiveness
@@ -211,9 +209,9 @@ mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in t
 
 ## How to connect Pedalino to a WiFi network
 
-AppleMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n Wi-Fi with WPA/WPA2 authentication (only 2.4 GHz).
+AppleMIDI, ipMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n WiFi with WPA/WPA2 authentication (only 2.4 GHz).
 
-Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a Wi-Fi network through simple configuration on a smartphone.
+Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a WiFi network through simple configuration on a smartphone.
 
 Tested apps for configure SSID and password are:
 - [ESP8266 SmartConfig](https://play.google.com/store/apps/details?id=com.cmmakerclub.iot.esptouch) for Android
@@ -233,11 +231,13 @@ You can reset the last know access point via menu.
 
 ## MIDI Network - AppleMIDI - RTP-MIDI
 
-Pedalino is a session listener over Wi-Fi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer (Audio MIDI Setup->MIDI Studio->MIDI Network Setup) or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), an embedded RTP-MIDI device or an app on your iOS device (I am using [MIDI Network](http://audioapps.nl/app/MIDINetwork))
+Pedalino is a session listener over WiFi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer (Audio MIDI Setup->MIDI Studio->MIDI Network Setup) or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), an embedded RTP-MIDI device or an app on your iOS device (I am using [MIDI Network](http://audioapps.nl/app/MIDINetwork))
 
 ## ipMIDI
 
-Pedalino can route MIDI over your Ethernet network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) ports to send and receive MIDI data between computers connected to your LAN.
+Pedalino can route MIDI over your Ethernet network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocola to send and receive MIDI data between computers connected to your LAN.
+
+I prefers and suggests [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well.
 
 ## Open Sound Control (OSC)
 
