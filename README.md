@@ -110,13 +110,13 @@ The rest is not mandatory but it depends of which features you want to support.
 
 ### OPTION 1 - WiFi only
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoESP8266_bb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266_bb.png)
 
 Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LPA7-HyU).
 
 ### OPTION 2 - WiFi and Bluetooth
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/PedalinoESP32_bb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32_bb.png)
 
 ## Pedal Wiring
 
@@ -151,9 +151,9 @@ Pedalino supports the following wiring:
 
 Switches per port|Connector|Wiring|Example
 -----|-----|-----|-----
-1|Mono 1/4" TS<br>![TS](https://github.com/alf45tar/Pedalino/blob/master/ts.gif)|1 switch between T and S|[Boss FS-5U](https://www.boss.info/us/products/fs-5u_5l/)<br>[Boss FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
-2|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|1<sup>st</sup> switch between T and S <br>2<sup>nd</sup> switch between R and S|[Boss FS-6](https://www.boss.info/us/products/fs-6/)<br>[Boss FS-7](https://www.boss.info/us/products/fs-7/)
-3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|[3-Button Schematic](https://github.com/alf45tar/Pedalino/blob/master/trs3button.jpg)|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
+1|Mono 1/4" TS<br>![TS](https://github.com/alf45tar/Pedalino/blob/master/images/ts.gif)|1 switch between T and S|[Boss FS-5U](https://www.boss.info/us/products/fs-5u_5l/)<br>[Boss FS-5L](https://www.boss.info/us/products/fs-5u_5l/)
+2|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/images/trs.gif)|1<sup>st</sup> switch between T and S <br>2<sup>nd</sup> switch between R and S|[Boss FS-6](https://www.boss.info/us/products/fs-6/)<br>[Boss FS-7](https://www.boss.info/us/products/fs-7/)
+3|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/images/trs.gif)|[3-Button Schematic](https://github.com/alf45tar/Pedalino/blob/master/images/trs3button.jpg)|[Digitech FS3X](https://digitech.com/en/products/fs3x-3-button-footswitch)
 
 Momentary and latch type switches are supported.
 
@@ -167,8 +167,8 @@ Most potentiometers have three connectors; Clockwise, Counter-clockwise, and Wip
 
 Standard|Connector|Wiring|Example
 -----|-----|-----|-----
-Roland|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Tip<br>CCW —> Ring|[Roland EV-5](https://www.roland.com/global/products/ev-5/)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) (switch in "M-Audio")
-Yamaha|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/trs.gif)|CW —> Sleeve<br>Wiper —> Ring<br>CCW —> Tip|[Yamaha FC7](https://usa.yamaha.com/products/music_production/accessories/fc7/index.html)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) (switch in "Other")<br>Technics SZ-E1/SZ-E2
+Roland|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/images/trs.gif)|CW —> Sleeve<br>Wiper —> Tip<br>CCW —> Ring|[Roland EV-5](https://www.roland.com/global/products/ev-5/)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) (switch in "M-Audio")
+Yamaha|Stereo 1/4" TRS<br>![TRS](https://github.com/alf45tar/Pedalino/blob/master/images/trs.gif)|CW —> Sleeve<br>Wiper —> Ring<br>CCW —> Tip|[Yamaha FC7](https://usa.yamaha.com/products/music_production/accessories/fc7/index.html)<br>[M-Audio EX-P](http://www.m-audio.com/products/view/ex-p) (switch in "Other")<br>Technics SZ-E1/SZ-E2
 
 Using a pedal with incompatible wiring can result in limited range, jumping or notch like response, or the pedal just won’t function at all, so make sure you check the requirements.
 
@@ -200,13 +200,13 @@ Arduino-Serial mode is required to upload a new sketch into main Arduino ATmega2
 
 To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Reset is required to swicth the firmware mode.
 
-![ArduinoSerialJumper](https://github.com/alf45tar/Pedalino/blob/master/mocoLUFA-ArduinoSerial-Jumper.svg)
+![ArduinoSerialJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-ArduinoSerial-Jumper.svg)
 
 ### mocoLUFA high speed mode
 
 mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in the code. A jumper betwen PIN 1 (MISO) and PIN 3 (SCK) on ICSP connector for ATmega16U2 enable the 1 Mbps speed. Pedalino USB MIDI works at 1 Mbps (1.000.000 bps).
 
-![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/mocoLUFA-HighSpeed-Jumper.svg)
+![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-HighSpeed-Jumper.svg)
 
 
 ## How to connect Pedalino to a WiFi network
