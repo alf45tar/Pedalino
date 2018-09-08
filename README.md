@@ -15,9 +15,9 @@ Smart wireless MIDI foot controller for guitarists and more.
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
 - USB MIDI class-compliant device
 - Bluetooth LE MIDI (iOS compatible)
-- Network MIDI (aka AppleMIDI or RTP-MIDI) via Wi-Fi
+- Network MIDI (aka AppleMIDI or RTP-MIDI)
 - ipMIDI
-- Open Sound Control (OSC) via Wi-Fi
+- Open Sound Control (OSC)
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
 - MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
 - MIDI clock master and slave
