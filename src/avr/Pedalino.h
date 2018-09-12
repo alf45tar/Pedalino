@@ -234,6 +234,7 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 // LCD pin definitions
 
+/*
 #define  LCD_BACKLIGHT  44    // PWM works only on 2-13, 44, 45, 46
 #define  LCD_CONTRAST   46    // PWM works only on 2-13, 44, 45, 46
 #define  LCD_RS         50
@@ -242,7 +243,18 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 #define  LCD_D5         40
 #define  LCD_D6         38
 #define  LCD_D7         36
+*/
 
+// LCD Keypad Shield
+// https://www.dfrobot.com/wiki/index.php/Arduino_LCD_KeyPad_Shield_(SKU:_DFR0009)
+
+#define  LCD_RS         8
+#define  LCD_ENA        9
+#define  LCD_D4         4
+#define  LCD_D5         5
+#define  LCD_D6         6
+#define  LCD_D7         7
+#define  LCD_BACKLIGHT  10    // PWM works only on 2-13, 44, 45, 46
 
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 boolean       powersaver = false;
@@ -252,8 +264,8 @@ byte          backlight  = 150;
 
 #include <IRremote.h>
 
-#define RECV_PIN       2     // connect Y to this PIN, G to GND, R to 5V
-#define RECV_LED_PIN   8
+#define RECV_PIN       24     // connect Y to this PIN, G to GND, R to 5V
+#define RECV_LED_PIN   26
 
 #define IR_ON_OFF   0xFFA25D
 #define IR_OK       0xFF02FD
