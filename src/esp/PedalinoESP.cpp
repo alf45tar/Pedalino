@@ -207,47 +207,47 @@ void printMIDI(const char *interface, midi::StatusByte status, const byte *data)
   unsigned int    beats;
 
     type    = MIDI.getTypeFromStatusByte(status);
-    channel = MIDI.getChannelFromStatusByte(status) - 1;
+    channel = MIDI.getChannelFromStatusByte(status);
 
     switch(type) {
      
       case midi::NoteOff:
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOff 0x%02X   Velocity 0x%02X   Channel 0x%02X", interface, note, velocity, channel);
+        DPRINTLN("Received from %s  NoteOff 0x%02X   Velocity 0x%02X   Channel %02d", interface, note, velocity, channel);
         break;
 
       case midi::NoteOn:
         note     = data[0];
         velocity = data[1];
-        DPRINTLN("Received from %s  NoteOn  0x%02X   Velocity 0x%02X   Channel 0x%02X", interface, note, velocity, channel);
+        DPRINTLN("Received from %s  NoteOn  0x%02X   Velocity 0x%02X   Channel %02d", interface, note, velocity, channel);
         break;
 
       case midi::AfterTouchPoly:
         note     = data[0];
         pressure = data[1];
-        DPRINTLN("Received from %s  AfterTouchPoly   Note 0x%02X   Pressure 0x%02X   Channel 0x%02X", interface, note, pressure, channel);
+        DPRINTLN("Received from %s  AfterTouchPoly   Note 0x%02X   Pressure 0x%02X   Channel %02d", interface, note, pressure, channel);
         break;
 
       case midi::ControlChange:
         number  = data[0];
         value   = data[1];
-        DPRINTLN("Received from %s  ControlChange 0x%02X   Value 0x%02X   Channel 0x%02X", interface, number, value, channel);
+        DPRINTLN("Received from %s  ControlChange 0x%02X   Value 0x%02X   Channel %02d", interface, number, value, channel);
         break;
 
       case midi::ProgramChange:
         number  = data[0];
-        DPRINTLN("Received from %s  ProgramChange 0x%02X   Channel 0x%02X", interface, number, channel);
+        DPRINTLN("Received from %s  ProgramChange 0x%02X   Channel %02d", interface, number, channel);
         break;
 
       case midi::AfterTouchChannel:    
         pressure = data[0];
-        DPRINTLN("Received from %s  AfterTouchChannel   Pressure 0x%02X   Channel 0x%02X", interface, pressure, channel);
+        DPRINTLN("Received from %s  AfterTouchChannel   Pressure 0x%02X   Channel %02d", interface, pressure, channel);
         break;
 
       case midi::PitchBend:
         bend = data[1] << 7 | data[0];
-        DPRINTLN("Received from %s  PitchBend   Bend 0x%02X   Channel 0x%02X", interface, bend, channel);
+        DPRINTLN("Received from %s  PitchBend   Bend 0x%02X   Channel %02d", interface, bend, channel);
         break;
 
       case 0xf0:
@@ -309,7 +309,7 @@ void printMIDI (const char *interface, const midi::MidiType type, const midi::Ch
   midi::StatusByte  status;
   byte              data[2];
 
-  status = type | channel & 0x0f;
+  status = type | (channel - 1) & 0x0f;
   data[0] = data1;
   data[1] = data2;
   printMIDI(interface, status, data);
@@ -470,7 +470,7 @@ void BLEMidiReceive(uint8_t *buffer, uint8_t bufferSize)
       return;
     }
     command = MIDI.getTypeFromStatusByte(lastStatus);
-    channel = MIDI.getChannelFromStatusByte(lastStatus) - 1;
+    channel = MIDI.getChannelFromStatusByte(lastStatus);
     //Point to next non-data byte
     rPtr = lPtr;
     while ( (buffer[rPtr + 1] < 0x80) && (rPtr < (bufferSize - 1)) ) {
@@ -522,7 +522,7 @@ void BLESendChannelMessage1(byte type, byte channel, byte data1)
   uint8_t midiPacket[4];
 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
-  midiPacket[2] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[2] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[3] = data1;
   pCharacteristic->setValue(midiPacket, 4);
   pCharacteristic->notify();
@@ -533,7 +533,7 @@ void BLESendChannelMessage2(byte type, byte channel, byte data1, byte data2)
   uint8_t midiPacket[5];
 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
-  midiPacket[2] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[2] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[3] = data1;
   midiPacket[4] = data2;
   pCharacteristic->setValue(midiPacket, 5);
@@ -720,7 +720,7 @@ void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
 {
   byte midiPacket[2];
 
-  midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[0] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[1] = data1;
 #ifdef ARDUINO_ARCH_ESP8266
   ipMIDI.beginPacketMulticast(ipMIDImulticast, ipMIDIdestPort, WiFi.localIP());
@@ -736,7 +736,7 @@ void ipMIDISendChannelMessage2(byte type, byte channel, byte data1, byte data2)
 {
   byte midiPacket[3];
 
-  midiPacket[0] = (type & 0xf0) | (channel & 0x0f);
+  midiPacket[0] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[1] = data1;
   midiPacket[2] = data2;
 #ifdef ARDUINO_ARCH_ESP8266
@@ -1457,7 +1457,7 @@ void ipMIDI_listen() {
     
     ipMIDI.read(&status, 1);
     type    = MIDI.getTypeFromStatusByte(status);
-    channel = MIDI.getChannelFromStatusByte(status) - 1;
+    channel = MIDI.getChannelFromStatusByte(status);
 
     switch(type) {
      

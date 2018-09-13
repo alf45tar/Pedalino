@@ -20,7 +20,7 @@ void screen_info(byte b1, byte b2, byte b3, byte b4)
   m1 = b1;
   m2 = b2;
   m3 = b3;
-  m4 = b4 + 1;    // MIDI Channel from 0..15 to 1..16
+  m4 = b4;
   endMillis2 = millis() + LCD_LINE1_PERSISTENCE;
 }
 

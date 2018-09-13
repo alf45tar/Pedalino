@@ -10,7 +10,7 @@
 
 
 #define SIGNATURE         "Pedalino(TM)"
-#define EEPROM_VERSION    3               // Increment each time you change the eeprom structure
+#define EEPROM_VERSION    2               // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces
@@ -23,7 +23,7 @@ void load_factory_default()
       {
         case 0:
           banks[b][p] = { PED_PROGRAM_CHANGE,             // MIDI message
-                          (byte)(b / 4),                  // MIDI channel
+                          (byte)(b / 4 + 1) ,             // MIDI channel
                           (byte)(b / 4 * 16 + p),         // MIDI code
                           127,
                           0,
@@ -33,7 +33,7 @@ void load_factory_default()
 
         case 1:
           banks[b][p] = { PED_CONTROL_CHANGE,             // MIDI message
-                          (byte)(b / 4),                  // MIDI channel
+                          (byte)(b / 4 + 1),              // MIDI channel
                           (byte)(b / 4 * 16 + p),         // MIDI code
                           127,
                           0,
@@ -43,7 +43,7 @@ void load_factory_default()
 
         case 2:
           banks[b][p] = { PED_NOTE_ON_OFF,                // MIDI message
-                          (byte)(b / 4),                  // MIDI channel
+                          (byte)(b / 4 + 1),              // MIDI channel
                           (byte)(b / 4 * 16 + p + 24),    // MIDI code
                           127,
                           0,
@@ -53,7 +53,7 @@ void load_factory_default()
 
         case 3:
           banks[b][p] = { PED_PITCH_BEND,                  // MIDI message
-                          (byte)(b / 4),                   // MIDI channel
+                          (byte)(b / 4 + 1),               // MIDI channel
                           (byte)(b / 4 * 16 + p),          // MIDI code
                           127,
                           0,

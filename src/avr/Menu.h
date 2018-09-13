@@ -220,8 +220,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       break;
 
     case II_MIDICHANNEL:
-      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiChannel+1;
-      else banks[currentBank][currentPedal].midiChannel = vBuf.value-1;
+      if (bGet) vBuf.value = banks[currentBank][currentPedal].midiChannel;
+      else banks[currentBank][currentPedal].midiChannel = vBuf.value;
       break;
 
     case II_MIDIMESSAGE:
