@@ -231,13 +231,28 @@ You can reset the last know access point via menu.
 
 ## MIDI Network - AppleMIDI - RTP-MIDI
 
-Pedalino is a session listener over WiFi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer (Audio MIDI Setup->MIDI Studio->MIDI Network Setup) or a Windows computer with the [RTP-MIDI driver activated](https://www.tobias-erichsen.de/software/rtpmidi.html), an embedded RTP-MIDI device or an app on your iOS device (I am using [MIDI Network](http://audioapps.nl/app/MIDINetwork))
+RTP-MIDI (also known as AppleMIDI) is a protocol to transport MIDI messages within RTP (Real-time Protocol) packets over Ethernet and WiFi networks. It is completely open and free.
+
+Pedalino is a session listener over WiFi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer (Audio MIDI Setup->MIDI Studio->MIDI Network Setup) or a Windows computer with the [RTP-MIDI driver](https://www.tobias-erichsen.de/software/rtpmidi.html), an app on your iOS device (for example [MIDI Network](http://audioapps.nl/app/MIDINetwork)) or an embedded RTP-MIDI device.
+
+Pedalino is designed to be compatible with:
+  - macOS computer
+  - iOS devices
+  - [rtpMIDI](https://www.tobias-erichsen.de/software/rtpmidi.html) for Windows
+  - [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows
 
 ## ipMIDI
 
-Pedalino can route MIDI over your Ethernet network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocola to send and receive MIDI data between computers connected to your LAN.
+Pedalino can route MIDI over your Ethernet network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocol to send and receive MIDI data between computers connected to your LAN.
 
-I prefers and suggests [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well.
+Pedalino is designed to be compatible with:
+  - [ipMIDI](https://www.nerds.de/en/ipmidi.html) for Windows/macOS
+  - [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows/macOS
+  - [QmidiNet](https://qmidinet.sourceforge.io) for Linux
+  - [multimidicast](http://llg.cubic.org/tools/multimidicast) for Linux
+
+I prefers and suggests [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well under Windows.
+
 
 ## Open Sound Control (OSC)
 
