@@ -114,7 +114,7 @@ Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LP
 
 ### OPTION 2 - WiFi and Bluetooth
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32_bb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
 
 ## Pedal Wiring
 
@@ -243,7 +243,7 @@ Pedalino is designed to be compatible with:
 
 ## ipMIDI
 
-Pedalino can route MIDI over your Ethernet network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocol to send and receive MIDI data between computers connected to your LAN.
+Pedalino can route MIDI over your Ethernet or WiFi network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocol to send and receive MIDI data between computers connected to your LAN.
 
 Pedalino is designed to be compatible with:
   - [ipMIDI](https://www.nerds.de/en/ipmidi.html) for Windows/macOS
@@ -251,7 +251,7 @@ Pedalino is designed to be compatible with:
   - [QmidiNet](https://qmidinet.sourceforge.io) for Linux
   - [multimidicast](http://llg.cubic.org/tools/multimidicast) for Linux
 
-I prefers and suggests [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well under Windows.
+I prefers [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well under Windows.
 
 
 ## Open Sound Control (OSC)
