@@ -141,7 +141,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 // Input Items ---------
 const PROGMEM char listMidiMessage[]     = "Program Change| Control Code |  Note On/Off |  Pitch Bend  ";
 const PROGMEM char listPedalFunction[]   = "     MIDI     |    Bank +    |    Bank -    |     Start    |     Stop     |   Continue   |     Tap      |     Menu     |    Confirm   |    Escape    |     Next     |   Previous   ";
-const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   ";
+const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    Analog    |   Jog Wheel  |  Momentary 2 |  Momentary 3 |    Latch 2   |    Ladder    ";
 const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
@@ -568,6 +568,9 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
           case PED_APPLEMIDI:
             strcpy(line, "AppleMIDI");
             break;
+          case PED_IPMIDI:
+            strcpy(line, "ipMIDI");
+            break;
           case PED_BLUETOOTHMIDI:
             strcpy(line, "Bluetooth MIDI");
             break;
@@ -604,12 +607,17 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
   unsigned long         ircode;
   byte                  numberPressed = 0;
 
-  MD_UISwitch::keyResult_t k1;
-  MD_UISwitch::keyResult_t k2;
-  byte                     k;
+  MD_UISwitch::keyResult_t k1;    // Close status between T and S
+  MD_UISwitch::keyResult_t k2;    // Close status between R and S
+  byte                     k;     /*       k1      k2
+                                     0 =  Open    Open
+                                     1 = Closed   Open
+                                     2 =  Open   Closed
+                                     3 = Closed  Closed */
 
   for (byte i = 0; i < PEDALS; i++) {
     if (pedals[i].function == PED_MIDI) continue;
+
     k = 0;
     k1 = MD_UISwitch::KEY_NULL;
     k2 = MD_UISwitch::KEY_NULL;
@@ -620,8 +628,55 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
     if ((k1 == MD_UISwitch::KEY_PRESS || k1 == MD_UISwitch::KEY_DPRESS || k1 == MD_UISwitch::KEY_LONGPRESS) &&
         (k2 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_DPRESS || k2 == MD_UISwitch::KEY_LONGPRESS)) k = 3;
     if (k > 0 && (k1 == MD_UISwitch::KEY_PRESS || k2 == MD_UISwitch::KEY_PRESS)) {
-      switch (pedals[i].function) {
+      // Single press
+      if (pedals[i].mode == PED_LADDER) {
+        if (k1 != MD_UISwitch::KEY_NULL) {
+          switch (pedals[i].footSwitch[0]->getKey()) {
 
+            case 'S':
+              return MD_Menu::NAV_SEL;
+              break;
+
+            case 'L':
+              if (M.isInMenu())
+                return MD_Menu::NAV_ESC;
+              else if (MTC.isPlaying()) 
+                MTC.sendStop();
+              else {
+                MTC.sendPosition(0, 0, 0, 0);
+                MTC.sendPlay();
+              }
+              return MD_Menu::NAV_NULL;
+              break;
+
+            case 'U':
+              if (M.isInMenu())
+                return MD_Menu::NAV_DEC;
+              else if (currentBank < BANKS - 1) currentBank++;
+              return MD_Menu::NAV_NULL;
+              break;
+
+            case 'D':
+              if (M.isInMenu())
+                return MD_Menu::NAV_INC;
+              else if (currentBank > 0) currentBank--;
+              return MD_Menu::NAV_NULL;
+              break;
+
+            case 'R':
+              if (M.isInMenu())
+                return MD_Menu::NAV_NULL;
+              else {
+                bpm = MTC.tapTempo();
+                if (bpm > 0) MTC.setBpm(bpm);
+              }
+              return MD_Menu::NAV_NULL;
+              break;
+          }
+        }
+      }
+      else {
+        switch (pedals[i].function) {
         case PED_BANK_PLUS:
           switch (k) {
             case 1:
@@ -728,9 +783,11 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case PED_PREVIOUS:
           return MD_Menu::NAV_DEC;
           break;
+        }
       }
     }
 
+    // Double press, long press and repeat
     if (pedals[i].footSwitch[0] != nullptr)
       switch (k1) {
         case MD_UISwitch::KEY_NULL:
@@ -782,17 +839,6 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
         case MD_UISwitch::KEY_PRESS:
           break;
       }
-
-    if (k1 != MD_UISwitch::KEY_NULL) {
-      switch (pedals[i].footSwitch[0]->getKey()) {
-        case 'L':
-          return MD_Menu::NAV_INC;
-          break;
-        case 'R':
-          return MD_Menu::NAV_DEC;
-          break;
-      }
-    }
   }
 
   // IR Remote Control navigation

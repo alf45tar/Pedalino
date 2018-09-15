@@ -77,7 +77,9 @@ void load_factory_default()
                  millis(),                  // last time switch 2 status changed
                  nullptr, nullptr, nullptr, nullptr, nullptr
                 };
-
+  pedals[0].function  = PED_MENU;
+  pedals[0].mode      = PED_LADDER;
+/*
   pedals[7].function  = PED_START;
   pedals[7].mode      = PED_MOMENTARY1;
   pedals[8].function  = PED_STOP;
@@ -90,6 +92,10 @@ void load_factory_default()
   pedals[11].mode     = PED_MOMENTARY2;
   pedals[12].function = PED_MENU;
   pedals[12].mode     = PED_MOMENTARY3;
+*/
+  pedals[11].mode     = PED_MOMENTARY2;
+  pedals[12].mode     = PED_MOMENTARY3;
+  
   pedals[15].function = PED_MIDI;
   pedals[15].mode     = PED_ANALOG;
 

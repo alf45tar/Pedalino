@@ -68,6 +68,7 @@
 #define PED_MOMENTARY2      4
 #define PED_MOMENTARY3      5
 #define PED_LATCH2          6
+#define PED_LADDER          7
 
 #define PED_PRESS_1         0
 #define PED_PRESS_2         1
@@ -96,7 +97,7 @@
 
 #define PED_USBMIDI         0
 #define PED_LEGACYMIDI      1
-#define PED_APPLEMIDI       2   // also known as rtpMIDI protocol
+#define PED_APPLEMIDI       2   // also known as RTP-MIDI protocol
 #define PED_IPMIDI          3
 #define PED_BLUETOOTHMIDI   4
 
@@ -154,7 +155,11 @@ struct pedal {
   byte                   mode;            /* 0 = momentary
                                              1 = latch
                                              2 = analog
-                                             3 = jog wheel */
+                                             3 = jog wheel
+                                             4 = momentary 2
+                                             5 = momentary 3
+                                             6 = latch 2
+                                             7 = ladder */
   byte                   pressMode;       /* 0 = single click
                                              1 = double click
                                              2 = long click
@@ -215,12 +220,15 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
 
 
-//
+// The keys value that works for most LCD Keypad Shield
+
 MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 {
-  {   50,  50, 'L' },  // Left
-  {  512, 100, 'N' },  // Center
-  { 1023,  50, 'R' },  // Right
+  {  10, 10, 'R' },  // Right
+  { 130, 15, 'U' },  // Up
+  { 305, 15, 'D' },  // Down
+  { 475, 15, 'L' },  // Left
+  { 720, 15, 'S' },  // Select
 };
 
 

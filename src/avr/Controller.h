@@ -161,6 +161,9 @@ void controller_setup()
     case PED_APPLEMIDI:
       DPRINTLNF("AppleMIDI");
       break;
+    case PED_IPMIDI:
+      DPRINTLNF("ipMIDI");
+      break;
     case PED_BLUETOOTHMIDI:
       DPRINTLNF("Bluetooth");
       break;
@@ -197,6 +200,7 @@ void controller_setup()
       case PED_LATCH2:      DPRINTF("LATCH2    "); break;
       case PED_ANALOG:      DPRINTF("ANALOG    "); break;
       case PED_JOG_WHEEL:   DPRINTF("JOG_WHEEL "); break;
+      case PED_LADDER:      DPRINTF("LADDER    "); break;
     }
     DPRINTF("   ");
     switch (pedals[i].pressMode) {
@@ -288,7 +292,7 @@ void controller_setup()
                 break;
             }
             pedals[i].footSwitch[p]->begin();
-            pedals[i].footSwitch[p]->setDebounceTime(50);
+            pedals[i].footSwitch[p]->setDebounceTime(DEBOUNCE_INTERVAL);
             if (pedals[i].function == PED_MIDI) {
               switch (pedals[i].pressMode) {
                 case PED_PRESS_1:
@@ -307,9 +311,6 @@ void controller_setup()
                   break;
                 case PED_PRESS_1_2_L:
                 case PED_PRESS_2_L:
-                  pedals[i].footSwitch[p]->enableDoublePress(true);
-                  pedals[i].footSwitch[p]->enableLongPress(true);
-                  break;
                   pedals[i].footSwitch[p]->enableDoublePress(true);
                   pedals[i].footSwitch[p]->enableLongPress(true);
                   break;
@@ -339,8 +340,47 @@ void controller_setup()
           pedals[i].analogPedal->enableEdgeSnap();                            // ensures that values at the edges of the spectrum can be easily reached when sleep is enabled
           if (lastUsedPedal == 0xFF) lastUsedPedal = i;
         }
+        break;
+
+      case PED_LADDER:
+        pedals[i].footSwitch[0] = new MD_UISwitch_Analog(PIN_A(i), kt, ARRAY_SIZE(kt));
+        DPRINTF("   Pin A");
+        DPRINT(i);
+        pedals[i].footSwitch[0]->begin();
+        pedals[i].footSwitch[0]->setDebounceTime(DEBOUNCE_INTERVAL);
+        if (pedals[i].function == PED_MIDI) {
+          switch (pedals[i].pressMode) {
+            case PED_PRESS_1:
+              pedals[i].footSwitch[0]->enableDoublePress(false);
+              pedals[i].footSwitch[0]->enableLongPress(false);
+              break;
+            case PED_PRESS_2:
+            case PED_PRESS_1_2:
+              pedals[i].footSwitch[0]->enableDoublePress(true);
+              pedals[i].footSwitch[0]->enableLongPress(false);
+              break;
+            case PED_PRESS_L:
+            case PED_PRESS_1_L:
+              pedals[i].footSwitch[0]->enableDoublePress(false);
+              pedals[i].footSwitch[0]->enableLongPress(true);
+              break;
+            case PED_PRESS_1_2_L:
+            case PED_PRESS_2_L:
+              pedals[i].footSwitch[0]->enableDoublePress(true);
+              pedals[i].footSwitch[0]->enableLongPress(true);
+              break;
+          }
+          pedals[i].footSwitch[0]->setDoublePressTime(300);
+          pedals[i].footSwitch[0]->setLongPressTime(500);
+          pedals[i].footSwitch[0]->enableRepeat(false);
+        }
         else
-          pedals[i].footSwitch[0] = new MD_UISwitch_Analog(PIN_A(i), kt, ARRAY_SIZE(kt));
+        {
+          pedals[i].footSwitch[0]->setDoublePressTime(300);
+          pedals[i].footSwitch[0]->setLongPressTime(500);
+          pedals[i].footSwitch[0]->setRepeatTime(500);
+          pedals[i].footSwitch[0]->enableRepeatResult(true);
+        }
         break;
 
       case PED_JOG_WHEEL:
