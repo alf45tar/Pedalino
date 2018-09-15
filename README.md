@@ -37,7 +37,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Dramatically expanded audio system parameter control via WiFi, Bluetooth, USB, MIDI or OSC.
 - Set your music free with wireless MIDI connectivity
 - Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
-- Send MIDI messages using any spare IR remote control
+- Send MIDI messages using an IR remote control
 
 ## Features
 
