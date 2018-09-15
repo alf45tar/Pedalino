@@ -4,6 +4,7 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
 # Pedalino™
+
 Smart wireless MIDI foot controller for guitarists and more.
 
 - High customizable using iOS or Android app
@@ -26,6 +27,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Modular assembly of easy to find pieces of hardware and re-use of open source software libraries
 
 ## Applications
+
 - Change preset to your favourite guitar rig
 - Transform legacy MIDI equipment to USB MIDI class-compliant device
 - Transform wired MIDI equipment into wireless MIDI equipment
@@ -35,8 +37,10 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Dramatically expanded audio system parameter control via WiFi, Bluetooth, USB, MIDI or OSC.
 - Set your music free with wireless MIDI connectivity
 - Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
+- Send MIDI messages using any spare IR remote control
 
 ## Features
+
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
@@ -47,7 +51,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Invert polarity via software
 - Individual automatic calibration of expression pedals. Manual fine tuning is not usually requested.
 - Transform a linear expression pedal into log expression pedal and vice versa
-- Configuration via IR/Bluetooth remote control
+- Configuration via IR remote control
 - Change bank via IR remote control
 - Simulate footswitch push via IR remote control
 - Use any spare IR remote control
@@ -179,12 +183,12 @@ Most of them are plug-and-play because Pedalino will recognize via auto-sensing 
 
 Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
-
 ## USB MIDI
 
 A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1 Mbps). HIDUINO can works with minimal changes.
 
 More information can be obtained in the following links:
+
 - [MIDI_Controller](https://github.com/tttapa/MIDI_controller)
 - [MocoLUFA](https://github.com/kuwatay/mocolufa)
 - [HIDUINO](https://github.com/ddiakopoulos/hiduino)
@@ -217,6 +221,7 @@ Tested apps for configure SSID and password are:
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
 Boot procedure
+
 - On power on Pedalino will try to connect to the last know access point (double blinking led)
 - If it cannot connect to the last used access point within 15 seconds it enters into Smart Config mode (slow blinking led)
 - Start one of the tested apps to configure SSID and password 
@@ -235,6 +240,7 @@ RTP-MIDI (also known as AppleMIDI) is a protocol to transport MIDI messages with
 Pedalino is a session listener over WiFi. It does not support session initiation functionalities, which requires the use of an external session initiator on the network to open a RTP-MIDI session with the Pedalino. This session initiator can be a macOS computer (Audio MIDI Setup->MIDI Studio->MIDI Network Setup) or a Windows computer with the [RTP-MIDI driver](https://www.tobias-erichsen.de/software/rtpmidi.html), an app on your iOS device (for example [MIDI Network](http://audioapps.nl/app/MIDINetwork)) or an embedded RTP-MIDI device.
 
 Pedalino is designed to be compatible with:
+
   - macOS computer
   - iOS devices
   - [rtpMIDI](https://www.tobias-erichsen.de/software/rtpmidi.html) for Windows
@@ -245,13 +251,13 @@ Pedalino is designed to be compatible with:
 Pedalino can route MIDI over your Ethernet or WiFi network, using [ipMIDI](https://www.nerds.de/en/ipmidi.html) protocol to send and receive MIDI data between computers connected to your LAN.
 
 Pedalino is designed to be compatible with:
+
   - [ipMIDI](https://www.nerds.de/en/ipmidi.html) for Windows/macOS
   - [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows/macOS
   - [QmidiNet](https://qmidinet.sourceforge.io) for Linux
   - [multimidicast](http://llg.cubic.org/tools/multimidicast) for Linux
 
 I prefers [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well under Windows.
-
 
 ## Open Sound Control (OSC)
 
@@ -269,7 +275,6 @@ UDP and TCP are network protocols used for communicating OSC messages between tw
 Pedalino supports UDP protocol only for transmitting and receiving OSC messages because TCP has more latency than UDP.
 
 Pedalino will listen for OSC messages on UDP port 8000 and broadcast OSC messages on UDP port 9000 on the same WiFi LAN segment it is connected.
-
 
 ### OSC namespace
 
@@ -295,13 +300,11 @@ Stop|/pedalino/midi/stop/||||
 Active Sensing|/pedalino/midi/activesensing/||||
 Reset|/pedalino/midi/reset/||||
 
-
 ### OSC-to-MIDI and MIDI-to-OSC
 
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
 
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
-
 
 ## Firmware update
 
@@ -350,11 +353,12 @@ That's all folks.
 - [iRig BlueBoard](http://www.ikmultimedia.com/products/irigblueboard)
 - [Yamaha MD-BT01](https://usa.yamaha.com/products/music_production/accessories/md-bt01/index.html)
 
-
 ## ToDo
 
 - [ ] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
+- [ ] User guide
 
 # Copyright
-Copyright 2017-2018 alfa45star
+
+Copyright 2017-2018 alf45tar
