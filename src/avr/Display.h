@@ -70,7 +70,6 @@ void screen_update(bool force = false) {
           sprintf(&buf[strlen(buf)], "PiBend %3d Ch %2d", m2, m4);
           break;
       }
-      lcd.noCursor();
     }
     else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroClockMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroClockSlave) {
       sprintf(&buf[strlen(buf)], "%3dBPM", bpm);

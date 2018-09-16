@@ -43,6 +43,7 @@
 
 #include "MidiTimeCode.h"
 
+#define PROFILES           3
 #define BANKS             10
 
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO

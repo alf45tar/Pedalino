@@ -59,7 +59,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MIDI_ROUTING   45
 #define II_MIDI_CLOCK     46
 #define II_PROFILE_LOAD   48
-#define II_PROFILE_SAVE   49
+#define II_PROFILE_COPY   49
 #define II_BACKLIGHT      50
 #define II_IRLEARN        51
 #define II_IRCLEAR        52
@@ -129,7 +129,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 72, "BPM",             MD_Menu::MNU_INPUT, II_BPM },
   // Profiles Setup
   { 80, "Load Profile",    MD_Menu::MNU_INPUT, II_PROFILE_LOAD },
-  { 81, "Save Profile",    MD_Menu::MNU_INPUT, II_PROFILE_SAVE },
+  { 81, "Copy To Profile", MD_Menu::MNU_INPUT, II_PROFILE_COPY },
   // Options
   { 90, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
   { 91, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
@@ -183,8 +183,8 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDI_THRU,     ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_ROUTING,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
   { II_MIDI_CLOCK,    ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listEnableDisable },
-  { II_PROFILE_LOAD,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
-  { II_PROFILE_SAVE,  ">1-9:      " , MD_Menu::INP_INT,   mnuValueRqst,  1, 0, 0,                  9, 0, 10, nullptr },
+  { II_PROFILE_LOAD,  ">1-3:        ", MD_Menu::INP_INT,   mnuValueRqst,  1, 1, 0,                  3, 1, 10, nullptr },
+  { II_PROFILE_COPY,  ">1-3:        ", MD_Menu::INP_INT,   mnuValueRqst,  1, 1, 0,                  3, 1, 10, nullptr },
   { II_BACKLIGHT,     ">1-10:      ", MD_Menu::INP_INT,   mnuValueRqst,  2, 1, 0,                 10, 0, 10, nullptr },
   { II_IRLEARN,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_IRCLEAR,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
@@ -209,6 +209,22 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
   switch (id)
   {
+    case II_PROFILE_LOAD:
+      if (bGet) vBuf.value = currentProfile + 1;
+      else {
+        currentProfile = vBuf.value - 1;
+        update_current_profile_eeprom();
+        DPRINTLNF("Switching profile");
+        Reset_AVR();
+        //setup();
+      }
+      break;
+
+    case II_PROFILE_COPY:
+      if (bGet) vBuf.value = currentProfile + 1;
+      else currentProfile = vBuf.value - 1;
+      break;
+
     case II_BANK:
       if (bGet) vBuf.value = currentBank + 1;
       else currentBank = vBuf.value - 1;
@@ -525,7 +541,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       break;
   }
 
-  if (!bGet && id != II_IRLEARN && id != II_WIFIRESET) {
+  if (!bGet && id != II_PROFILE_LOAD && id != II_IRLEARN && id != II_WIFIRESET) {
     update_eeprom();
     controller_setup();
   }
@@ -642,23 +658,21 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
                 return MD_Menu::NAV_ESC;
               else if (MTC.isPlaying()) 
                 MTC.sendStop();
-              else {
+              else
                 MTC.sendPosition(0, 0, 0, 0);
-                MTC.sendPlay();
-              }
               return MD_Menu::NAV_NULL;
               break;
 
             case 'U':
               if (M.isInMenu())
-                return MD_Menu::NAV_DEC;
+                return MD_Menu::NAV_INC;
               else if (currentBank < BANKS - 1) currentBank++;
               return MD_Menu::NAV_NULL;
               break;
 
             case 'D':
               if (M.isInMenu())
-                return MD_Menu::NAV_INC;
+                return MD_Menu::NAV_DEC;
               else if (currentBank > 0) currentBank--;
               return MD_Menu::NAV_NULL;
               break;
@@ -666,10 +680,12 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
             case 'R':
               if (M.isInMenu())
                 return MD_Menu::NAV_NULL;
-              else {
-                bpm = MTC.tapTempo();
-                if (bpm > 0) MTC.setBpm(bpm);
-              }
+              else if (MTC.isPlaying())
+                MTC.sendStop();
+              else if (MTC.getFrames() == 0 && MTC.getSeconds() == 0 && MTC.getMinutes() == 0 && MTC.getHours() == 0)
+                MTC.sendPlay();
+              else
+                MTC.sendContinue();
               return MD_Menu::NAV_NULL;
               break;
           }

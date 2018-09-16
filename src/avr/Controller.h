@@ -133,6 +133,363 @@ unsigned int map_analog(byte p, unsigned int value)
   return value;
 }
 
+
+void midi_send(byte message, byte code, byte value, byte channel, bool on_off = true )
+{
+  switch (message) {
+
+    case PED_NOTE_ON_OFF:
+
+      if (on_off && value > 0) {
+#ifdef DEBUG_PEDALINO
+        DPRINTF("     NOTE ON     Note ");
+        DPRINT(code);
+        DPRINTF("     Velocity ");
+        DPRINT(value);
+        DPRINTF("     Channel ");
+        DPRINT(channel);
+#else
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(code, value, channel);
+#endif
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(code, value, channel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOn(code, value, channel);
+        screen_info(midi::NoteOn, code, value, channel);
+      }
+      else {
+#ifdef DEBUG_PEDALINO
+        DPRINTF("     NOTE OFF    Note ");
+        DPRINT(code);
+        DPRINTF("     Velocity ");
+        DPRINT(value);
+        DPRINTF("     Channel ");
+        DPRINT(channel);
+#else
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(code, value, channel);
+#endif
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(code, value, channel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(code, value, channel);
+        screen_info(midi::NoteOff, code, value, channel);
+      }
+      break;
+
+    case PED_CONTROL_CHANGE:
+
+      if (on_off) {
+#ifdef DEBUG_PEDALINO
+        DPRINTF("     CONTROL CHANGE     Code ");
+        DPRINT(code);
+        DPRINTF("     Value ");
+        DPRINT(value);
+        DPRINTF("     Channel ");
+        DPRINT(channel);
+#else
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(code, value, channel);
+#endif
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(code, value, channel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendControlChange(code, value, channel);
+        screen_info(midi::ControlChange, code, value, channel);
+      }
+      break;
+
+    case PED_PROGRAM_CHANGE:
+
+      if (on_off) {
+#ifdef DEBUG_PEDALINO
+        DPRINTF("     PROGRAM CHANGE     Program ");
+        DPRINT(code);
+        DPRINTF("     Channel ");
+        DPRINT(channel);
+#else
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(code, channel);
+#endif
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(code, channel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendProgramChange(code, channel);
+        screen_info(midi::ProgramChange, code, 0, channel);
+      }
+      break;
+
+    case PED_PITCH_BEND:
+
+      if (on_off) {
+        int bend = map(value, 0, 127, - 8192, 8191);
+#ifdef DEBUG_PEDALINO
+        DPRINTF("     PITCH BEND     Value ");
+        DPRINT(bend);
+        DPRINTF("     Channel ");
+        DPRINT(channel);
+#else
+        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, channel);
+#endif
+        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, channel);
+        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendPitchBend(bend, channel);
+        screen_info(midi::PitchBend, bend, 0, channel);
+      }
+      break;
+  }
+}
+
+//
+//  MIDI messages refresh
+//
+void midi_refresh(bool send = true)
+{
+  MD_UISwitch::keyResult_t  k, k1, k2;
+  bool                      state1, state2;
+  unsigned int              input;
+  unsigned int              value;
+  byte                      b;
+
+  for (byte i = 0; i < PEDALS; i++) {
+    if (pedals[i].function == PED_MIDI) {
+      switch (pedals[i].mode) {
+
+        case PED_MOMENTARY1:
+        case PED_MOMENTARY2:
+        case PED_MOMENTARY3:
+        case PED_LATCH1:
+        case PED_LATCH2:
+
+          switch (pedals[i].pressMode) {
+
+            case PED_PRESS_1:
+              state1 = false;
+              state2 = false;
+              if (pedals[i].debouncer[0] != nullptr) state1 = pedals[i].debouncer[0]->update();
+              if (pedals[i].debouncer[1] != nullptr) state2 = pedals[i].debouncer[1]->update();
+              if (state1 && state2) {                                                     // pin state changed
+                input = pedals[i].debouncer[0]->read();                                   // reads the updated pin state
+                if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;        // invert the value
+                value = map_digital(i, input);                                            // apply the digital map function to the value
+
+                DPRINTLNF("");
+                DPRINTF("Pedal ");
+                if (i < 9) DPRINTF(" ");
+                DPRINT(i + 1);
+                DPRINTF("   input ");
+                DPRINT(input);
+                DPRINTF(" output ");
+                DPRINT(value);
+
+                b = (currentBank + 2) % BANKS;
+                if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                  midi_send(banks[b][i].midiMessage,
+                            banks[b][i].midiCode,
+                            banks[b][i].midiValue1,
+                            banks[b][i].midiChannel);
+                else
+                  midi_send(banks[b][i].midiMessage,
+                            banks[b][i].midiCode,
+                            banks[b][i].midiValue2,
+                            banks[b][i].midiChannel,
+                            pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
+                pedals[i].pedalValue[0] = value;
+                pedals[i].lastUpdate[0] = millis();
+                pedals[i].pedalValue[1] = pedals[i].pedalValue[0];
+                pedals[i].lastUpdate[1] = pedals[i].lastUpdate[0];
+                lastUsedSwitch = i;
+              }
+              else {
+                if (state1) {                                                             // pin state changed
+                  input = pedals[i].debouncer[0]->read();                                 // reads the updated pin state
+                  if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
+                  value = map_digital(i, input);                                          // apply the digital map function to the value
+
+                  DPRINTLNF("");
+                  DPRINTF("Pedal ");
+                  if (i < 9) DPRINTF(" ");
+                  DPRINT(i + 1);
+                  DPRINTF("   input ");
+                  DPRINT(input);
+                  DPRINTF(" output ");
+                  DPRINT(value);
+
+                  b = currentBank;
+                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                    if (send) midi_send(banks[b][i].midiMessage,
+                                        banks[b][i].midiCode,
+                                        banks[b][i].midiValue1,
+                                        banks[b][i].midiChannel);
+                  else
+                    if (send) midi_send(banks[b][i].midiMessage,
+                                        banks[b][i].midiCode,
+                                        banks[b][i].midiValue2,
+                                        banks[b][i].midiChannel,
+                                        pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
+                  pedals[i].pedalValue[0] = value;
+                  pedals[i].lastUpdate[0] = millis();
+                  lastUsedSwitch = i;
+                }
+                if (state2) {                                                             // pin state changed
+                  input = pedals[i].debouncer[1]->read();                                 // reads the updated pin state
+                  if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
+                  value = map_digital(i, input);                                          // apply the digital map function to the value
+
+                  DPRINTLNF("");
+                  DPRINTF("Pedal ");
+                  if (i < 9) DPRINTF(" ");
+                  DPRINT(i + 1);
+                  DPRINTF("   input ");
+                  DPRINT(input);
+                  DPRINTF(" output ");
+                  DPRINT(value);
+
+                  b = (currentBank + 1) % BANKS;
+                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                    if (send) midi_send(banks[b][i].midiMessage,
+                                        banks[b][i].midiCode,
+                                        banks[b][i].midiValue1,
+                                        banks[b][i].midiChannel);
+                  else
+                    if (send) midi_send(banks[b][i].midiMessage,
+                                        banks[b][i].midiCode,
+                                        banks[b][i].midiValue2,
+                                        banks[b][i].midiChannel,
+                                        pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
+                  pedals[i].pedalValue[1] = value;
+                  pedals[i].lastUpdate[1] = millis();
+                  lastUsedSwitch = i;
+                }
+              }
+              break;
+
+            case PED_PRESS_1_2:
+            case PED_PRESS_1_L:
+            case PED_PRESS_1_2_L:
+            case PED_PRESS_2:
+            case PED_PRESS_2_L:
+            case PED_PRESS_L:
+
+              if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2) break;
+
+              pedals[i].pedalValue[0] = digitalRead(PIN_D(i));
+              //pedals[i].lastUpdate[0] = millis();
+              pedals[i].pedalValue[1] = digitalRead(PIN_A(i));
+              //pedals[i].lastUpdate[1] = millis();
+
+              k1 = MD_UISwitch::KEY_NULL;
+              k2 = MD_UISwitch::KEY_NULL;
+              if (pedals[i].footSwitch[0] != nullptr) k1 = pedals[i].footSwitch[0]->read();
+              if (pedals[i].footSwitch[1] != nullptr) k2 = pedals[i].footSwitch[1]->read();
+
+              int j = 2;
+              while ( j >= 0) {
+                b = (currentBank + j) % BANKS;
+                switch (j) {
+                  case 0: k = k1; break;
+                  case 1: k = k2; break;
+                  case 2: k = (k1 == k2) ? k1 : MD_UISwitch::KEY_NULL; break;
+                }
+                switch (k) {
+
+                  case MD_UISwitch::KEY_PRESS:
+
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
+                    DPRINT(i + 1);
+                    DPRINTF("   SINGLE PRESS ");
+
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel);
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel, false);
+                    lastUsedSwitch = i;
+                    break;
+
+                  case MD_UISwitch::KEY_DPRESS:
+
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
+                    DPRINT(i + 1);
+                    DPRINTF("   DOUBLE PRESS ");
+
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel);
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel, false);
+                    lastUsedSwitch = i;
+                    break;
+
+                  case MD_UISwitch::KEY_LONGPRESS:
+
+                    DPRINTLNF("");
+                    DPRINTF("Pedal ");
+                    if (i < 9) DPRINTF(" ");
+                    DPRINT(i + 1);
+                    DPRINTF("   LONG   PRESS ");
+
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel);
+                    if (send) midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel, false);
+                    lastUsedSwitch = i;
+                    break;
+                    
+                  case MD_UISwitch::KEY_RPTPRESS:
+                  case MD_UISwitch::KEY_NULL:
+                    break;
+                }
+                if (k1 == k2 && k1 != MD_UISwitch::KEY_NULL) j = -1;
+                else j--;
+              }
+              break;
+          }
+          break;
+
+        case PED_ANALOG:
+
+          if (pedals[i].analogPedal == nullptr) continue;           // sanity check
+
+          input = analogRead(PIN_A(i));                             // read the raw analog input value
+          if (pedals[i].autoSensing) {                              // continuos calibration
+
+            if (pedals[i].expZero > round(1.1 * input)) {
+              DPRINTF("Pedal ");
+              if (i < 9) DPRINTF(" ");
+              DPRINT(i + 1);
+              DPRINTF(" calibration min ");
+              DPRINT(round(1.1 * input));
+              DPRINTLNF("");
+            }
+            if (pedals[i].expMax < round(0.9 * input)) {
+              DPRINTF("Pedal ");
+              if (i < 9) DPRINTF(" ");
+              DPRINT(i + 1);
+              DPRINTF(" calibration max ");
+              DPRINT(round(0.9 * input));
+              DPRINTLNF("");
+            }
+
+            pedals[i].expZero = min(pedals[i].expZero, round(1.1 * input));
+            pedals[i].expMax  = max(pedals[i].expMax,  round(0.9 * input));
+          }
+          value = map_analog(i, input);                             // apply the digital map function to the value
+          if (pedals[i].invertPolarity) value = ADC_RESOLUTION - 1 - value;   // invert the scale
+          value = value >> 3;                                       // map from 10-bit value [0, 1023] to the 7-bit MIDI value [0, 127]
+          pedals[i].analogPedal->update(value);                     // update the responsive analog average
+          if (pedals[i].analogPedal->hasChanged())                  // if the value changed since last time
+          {
+            value = pedals[i].analogPedal->getValue();              // get the responsive analog average value
+            double velocity = ((double)value - pedals[i].pedalValue[0]) / (millis() - pedals[i].lastUpdate[0]);
+
+            DPRINTLNF("");
+            DPRINTF("Pedal ");
+            if (i < 9) DPRINTF(" ");
+            DPRINT(i + 1);
+            DPRINTF("   input ");
+            DPRINT(input);
+            DPRINTF(" output ");
+            DPRINT(value);
+            DPRINTF(" velocity ");
+            DPRINT(velocity);
+
+            if (send) midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
+            if (send) midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel, false);
+            pedals[i].pedalValue[0] = value;
+            pedals[i].lastUpdate[0] = millis();
+            lastUsedPedal = i;
+          }
+          break;
+      }
+    }
+  }
+}
+
 //
 //  Create new MIDI controllers setup
 //
@@ -388,363 +745,7 @@ void controller_setup()
     }
     DPRINTLNF("");
   }
-}
-
-
-void midi_send(byte message, byte code, byte value, byte channel, bool on_off = true )
-{
-  switch (message) {
-
-    case PED_NOTE_ON_OFF:
-
-      if (on_off && value > 0) {
-#ifdef DEBUG_PEDALINO
-        DPRINTF("     NOTE ON     Note ");
-        DPRINT(code);
-        DPRINTF("     Velocity ");
-        DPRINT(value);
-        DPRINTF("     Channel ");
-        DPRINT(channel);
-#else
-        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(code, value, channel);
-#endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOn(code, value, channel);
-        screen_info(midi::NoteOn, code, value, channel);
-      }
-      else {
-#ifdef DEBUG_PEDALINO
-        DPRINTF("     NOTE OFF    Note ");
-        DPRINT(code);
-        DPRINTF("     Velocity ");
-        DPRINT(value);
-        DPRINTF("     Channel ");
-        DPRINT(channel);
-#else
-        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(code, value, channel);
-#endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendNoteOff(code, value, channel);
-        screen_info(midi::NoteOff, code, value, channel);
-      }
-      break;
-
-    case PED_CONTROL_CHANGE:
-
-      if (on_off) {
-#ifdef DEBUG_PEDALINO
-        DPRINTF("     CONTROL CHANGE     Code ");
-        DPRINT(code);
-        DPRINTF("     Value ");
-        DPRINT(value);
-        DPRINTF("     Channel ");
-        DPRINT(channel);
-#else
-        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(code, value, channel);
-#endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendControlChange(code, value, channel);
-        screen_info(midi::ControlChange, code, value, channel);
-      }
-      break;
-
-    case PED_PROGRAM_CHANGE:
-
-      if (on_off) {
-#ifdef DEBUG_PEDALINO
-        DPRINTF("     PROGRAM CHANGE     Program ");
-        DPRINT(code);
-        DPRINTF("     Channel ");
-        DPRINT(channel);
-#else
-        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(code, channel);
-#endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(code, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendProgramChange(code, channel);
-        screen_info(midi::ProgramChange, code, 0, channel);
-      }
-      break;
-
-    case PED_PITCH_BEND:
-
-      if (on_off) {
-        int bend = map(value, 0, 127, - 8192, 8191);
-#ifdef DEBUG_PEDALINO
-        DPRINTF("     PITCH BEND     Value ");
-        DPRINT(bend);
-        DPRINTF("     Channel ");
-        DPRINT(channel);
-#else
-        if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, channel);
-#endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut)  RTP_MIDI.sendPitchBend(bend, channel);
-        screen_info(midi::PitchBend, bend, 0, channel);
-      }
-      break;
-  }
-}
-
-//
-//  MIDI messages refresh
-//
-void midi_refresh()
-{
-  MD_UISwitch::keyResult_t  k, k1, k2;
-  bool                      state1, state2;
-  unsigned int              input;
-  unsigned int              value;
-  byte                      b;
-
-  for (byte i = 0; i < PEDALS; i++) {
-    if (pedals[i].function == PED_MIDI) {
-      switch (pedals[i].mode) {
-
-        case PED_MOMENTARY1:
-        case PED_MOMENTARY2:
-        case PED_MOMENTARY3:
-        case PED_LATCH1:
-        case PED_LATCH2:
-
-          switch (pedals[i].pressMode) {
-
-            case PED_PRESS_1:
-              state1 = false;
-              state2 = false;
-              if (pedals[i].debouncer[0] != nullptr) state1 = pedals[i].debouncer[0]->update();
-              if (pedals[i].debouncer[1] != nullptr) state2 = pedals[i].debouncer[1]->update();
-              if (state1 && state2) {                                                     // pin state changed
-                input = pedals[i].debouncer[0]->read();                                   // reads the updated pin state
-                if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;        // invert the value
-                value = map_digital(i, input);                                            // apply the digital map function to the value
-
-                DPRINTLNF("");
-                DPRINTF("Pedal ");
-                if (i < 9) DPRINTF(" ");
-                DPRINT(i + 1);
-                DPRINTF("   input ");
-                DPRINT(input);
-                DPRINTF(" output ");
-                DPRINT(value);
-
-                b = (currentBank + 2) % BANKS;
-                if (value == LOW)                                                         // LOW = pressed, HIGH = released
-                  midi_send(banks[b][i].midiMessage,
-                            banks[b][i].midiCode,
-                            banks[b][i].midiValue1,
-                            banks[b][i].midiChannel);
-                else
-                  midi_send(banks[b][i].midiMessage,
-                            banks[b][i].midiCode,
-                            banks[b][i].midiValue2,
-                            banks[b][i].midiChannel,
-                            pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
-                pedals[i].pedalValue[0] = value;
-                pedals[i].lastUpdate[0] = millis();
-                pedals[i].pedalValue[1] = pedals[i].pedalValue[0];
-                pedals[i].lastUpdate[1] = pedals[i].lastUpdate[0];
-                lastUsedSwitch = i;
-              }
-              else {
-                if (state1) {                                                             // pin state changed
-                  input = pedals[i].debouncer[0]->read();                                 // reads the updated pin state
-                  if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
-                  value = map_digital(i, input);                                          // apply the digital map function to the value
-
-                  DPRINTLNF("");
-                  DPRINTF("Pedal ");
-                  if (i < 9) DPRINTF(" ");
-                  DPRINT(i + 1);
-                  DPRINTF("   input ");
-                  DPRINT(input);
-                  DPRINTF(" output ");
-                  DPRINT(value);
-
-                  b = currentBank;
-                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
-                    midi_send(banks[b][i].midiMessage,
-                              banks[b][i].midiCode,
-                              banks[b][i].midiValue1,
-                              banks[b][i].midiChannel);
-                  else
-                    midi_send(banks[b][i].midiMessage,
-                              banks[b][i].midiCode,
-                              banks[b][i].midiValue2,
-                              banks[b][i].midiChannel,
-                              pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
-                  pedals[i].pedalValue[0] = value;
-                  pedals[i].lastUpdate[0] = millis();
-                  lastUsedSwitch = i;
-                }
-                if (state2) {                                                             // pin state changed
-                  input = pedals[i].debouncer[1]->read();                                 // reads the updated pin state
-                  if (pedals[i].invertPolarity) input = (input == LOW) ? HIGH : LOW;      // invert the value
-                  value = map_digital(i, input);                                          // apply the digital map function to the value
-
-                  DPRINTLNF("");
-                  DPRINTF("Pedal ");
-                  if (i < 9) DPRINTF(" ");
-                  DPRINT(i + 1);
-                  DPRINTF("   input ");
-                  DPRINT(input);
-                  DPRINTF(" output ");
-                  DPRINT(value);
-
-                  b = (currentBank + 1) % BANKS;
-                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
-                    midi_send(banks[b][i].midiMessage,
-                              banks[b][i].midiCode,
-                              banks[b][i].midiValue1,
-                              banks[b][i].midiChannel);
-                  else
-                    midi_send(banks[b][i].midiMessage,
-                              banks[b][i].midiCode,
-                              banks[b][i].midiValue2,
-                              banks[b][i].midiChannel,
-                              pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2);
-                  pedals[i].pedalValue[1] = value;
-                  pedals[i].lastUpdate[1] = millis();
-                  lastUsedSwitch = i;
-                }
-              }
-              break;
-
-            case PED_PRESS_1_2:
-            case PED_PRESS_1_L:
-            case PED_PRESS_1_2_L:
-            case PED_PRESS_2:
-            case PED_PRESS_2_L:
-            case PED_PRESS_L:
-
-              if (pedals[i].mode == PED_LATCH1 || pedals[i].mode == PED_LATCH2) break;
-
-              pedals[i].pedalValue[0] = digitalRead(PIN_D(i));
-              //pedals[i].lastUpdate[0] = millis();
-              pedals[i].pedalValue[1] = digitalRead(PIN_A(i));
-              //pedals[i].lastUpdate[1] = millis();
-
-              k1 = MD_UISwitch::KEY_NULL;
-              k2 = MD_UISwitch::KEY_NULL;
-              if (pedals[i].footSwitch[0] != nullptr) k1 = pedals[i].footSwitch[0]->read();
-              if (pedals[i].footSwitch[1] != nullptr) k2 = pedals[i].footSwitch[1]->read();
-
-              int j = 2;
-              while ( j >= 0) {
-                b = (currentBank + j) % BANKS;
-                switch (j) {
-                  case 0: k = k1; break;
-                  case 1: k = k2; break;
-                  case 2: k = (k1 == k2) ? k1 : MD_UISwitch::KEY_NULL; break;
-                }
-                switch (k) {
-
-                  case MD_UISwitch::KEY_PRESS:
-
-                    DPRINTLNF("");
-                    DPRINTF("Pedal ");
-                    if (i < 9) DPRINTF(" ");
-                    DPRINT(i + 1);
-                    DPRINTF("   SINGLE PRESS ");
-
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue1, banks[b][i].midiChannel, false);
-                    lastUsedSwitch = i;
-                    break;
-
-                  case MD_UISwitch::KEY_DPRESS:
-
-                    DPRINTLNF("");
-                    DPRINTF("Pedal ");
-                    if (i < 9) DPRINTF(" ");
-                    DPRINT(i + 1);
-                    DPRINTF("   DOUBLE PRESS ");
-
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue2, banks[b][i].midiChannel, false);
-                    lastUsedSwitch = i;
-                    break;
-
-                  case MD_UISwitch::KEY_LONGPRESS:
-
-                    DPRINTLNF("");
-                    DPRINTF("Pedal ");
-                    if (i < 9) DPRINTF(" ");
-                    DPRINT(i + 1);
-                    DPRINTF("   LONG   PRESS ");
-
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel);
-                    midi_send(banks[b][i].midiMessage, banks[b][i].midiCode, banks[b][i].midiValue3, banks[b][i].midiChannel, false);
-                    lastUsedSwitch = i;
-                    break;
-                    
-                  case MD_UISwitch::KEY_RPTPRESS:
-                  case MD_UISwitch::KEY_NULL:
-                    break;
-                }
-                if (k1 == k2 && k1 != MD_UISwitch::KEY_NULL) j = -1;
-                else j--;
-              }
-              break;
-          }
-          break;
-
-        case PED_ANALOG:
-
-          if (pedals[i].analogPedal == nullptr) continue;           // sanity check
-
-          input = analogRead(PIN_A(i));                             // read the raw analog input value
-          if (pedals[i].autoSensing) {                              // continuos calibration
-
-            if (pedals[i].expZero > round(1.1 * input)) {
-              DPRINTF("Pedal ");
-              if (i < 9) DPRINTF(" ");
-              DPRINT(i + 1);
-              DPRINTF(" calibration min ");
-              DPRINT(round(1.1 * input));
-              DPRINTLNF("");
-            }
-            if (pedals[i].expMax < round(0.9 * input)) {
-              DPRINTF("Pedal ");
-              if (i < 9) DPRINTF(" ");
-              DPRINT(i + 1);
-              DPRINTF(" calibration max ");
-              DPRINT(round(0.9 * input));
-              DPRINTLNF("");
-            }
-
-            pedals[i].expZero = min(pedals[i].expZero, round(1.1 * input));
-            pedals[i].expMax  = max(pedals[i].expMax,  round(0.9 * input));
-          }
-          value = map_analog(i, input);                             // apply the digital map function to the value
-          if (pedals[i].invertPolarity) value = ADC_RESOLUTION - 1 - value;   // invert the scale
-          value = value >> 3;                                       // map from 10-bit value [0, 1023] to the 7-bit MIDI value [0, 127]
-          pedals[i].analogPedal->update(value);                     // update the responsive analog average
-          if (pedals[i].analogPedal->hasChanged())                  // if the value changed since last time
-          {
-            value = pedals[i].analogPedal->getValue();              // get the responsive analog average value
-            double velocity = ((double)value - pedals[i].pedalValue[0]) / (millis() - pedals[i].lastUpdate[0]);
-
-            DPRINTLNF("");
-            DPRINTF("Pedal ");
-            if (i < 9) DPRINTF(" ");
-            DPRINT(i + 1);
-            DPRINTF("   input ");
-            DPRINT(input);
-            DPRINTF(" output ");
-            DPRINT(value);
-            DPRINTF(" velocity ");
-            DPRINT(velocity);
-
-            midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel);
-            midi_send(banks[currentBank][i].midiMessage, banks[currentBank][i].midiCode, value, banks[currentBank][i].midiChannel, false);
-            pedals[i].pedalValue[0] = value;
-            pedals[i].lastUpdate[0] = millis();
-            lastUsedPedal = i;
-          }
-          break;
-      }
-    }
-  }
+  midi_refresh(false); // to avoid spurious readings
 }
 
 //
