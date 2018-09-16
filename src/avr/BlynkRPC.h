@@ -23,6 +23,7 @@
 //#include <ESP8266_Lib.h>
 //#include <BlynkSimpleShieldEsp8266.h>
 
+#define BLYNK_PROFILE               V1
 #define BLYNK_CLOCK_START           V11
 #define BLYNK_CLOCK_STOP            V12
 #define BLYNK_CLOCK_CONTINUE        V13
@@ -67,10 +68,13 @@ const char blynkAuthToken[] = "31795677450a4ac088805d6d914bc747";
 WidgetLCD  blynkLCD(V0);
 void screen_update(boolean);
 
+void update_current_profile_eeprom();
+
 void blynk_refresh_bank()
 {
   //if (Blynk.connected())
   { 
+    Blynk.virtualWrite(BLYNK_PROFILE,               currentProfile + 1);
     Blynk.virtualWrite(BLYNK_BANK,                  currentBank + 1);
     Blynk.virtualWrite(BLYNK_PEDAL,                 currentPedal + 1);
     Blynk.virtualWrite(BLYNK_MIDIMESSAGE,           banks[currentBank][currentPedal].midiMessage + 1);
@@ -211,6 +215,16 @@ BLYNK_APP_DISCONNECTED() {
   DPRINTLNF("Blink App disconnected");
 }
 
+BLYNK_WRITE(BLYNK_PROFILE) {
+  int profile = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Profile ");
+  DPRINTLN(profile);
+  currentProfile = constrain(profile - 1, 0, PROFILES - 1);
+  update_current_profile_eeprom();
+  DPRINTLNF("Switching profile");
+  Reset_AVR();
+}
 
 BLYNK_WRITE(BLYNK_MIDI_TIME_CODE) {
   int mtc = param.asInt();
