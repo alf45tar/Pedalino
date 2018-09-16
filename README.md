@@ -11,7 +11,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Multi purpose
 - Battery operated
 - 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN MIDI IN and MIDI OUT connectors)
-- No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android. 
+- No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android
 - USB MIDI class-compliant device
 - Bluetooth LE MIDI (iOS compatible)
 - Network MIDI (aka AppleMIDI or RTP-MIDI)
@@ -43,6 +43,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
 - 10 banks of 16 controllers each (up to 8 controllers for lite version)
+- 3 user configuration profiles
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
 - MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector, AppleMIDI (also known as RTP-MIDI) or ipMIDI via Wi-Fi
 - Send the following MIDI events: Program Change, Control Code, Note On/Off or Pitch Bend
