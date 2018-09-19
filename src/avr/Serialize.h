@@ -87,17 +87,7 @@ void serialize_interface() {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
-  switch (currentInterface) {
-    case PED_APPLEMIDI:
-      root["interface"] = "RTP";
-      break;
-    case PED_BLUETOOTHMIDI:
-      root["interface"] = "BLE";
-      break;
-    default:
-      root["interface"] = "";
-      break;
-  }
+  root["interface"] = currentInterface;
   root["in"]        = interfaces[currentInterface].midiIn;
   root["out"]       = interfaces[currentInterface].midiOut;
   root["thru"]      = interfaces[currentInterface].midiThru;

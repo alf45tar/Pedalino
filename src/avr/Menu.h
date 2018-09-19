@@ -145,7 +145,7 @@ const PROGMEM char listPedalMode[]       = "   Momentary  |     Latch    |    An
 const PROGMEM char listPedalPressMode[]  = "    Single    |    Double    |     Long     |      1+2     |      1+L     |     1+2+L    |      2+L     ";
 const PROGMEM char listPolarity[]        = " No|Yes";
 const PROGMEM char listResponseCurve[]   = "    Linear    |      Log     |   Anti-Log   ";
-const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |    ipMIDI    |   Bluetooth  ";
+const PROGMEM char listInterface[]       = "     USB      |  Legacy MIDI |   AppleMIDI  |    ipMIDI    |   Bluetooth  |     OSC      ";
 const PROGMEM char listEnableDisable[]   = "   Disable    |    Enable    ";
 const PROGMEM char listMidiTimeCode[]    = "    None      |   MTC Slave  |    MTC 24    |    MTC 25    |   MTC 30 DF  |    MTC 30    |  Clock Slave | Clock Master ";
 const PROGMEM char listTimeSignature[]   = "     2/4      |     4/4      |     3/4      |     3/8      |     6/8      |     9/8      |     12/8     ";
@@ -329,7 +329,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = interfaces[currentInterface].midiIn;
       else {
         interfaces[currentInterface].midiIn = vBuf.value;
-        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+        serialize_interface();
       }
       break;
 
@@ -337,7 +337,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = interfaces[currentInterface].midiOut;
       else {
         interfaces[currentInterface].midiOut = vBuf.value;
-        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+        serialize_interface();
       }
       break;
 
@@ -348,7 +348,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
         interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
         interfaces[PED_APPLEMIDI].midiThru  ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
-        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+        serialize_interface();
       }
       break;
 
@@ -356,7 +356,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = interfaces[currentInterface].midiRouting;
       else {
         interfaces[currentInterface].midiRouting = vBuf.value;
-        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+        serialize_interface();
       }
       break;
 
@@ -364,7 +364,7 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = interfaces[currentInterface].midiClock;
       else {
         interfaces[currentInterface].midiClock = vBuf.value;
-        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+        serialize_interface();
       }
       break;
 
@@ -602,6 +602,9 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
             break;
           case PED_BLUETOOTHMIDI:
             strcpy(line, "Bluetooth MIDI");
+            break;
+          case PED_OSC:
+            strcpy(line, "OSC");
             break;
         }
       else

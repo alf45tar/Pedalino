@@ -745,7 +745,8 @@ void controller_setup()
     }
     DPRINTLNF("");
   }
-  midi_refresh(false); // to avoid spurious readings
+  for (byte i = 0; i < 10; i++)
+    midi_refresh(false);            // to avoid spurious readings
 }
 
 //

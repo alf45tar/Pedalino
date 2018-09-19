@@ -54,7 +54,7 @@
 #define PIN_D(x)            23+2*x      // map 0..15 to 23,25,...53
 #define PIN_A(x)            PIN_A0+x    // map 0..15 to A0, A1,...A15
 
-#define INTERFACES          5
+#define INTERFACES          6
 
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
@@ -100,6 +100,7 @@
 #define PED_APPLEMIDI       2   // also known as RTP-MIDI protocol
 #define PED_IPMIDI          3
 #define PED_BLUETOOTHMIDI   4
+#define PED_OSC             5
 
 #define PED_DISABLE         0
 #define PED_ENABLE          1

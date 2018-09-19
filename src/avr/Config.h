@@ -9,7 +9,7 @@
  */
 
 #define SIGNATURE "Pedalino(TM)"
-#define EEPROM_VERSION 10 // Increment each time you change the eeprom structure
+#define EEPROM_VERSION 11 // Increment each time you change the eeprom structure
 
 //
 //  Load factory deafult value for banks, pedals and interfaces

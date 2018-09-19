@@ -197,6 +197,32 @@ const unsigned int      oscRemotePort = 9000;    // remote port of an external O
 const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
 OSCMessage              oscMsg;
 
+// Interfaces
+
+#define INTERFACES          6
+
+#define PED_USBMIDI         0
+#define PED_DINMIDI         1
+#define PED_RTPMIDI         2
+#define PED_IPMIDI          3
+#define PED_BLEMIDI         4
+#define PED_OSC             5
+
+struct interface {
+  byte                   midiIn;          // 0 = disable, 1 = enable
+  byte                   midiOut;         // 0 = disable, 1 = enable
+  byte                   midiThru;        // 0 = disable, 1 = enable
+  byte                   midiRouting;     // 0 = disable, 1 = enable
+  byte                   midiClock;       // 0 = disable, 1 = enable
+};
+
+interface interfaces[INTERFACES] = { 1, 1, 0, 1, 0,
+                                     1, 1, 0, 1, 0,
+                                     1, 1, 0, 1, 0,
+                                     1, 1, 0, 1, 0,
+                                     1, 1, 0, 1, 0,                                     
+                                     1, 1, 0, 1, 0 };   // Interfaces Setup
+
 
 void printMIDI(const char *interface, midi::StatusByte status, const byte *data) {
   
@@ -334,10 +360,11 @@ class MyBLEServerCallbacks: public BLEServerCallbacks {
 class MyBLECharateristicCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string rxValue = pCharacteristic->getValue();
-      if (rxValue.length() > 0) {
-        BLEMidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
-        DPRINT("Received %2d bytes: %2h %2h %2h", rxValue.length(), rxValue[2], rxValue[3], rxValue[4]);
-      }
+      if (rxValue.length() > 0)
+        if (interfaces[PED_BLEMIDI].midiIn) {
+          BLEMidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
+          DPRINT("Received %2d bytes: %2h %2h %2h", rxValue.length(), rxValue[2], rxValue[3], rxValue[4]);
+        }        
     }
 };
 
@@ -521,6 +548,8 @@ void BLESendChannelMessage1(byte type, byte channel, byte data1)
 {
   uint8_t midiPacket[4];
 
+  if (!interfaces[PED_BLEMIDI].midiOut) return;
+
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
   midiPacket[2] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[3] = data1;
@@ -531,6 +560,8 @@ void BLESendChannelMessage1(byte type, byte channel, byte data1)
 void BLESendChannelMessage2(byte type, byte channel, byte data1, byte data2)
 {
   uint8_t midiPacket[5];
+
+  if (!interfaces[PED_BLEMIDI].midiOut) return;
 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
   midiPacket[2] = (type & 0xf0) | ((channel - 1) & 0x0f);
@@ -544,6 +575,8 @@ void BLESendSystemCommonMessage1(byte type, byte data1)
 {
   uint8_t midiPacket[4];
 
+  if (!interfaces[PED_BLEMIDI].midiOut) return;
+ 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
   midiPacket[2] = type;
   midiPacket[3] = data1;
@@ -555,6 +588,8 @@ void BLESendSystemCommonMessage2(byte type, byte data1, byte data2)
 {
   uint8_t midiPacket[5];
 
+  if (!interfaces[PED_BLEMIDI].midiOut) return;
+ 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
   midiPacket[2] = type;
   midiPacket[3] = data1;
@@ -567,6 +602,8 @@ void BLESendRealTimeMessage(byte type)
 {
   uint8_t midiPacket[3];
 
+  if (!interfaces[PED_BLEMIDI].midiOut) return;
+ 
   BLEMidiTimestamp(&midiPacket[0], &midiPacket[1]);
   midiPacket[2] = type;
   pCharacteristic->setValue(midiPacket, 3);
@@ -720,6 +757,8 @@ void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
 {
   byte midiPacket[2];
 
+  if (!interfaces[PED_IPMIDI].midiOut) return;
+
   midiPacket[0] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[1] = data1;
 #ifdef ARDUINO_ARCH_ESP8266
@@ -735,6 +774,8 @@ void ipMIDISendChannelMessage1(byte type, byte channel, byte data1)
 void ipMIDISendChannelMessage2(byte type, byte channel, byte data1, byte data2)
 {
   byte midiPacket[3];
+
+  if (!interfaces[PED_IPMIDI].midiOut) return;
 
   midiPacket[0] = (type & 0xf0) | ((channel - 1) & 0x0f);
   midiPacket[1] = data1;
@@ -753,6 +794,8 @@ void ipMIDISendSystemCommonMessage1(byte type, byte data1)
 {
   byte midiPacket[2];
 
+  if (!interfaces[PED_IPMIDI].midiOut) return;
+
   midiPacket[0] = type;
   midiPacket[1] = data1;
 #ifdef ARDUINO_ARCH_ESP8266
@@ -768,6 +811,8 @@ void ipMIDISendSystemCommonMessage1(byte type, byte data1)
 void ipMIDISendSystemCommonMessage2(byte type, byte data1, byte data2)
 {
   byte  midiPacket[3];
+
+  if (!interfaces[PED_IPMIDI].midiOut) return;
 
   midiPacket[0] = type;
   midiPacket[1] = data1;
@@ -785,6 +830,8 @@ void ipMIDISendSystemCommonMessage2(byte type, byte data1, byte data2)
 void ipMIDISendRealTimeMessage(byte type)
 {
   byte midiPacket[1];
+
+  if (!interfaces[PED_IPMIDI].midiOut) return;
 
   midiPacket[0] = type;
 #ifdef ARDUINO_ARCH_ESP8266
@@ -894,6 +941,8 @@ void ipMIDISendSystemReset(void)
 
 void OSCSendNoteOn(byte note, byte velocity, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/note/";
   msg += note;
   OSCMessage oscMsg(msg.c_str());
@@ -904,6 +953,8 @@ void OSCSendNoteOn(byte note, byte velocity, byte channel)
 
 void OSCSendNoteOff(byte note, byte velocity, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/note/";
   msg += note;
   OSCMessage oscMsg(msg.c_str());
@@ -914,6 +965,8 @@ void OSCSendNoteOff(byte note, byte velocity, byte channel)
 
 void OSCSendAfterTouchPoly(byte note, byte pressure, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/aftertouchpoly/";
   msg += note;
   OSCMessage oscMsg(msg.c_str());
@@ -924,6 +977,8 @@ void OSCSendAfterTouchPoly(byte note, byte pressure, byte channel)
 
 void OSCSendControlChange(byte number, byte value, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/cc/";
   msg += number;
   OSCMessage oscMsg(msg.c_str());
@@ -934,6 +989,8 @@ void OSCSendControlChange(byte number, byte value, byte channel)
 
 void OSCSendProgramChange(byte number, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/pc/";
   msg += number;
   OSCMessage oscMsg(msg.c_str());
@@ -944,6 +1001,8 @@ void OSCSendProgramChange(byte number, byte channel)
 
 void OSCSendAfterTouch(byte pressure, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/aftertouchchannel/";
   msg += channel;
   OSCMessage oscMsg(msg.c_str());
@@ -954,6 +1013,8 @@ void OSCSendAfterTouch(byte pressure, byte channel)
 
 void OSCSendPitchBend(int bend, byte channel)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/pitchbend/";
   msg += channel;
   OSCMessage oscMsg(msg.c_str());
@@ -972,6 +1033,8 @@ void OSCSendTimeCodeQuarterFrame(byte data)
 
 void OSCSendSongPosition(unsigned int beats)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/songpostion/";
   msg += beats;
   OSCMessage oscMsg(msg.c_str());
@@ -982,6 +1045,8 @@ void OSCSendSongPosition(unsigned int beats)
 
 void OSCSendSongSelect(byte songnumber)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   String msg = "/pedalino/midi/songselect/";
   msg += songnumber;
   OSCMessage oscMsg(msg.c_str());
@@ -992,6 +1057,8 @@ void OSCSendSongSelect(byte songnumber)
 
 void OSCSendTuneRequest(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/tunerequest/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1004,6 +1071,8 @@ void OSCSendClock(void)
 
 void OSCSendStart(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/start/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1012,6 +1081,8 @@ void OSCSendStart(void)
 
 void OSCSendContinue(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/continue/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1020,6 +1091,8 @@ void OSCSendContinue(void)
 
 void OSCSendStop(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/stop/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1028,6 +1101,8 @@ void OSCSendStop(void)
 
 void OSCSendActiveSensing(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/activesensing/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1036,6 +1111,8 @@ void OSCSendActiveSensing(void)
 
 void OSCSendSystemReset(void)
 {
+  if (!interfaces[PED_OSC].midiOut) return;
+
   OSCMessage oscMsg("/pedalino/midi/reset/");
   oscUDP.beginPacket(oscRemoteIp, oscRemotePort);
   oscMsg.send(oscUDP).empty();
@@ -1049,7 +1126,7 @@ void OnSerialMidiNoteOn(byte channel, byte note, byte velocity)
 {
   BLESendNoteOn(note, velocity, channel);
   ipMIDISendNoteOn(note, velocity, channel);
-  AppleMIDI.noteOn(note, velocity, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
 
@@ -1057,7 +1134,7 @@ void OnSerialMidiNoteOff(byte channel, byte note, byte velocity)
 {
   BLESendNoteOff(note, velocity, channel);
   ipMIDISendNoteOff(note, velocity, channel);
-  AppleMIDI.noteOff(note, velocity, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
 
@@ -1065,7 +1142,7 @@ void OnSerialMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   BLESendAfterTouchPoly(note, pressure, channel);
   ipMIDISendAfterTouchPoly(note, pressure, channel);
-  AppleMIDI.polyPressure(note, pressure, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.polyPressure(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
@@ -1073,7 +1150,7 @@ void OnSerialMidiControlChange(byte channel, byte number, byte value)
 {
   BLESendControlChange(number, value, channel);
   ipMIDISendControlChange(number, value, channel);
-  AppleMIDI.controlChange(number, value, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.controlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
 
@@ -1081,7 +1158,7 @@ void OnSerialMidiProgramChange(byte channel, byte number)
 {
   BLESendProgramChange(number, channel);
   ipMIDISendProgramChange(number, channel);
-  AppleMIDI.programChange(number, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.programChange(number, channel);
   OSCSendProgramChange(number, channel);
 }
 
@@ -1089,7 +1166,7 @@ void OnSerialMidiAfterTouchChannel(byte channel, byte pressure)
 {
   BLESendAfterTouch(pressure, channel);
   ipMIDISendAfterTouch(pressure, channel);
-  AppleMIDI.afterTouch(pressure, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.afterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
 
@@ -1097,7 +1174,7 @@ void OnSerialMidiPitchBend(byte channel, int bend)
 {
   BLESendPitchBend(bend, channel);
   ipMIDISendPitchBend(bend, channel);
-  AppleMIDI.pitchBend(bend, channel);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.pitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
 
@@ -1145,6 +1222,14 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
 #endif
+    if (interface) {
+      byte currentInterface = constrain(*interface, 0, INTERFACES - 1);
+      if (in) interfaces[currentInterface].midiIn = *in;
+      if (out) interfaces[currentInterface].midiOut = *out;
+      if (thru) interfaces[currentInterface].midiThru = *thru;
+      if (routing) interfaces[currentInterface].midiRouting = *routing;
+      if (clock) interfaces[currentInterface].midiClock = *clock;
+    }
     if (factory_default) {
 #ifdef ARDUINO_ARCH_ESP32
       int address = 0;
@@ -1161,7 +1246,7 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     else {
       BLESendSystemExclusive(array, size);
       ipMIDISendSystemExclusive(array, size);
-      AppleMIDI.sysEx(array, size);
+      if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.sysEx(array, size);
       OSCSendSystemExclusive(array, size);
     }
   }
@@ -1171,7 +1256,7 @@ void OnSerialMidiTimeCodeQuarterFrame(byte data)
 {
   BLESendTimeCodeQuarterFrame(data);
   ipMIDISendTimeCodeQuarterFrame(data);
-  AppleMIDI.timeCodeQuarterFrame(data);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.timeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
 
@@ -1179,7 +1264,7 @@ void OnSerialMidiSongPosition(unsigned int beats)
 {
   BLESendSongPosition(beats);
   ipMIDISendSongPosition(beats);
-  AppleMIDI.songPosition(beats);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songPosition(beats);
   OSCSendSongPosition(beats);
 }
 
@@ -1187,7 +1272,7 @@ void OnSerialMidiSongSelect(byte songnumber)
 {
   BLESendSongSelect(songnumber);
   ipMIDISendSongSelect(songnumber);
-  AppleMIDI.songSelect(songnumber);
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
 
@@ -1195,7 +1280,7 @@ void OnSerialMidiTuneRequest(void)
 {
   BLESendTuneRequest();
   ipMIDISendTuneRequest();
-  AppleMIDI.tuneRequest();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.tuneRequest();
   OSCSendTuneRequest();
 }
 
@@ -1203,7 +1288,7 @@ void OnSerialMidiClock(void)
 {
   BLESendClock();
   ipMIDISendClock();
-  AppleMIDI.clock();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.clock();
   OSCSendClock();
 }
 
@@ -1211,7 +1296,7 @@ void OnSerialMidiStart(void)
 {
   BLESendStart();
   ipMIDISendStart();
-  AppleMIDI.start();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.start();
   OSCSendStart();
 }
 
@@ -1219,7 +1304,7 @@ void OnSerialMidiContinue(void)
 {
   BLESendContinue();
   ipMIDISendContinue();
-  AppleMIDI._continue();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI._continue();
   OSCSendContinue();
 }
 
@@ -1227,7 +1312,7 @@ void OnSerialMidiStop(void)
 {
   BLESendStop();
   ipMIDISendStop();
-  AppleMIDI.stop();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.stop();
   OSCSendStop();
 }
 
@@ -1235,7 +1320,7 @@ void OnSerialMidiActiveSensing(void)
 {
   BLESendActiveSensing();
   ipMIDISendActiveSensing();
-  AppleMIDI.activeSensing();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.activeSensing();
   OSCSendActiveSensing();
 }
 
@@ -1243,7 +1328,7 @@ void OnSerialMidiSystemReset(void)
 {
   BLESendSystemReset();
   ipMIDISendSystemReset();
-  AppleMIDI.reset();
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.reset();
   OSCSendSystemReset();
 }
 
@@ -1264,6 +1349,8 @@ void OnAppleMidiDisconnected(uint32_t ssrc)
 
 void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendNoteOn(note, velocity, channel);
   BLESendNoteOn(note, velocity, channel);
   ipMIDISendNoteOn(note, velocity, channel);
@@ -1272,6 +1359,8 @@ void OnAppleMidiNoteOn(byte channel, byte note, byte velocity)
 
 void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendNoteOff(note, velocity, channel);
   BLESendNoteOff(note, velocity, channel);
   ipMIDISendNoteOff(note, velocity, channel);
@@ -1280,6 +1369,8 @@ void OnAppleMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendAfterTouch(note, pressure, channel);
   BLESendAfterTouchPoly(note, pressure, channel);
   ipMIDISendAfterTouchPoly(note, pressure, channel);
@@ -1288,6 +1379,8 @@ void OnAppleMidiReceiveAfterTouchPoly(byte channel, byte note, byte pressure)
 
 void OnAppleMidiReceiveControlChange(byte channel, byte number, byte value)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendControlChange(number, value, channel);
   BLESendControlChange(number, value, channel);
   ipMIDISendControlChange(number, value, channel);
@@ -1296,6 +1389,8 @@ void OnAppleMidiReceiveControlChange(byte channel, byte number, byte value)
 
 void OnAppleMidiReceiveProgramChange(byte channel, byte number)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendProgramChange(number, channel);
   BLESendProgramChange(number, channel);
   OSCSendProgramChange(number, channel);
@@ -1303,6 +1398,8 @@ void OnAppleMidiReceiveProgramChange(byte channel, byte number)
 
 void OnAppleMidiReceiveAfterTouchChannel(byte channel, byte pressure)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendAfterTouch(pressure, channel);
   BLESendAfterTouch(pressure, channel);
   ipMIDISendAfterTouch(pressure, channel);
@@ -1311,6 +1408,8 @@ void OnAppleMidiReceiveAfterTouchChannel(byte channel, byte pressure)
 
 void OnAppleMidiReceivePitchBend(byte channel, int bend)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendPitchBend(bend, channel);
   BLESendPitchBend(bend, channel);
   ipMIDISendPitchBend(bend, channel);
@@ -1319,6 +1418,8 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
 
 void OnAppleMidiReceiveSysEx(const byte * data, uint16_t size)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendSysEx(size, data);
   BLESendSystemExclusive(data, size);
   ipMIDISendSystemExclusive(data, size);
@@ -1327,6 +1428,8 @@ void OnAppleMidiReceiveSysEx(const byte * data, uint16_t size)
 
 void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendTimeCodeQuarterFrame(data);
   BLESendTimeCodeQuarterFrame(data);
   ipMIDISendTimeCodeQuarterFrame(data);
@@ -1335,6 +1438,8 @@ void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)
 
 void OnAppleMidiReceiveSongPosition(unsigned short beats)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendSongPosition(beats);
   BLESendSongPosition(beats);
   ipMIDISendSongPosition(beats);
@@ -1343,6 +1448,8 @@ void OnAppleMidiReceiveSongPosition(unsigned short beats)
 
 void OnAppleMidiReceiveSongSelect(byte songnumber)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendSongSelect(songnumber);
   BLESendSongSelect(songnumber);
   ipMIDISendSongSelect(songnumber);
@@ -1351,6 +1458,8 @@ void OnAppleMidiReceiveSongSelect(byte songnumber)
 
 void OnAppleMidiReceiveTuneRequest(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendTuneRequest();
   BLESendTuneRequest();
   ipMIDISendTuneRequest();
@@ -1359,6 +1468,8 @@ void OnAppleMidiReceiveTuneRequest(void)
 
 void OnAppleMidiReceiveClock(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::Clock);
   BLESendClock();
   ipMIDISendClock();
@@ -1367,6 +1478,8 @@ void OnAppleMidiReceiveClock(void)
 
 void OnAppleMidiReceiveStart(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::Start);
   BLESendStart();
   ipMIDISendStart();
@@ -1375,6 +1488,8 @@ void OnAppleMidiReceiveStart(void)
 
 void OnAppleMidiReceiveContinue(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::Continue);
   BLESendContinue();
   ipMIDISendContinue();
@@ -1383,6 +1498,8 @@ void OnAppleMidiReceiveContinue(void)
 
 void OnAppleMidiReceiveStop(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::Stop);
   BLESendStop();
   ipMIDISendStop();
@@ -1391,6 +1508,8 @@ void OnAppleMidiReceiveStop(void)
 
 void OnAppleMidiReceiveActiveSensing(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::ActiveSensing);
   BLESendActiveSensing();
   ipMIDISendActiveSensing();
@@ -1399,6 +1518,8 @@ void OnAppleMidiReceiveActiveSensing(void)
 
 void OnAppleMidiReceiveReset(void)
 {
+  if (!interfaces[PED_RTPMIDI].midiIn) return;
+
   MIDI.sendRealTime(midi::SystemReset);
   BLESendSystemReset();
   ipMIDISendSystemReset();
@@ -1427,6 +1548,8 @@ void OnOscControlChange(OSCMessage &msg)
 
 void oscUPD_listen() {
   
+  if (!interfaces[PED_OSC].midiIn) return;
+
   if (!WiFi.isConnected()) return;
 
   int size = oscUDP.parsePacket();
@@ -1455,6 +1578,8 @@ void ipMIDI_listen() {
   int  bend;
   unsigned int beats;
   
+  if (!interfaces[PED_IPMIDI].midiIn) return;
+
   if (!WiFi.isConnected()) return;
 
   packetSize = ipMIDI.parsePacket();
