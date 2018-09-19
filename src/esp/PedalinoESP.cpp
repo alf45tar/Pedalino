@@ -1134,6 +1134,12 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     const char *lcd1     = root["lcd1"];
     const char *lcd2     = root["lcd2"];
     const char *factory_default = root["factory.default"];
+    const char *interface = root["interface"];
+    const char *in        = root["in"];
+    const char *out       = root["out"];
+    const char *thru      = root["thru"];
+    const char *routing   = root["routing"];
+    const char *clock     = root["clock"];
 #ifdef BLYNK
     if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);

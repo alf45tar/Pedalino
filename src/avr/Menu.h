@@ -327,12 +327,18 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
     case II_MIDI_IN:
       if (bGet) vBuf.value = interfaces[currentInterface].midiIn;
-      else interfaces[currentInterface].midiIn = vBuf.value;
+      else {
+        interfaces[currentInterface].midiIn = vBuf.value;
+        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+      }
       break;
 
     case II_MIDI_OUT:
       if (bGet) vBuf.value = interfaces[currentInterface].midiOut;
-      else interfaces[currentInterface].midiOut = vBuf.value;
+      else {
+        interfaces[currentInterface].midiOut = vBuf.value;
+        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+      }
       break;
 
     case II_MIDI_THRU:
@@ -342,17 +348,24 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
         interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
         interfaces[PED_APPLEMIDI].midiThru  ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
+        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
       }
       break;
 
     case II_MIDI_ROUTING:
       if (bGet) vBuf.value = interfaces[currentInterface].midiRouting;
-      else interfaces[currentInterface].midiRouting = vBuf.value;
+      else {
+        interfaces[currentInterface].midiRouting = vBuf.value;
+        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+      }
       break;
 
     case II_MIDI_CLOCK:
       if (bGet) vBuf.value = interfaces[currentInterface].midiClock;
-      else interfaces[currentInterface].midiClock = vBuf.value;
+      else {
+        interfaces[currentInterface].midiClock = vBuf.value;
+        if (currentInterface == PED_APPLEMIDI || currentInterface == PED_BLUETOOTHMIDI) serialize_interface();
+      }
       break;
 
     case II_MIDITIMECODE:

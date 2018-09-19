@@ -8,6 +8,8 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
+#include <ArduinoJson.h>                // https://arduinojson.org/
+
 
 void serialize_lcd1(const char *l) {
 
@@ -78,4 +80,32 @@ void serialize_factory_default() {
   Serial3.flush();
 
   DPRINTLN("JSON: factory.default");
+}
+
+void serialize_interface() {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  switch (currentInterface) {
+    case PED_APPLEMIDI:
+      root["interface"] = "RTP";
+      break;
+    case PED_BLUETOOTHMIDI:
+      root["interface"] = "BLE";
+      break;
+    default:
+      root["interface"] = "";
+      break;
+  }
+  root["in"]        = interfaces[currentInterface].midiIn;
+  root["out"]       = interfaces[currentInterface].midiOut;
+  root["thru"]      = interfaces[currentInterface].midiThru;
+  root["routing"]   = interfaces[currentInterface].midiRouting;
+  root["clock"]     = interfaces[currentInterface].midiClock;
+
+  Serial3.write(0xF0);
+  root.printTo(Serial3);
+  Serial3.write(0xF7);
+  Serial3.flush();
 }
