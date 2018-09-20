@@ -18,9 +18,10 @@ env:
 install:
     - pip install -U platformio
     - platformio update
-    - platformio lib -g install 62 64 136 222 415 423 1106 1194 1266 1674 1954
+    - platformio lib -g install 62 64 136 222 415 423 1106 1194 1266 1954
                                 https://github.com/dxinteractive/ResponsiveAnalogRead.git
                                 https://github.com/z3t0/Arduino-IRremote.git
+                                https://github.com/alf45tar/MD_Menu
 
 script:
     -  platformio ci $PLATFORMIO_CI_EXTRA_ARGS --project-option="lib_deps=Wire" --project-option="board_build.partitions=no_ota.csv"
