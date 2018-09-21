@@ -322,7 +322,10 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
     case II_INTERFACE:
       if (bGet) vBuf.value = currentInterface;
-      else currentInterface = vBuf.value;
+      else {
+        currentInterface = vBuf.value;
+        serialize_interface();
+      }
       break;
 
     case II_MIDI_IN:

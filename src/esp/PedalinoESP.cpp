@@ -20,6 +20,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <EEPROM.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
@@ -34,7 +35,6 @@
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-#include <EEPROM.h>
 #include <WiFi.h>
 //#include <WebServer.h>
 #include <ESPmDNS.h>
@@ -1229,10 +1229,25 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
       if (thru) interfaces[currentInterface].midiThru = *thru;
       if (routing) interfaces[currentInterface].midiRouting = *routing;
       if (clock) interfaces[currentInterface].midiClock = *clock;
+      for (byte i = 0; i < INTERFACES; i++)
+        {
+          int address = 0;
+          EEPROM.write(address, interfaces[i].midiIn);
+          address += sizeof(byte);
+          EEPROM.write(address, interfaces[i].midiOut);
+          address += sizeof(byte);
+          EEPROM.write(address, interfaces[i].midiThru);
+          address += sizeof(byte);
+          EEPROM.write(address, interfaces[i].midiRouting);
+          address += sizeof(byte);
+          EEPROM.write(address, interfaces[i].midiClock);
+          address += sizeof(byte);
+        }
+      EEPROM.commit();
     }
     if (factory_default) {
 #ifdef ARDUINO_ARCH_ESP32
-      int address = 0;
+      int address = 32;
       EEPROM.writeString(address, "");
       address += 1;
       EEPROM.writeString(address, "");
@@ -2073,7 +2088,7 @@ bool smart_config()
     DPRINTLN("Password    : %s", WiFi.psk().c_str());
 
 #ifdef ARDUINO_ARCH_ESP32
-    int address = 0;
+    int address = 32;
     EEPROM.writeString(address, WiFi.SSID());
     address += WiFi.SSID().length() + 1;
     EEPROM.writeString(address, WiFi.psk());
@@ -2134,7 +2149,7 @@ bool auto_reconnect(String ssid = "", String password = "")
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-    int address = 0;
+    int address = 32;
     ssid = EEPROM.readString(address);
     address += ssid.length() + 1;
     password = EEPROM.readString(address);
@@ -2352,15 +2367,33 @@ void setup()
   //esp_log_level_set("wifi",   ESP_LOG_WARN);
   //esp_log_level_set("BLE*",   ESP_LOG_ERROR);
   esp_log_level_set(LOG_TAG,  ESP_LOG_INFO);
+#endif
 
-  DPRINTLN("Testing EEPROM Library");
+#ifdef ARDUINO_ARCH_ESP32
   if (!EEPROM.begin(128)) {
     DPRINTLN("Failed to initialise EEPROM");
     DPRINTLN("Restarting...");
     delay(1000);
     ESP.restart();
   }
+#else
+  EEPROM.begin(128);
 #endif
+  DPRINTLN("Reading EEPROM");
+  for (byte i = 0; i < INTERFACES; i++)
+    {
+      int address = 0;
+      interfaces[i].midiIn = EEPROM.read(address);
+      address += sizeof(byte);
+      interfaces[i].midiOut = EEPROM.read(address);
+      address += sizeof(byte);
+      interfaces[i].midiThru = EEPROM.read(address);
+      address += sizeof(byte);
+      interfaces[i].midiRouting = EEPROM.read(address);
+      address += sizeof(byte);
+      interfaces[i].midiClock = EEPROM.read(address);
+      address += sizeof(byte);
+    }
 
   pinMode(WIFI_LED, OUTPUT);
 
