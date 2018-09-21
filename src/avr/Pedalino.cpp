@@ -40,6 +40,20 @@ void setup(void)
 
 #endif
 
+ // Reset to factory default if RIGHT key is pressed and hold for 5 seconds at power on
+  pinMode(A0, INPUT_PULLUP);
+  unsigned long milliStart = millis();
+  while ((digitalRead(A0) == LOW) && ((millis() - milliStart) < 5000)) {
+    DPRINT("#");
+    delay(100);
+  }
+  if (digitalRead(A0) == LOW) {
+    DPRINTLN("");
+    DPRINTLN("Reset EEPROM to factory default");
+    load_factory_default();
+    update_eeprom();
+  }
+
   read_eeprom();
 
   // Initiate serial MIDI communications, listen to all channels and turn Thru off
