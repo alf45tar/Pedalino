@@ -391,8 +391,6 @@ void ble_midi_start_service ()
 
   pSecurity = new BLESecurity();
   pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_BOND);
-
-  DPRINT("BLE MIDI service advertising started");
 }
 
 void BLEMidiTimestamp (uint8_t *header, uint8_t *timestamp)
@@ -1541,6 +1539,35 @@ void OnAppleMidiReceiveReset(void)
   OSCSendSystemReset();
 }
 
+void apple_midi_start()
+{
+  // Create a session and wait for a remote host to connect to us
+  AppleMIDI.begin("Pedalino(TM)");
+
+  AppleMIDI.OnConnected(OnAppleMidiConnected);
+  AppleMIDI.OnDisconnected(OnAppleMidiDisconnected);
+
+  // Connect the handle function called upon reception of a MIDI message from WiFi MIDI interface
+  AppleMIDI.OnReceiveNoteOn(OnAppleMidiNoteOn);
+  AppleMIDI.OnReceiveNoteOff(OnAppleMidiNoteOff);
+  AppleMIDI.OnReceiveAfterTouchPoly(OnAppleMidiReceiveAfterTouchPoly);
+  AppleMIDI.OnReceiveControlChange(OnAppleMidiReceiveControlChange);
+  AppleMIDI.OnReceiveProgramChange(OnAppleMidiReceiveProgramChange);
+  AppleMIDI.OnReceiveAfterTouchChannel(OnAppleMidiReceiveAfterTouchChannel);
+  AppleMIDI.OnReceivePitchBend(OnAppleMidiReceivePitchBend);
+  AppleMIDI.OnReceiveSysEx(OnAppleMidiReceiveSysEx);
+  AppleMIDI.OnReceiveTimeCodeQuarterFrame(OnAppleMidiReceiveTimeCodeQuarterFrame);
+  AppleMIDI.OnReceiveSongPosition(OnAppleMidiReceiveSongPosition);
+  AppleMIDI.OnReceiveSongSelect(OnAppleMidiReceiveSongSelect);
+  AppleMIDI.OnReceiveTuneRequest(OnAppleMidiReceiveTuneRequest);
+  AppleMIDI.OnReceiveClock(OnAppleMidiReceiveClock);
+  AppleMIDI.OnReceiveStart(OnAppleMidiReceiveStart);
+  AppleMIDI.OnReceiveContinue(OnAppleMidiReceiveContinue);
+  AppleMIDI.OnReceiveStop(OnAppleMidiReceiveStop);
+  AppleMIDI.OnReceiveActiveSensing(OnAppleMidiReceiveActiveSensing);
+  AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
+}
+
 
 // Forward messages received from WiFI OSC interface to serial MIDI interface
 
@@ -1862,6 +1889,10 @@ typedef enum WiFiEvent
           ipMIDI.beginMulticast(WiFi.localIP(), ipMIDImulticast, ipMIDIdestPort);
           DPRINTLN("ipMIDI server started");
 
+          // RTP-MDI
+          apple_midi_start();
+          DPRINTLN("RTP-MIDI started");
+
           // Calculate the broadcast address of local WiFi to broadcast OSC messages
           oscRemoteIp = WiFi.localIP();
           localMask = WiFi.subnetMask();
@@ -1973,6 +2004,10 @@ SYSTEM_EVENT_MAX
 
           ipMIDI.beginMulticast(ipMIDImulticast, ipMIDIdestPort);
           DPRINTLN("ipMIDI server started");
+
+          // RTP-MDI
+          apple_midi_start();
+          DPRINTLN("RTP-MIDI started");
 
           // Calculate the broadcast address of local WiFi to broadcast OSC messages
           oscRemoteIp = WiFi.localIP();
@@ -2186,7 +2221,7 @@ void wifi_connect()
 }
 
 
-void midi_connect()
+void serial_midi_connect()
 {
   // Connect the handle function called upon reception of a MIDI message from serial MIDI interface
   MIDI.setHandleNoteOn(OnSerialMidiNoteOn);
@@ -2211,32 +2246,6 @@ void midi_connect()
   // Initiate serial MIDI communications, listen to all channels
   MIDI.begin(MIDI_CHANNEL_OMNI);
   MIDI.turnThruOff();
-
-  // Create a session and wait for a remote host to connect to us
-  AppleMIDI.begin("Pedalino(TM)");
-
-  AppleMIDI.OnConnected(OnAppleMidiConnected);
-  AppleMIDI.OnDisconnected(OnAppleMidiDisconnected);
-
-  // Connect the handle function called upon reception of a MIDI message from WiFi MIDI interface
-  AppleMIDI.OnReceiveNoteOn(OnAppleMidiNoteOn);
-  AppleMIDI.OnReceiveNoteOff(OnAppleMidiNoteOff);
-  AppleMIDI.OnReceiveAfterTouchPoly(OnAppleMidiReceiveAfterTouchPoly);
-  AppleMIDI.OnReceiveControlChange(OnAppleMidiReceiveControlChange);
-  AppleMIDI.OnReceiveProgramChange(OnAppleMidiReceiveProgramChange);
-  AppleMIDI.OnReceiveAfterTouchChannel(OnAppleMidiReceiveAfterTouchChannel);
-  AppleMIDI.OnReceivePitchBend(OnAppleMidiReceivePitchBend);
-  AppleMIDI.OnReceiveSysEx(OnAppleMidiReceiveSysEx);
-  AppleMIDI.OnReceiveTimeCodeQuarterFrame(OnAppleMidiReceiveTimeCodeQuarterFrame);
-  AppleMIDI.OnReceiveSongPosition(OnAppleMidiReceiveSongPosition);
-  AppleMIDI.OnReceiveSongSelect(OnAppleMidiReceiveSongSelect);
-  AppleMIDI.OnReceiveTuneRequest(OnAppleMidiReceiveTuneRequest);
-  AppleMIDI.OnReceiveClock(OnAppleMidiReceiveClock);
-  AppleMIDI.OnReceiveStart(OnAppleMidiReceiveStart);
-  AppleMIDI.OnReceiveContinue(OnAppleMidiReceiveContinue);
-  AppleMIDI.OnReceiveStop(OnAppleMidiReceiveStop);
-  AppleMIDI.OnReceiveActiveSensing(OnAppleMidiReceiveActiveSensing);
-  AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
 }
 
 #ifdef BLYNK
@@ -2395,6 +2404,10 @@ void setup()
       address += sizeof(byte);
     }
 
+  // On receiving MIDI data callbacks setup
+  serial_midi_connect();
+  DPRINTLN("Serial MIDI started");
+
   pinMode(WIFI_LED, OUTPUT);
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -2404,6 +2417,7 @@ void setup()
 
   // BLE MIDI service advertising
   ble_midi_start_service();
+  DPRINT("BLE MIDI service advertising started");
 
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
@@ -2421,9 +2435,6 @@ void setup()
   Debug.begin(host);              // Initiaze the telnet server
   Debug.setResetCmdEnabled(true); // Enable the reset command
 #endif
-
-  // On receiving MIDI data callbacks setup
-  midi_connect();
 }
 
 

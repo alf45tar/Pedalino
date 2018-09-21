@@ -40,15 +40,15 @@ void setup(void)
 
 #endif
 
- // Reset to factory default if RIGHT key is pressed and hold for 5 seconds at power on
+  // Reset to factory default if RIGHT key is pressed and hold for 5 seconds at power on
   pinMode(A0, INPUT_PULLUP);
   unsigned long milliStart = millis();
   while ((digitalRead(A0) == LOW) && ((millis() - milliStart) < 5000)) {
     DPRINT("#");
     delay(100);
   }
+  DPRINTLN("");
   if (digitalRead(A0) == LOW) {
-    DPRINTLN("");
     DPRINTLN("Reset EEPROM to factory default");
     load_factory_default();
     update_eeprom();
