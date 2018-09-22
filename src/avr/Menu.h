@@ -76,7 +76,7 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { M_ROOT,           SIGNATURE,         10, 16, 0 },
+  { M_ROOT,           SIGNATURE,         10, 15, 0 },
   { M_BANKSETUP,      "Banks Setup",     20, 37, 0 },
   { M_PEDALSETUP,     "Pedals Setup",    40, 49, 0 },
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },

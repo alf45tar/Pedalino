@@ -390,16 +390,16 @@ BLYNK_WRITE(BLYNK_MIDIMESSAGE) {
   DPRINTF(" - ");
   switch (msg) {
     case 1:
-      DPRINTF("Program Change");
+      DPRINTLNF("Program Change");
       break;
     case 2:
-      DPRINTF("Control Change");
+      DPRINTLNF("Control Change");
       break;
     case 3:
-      DPRINTF("Note On/Off");
+      DPRINTLNF("Note On/Off");
       break;
     case 4:
-      DPRINTF("Pitch Bend");
+      DPRINTLNF("Pitch Bend");
       break;
   }
   banks[currentBank][currentPedal].midiMessage = constrain(msg - 1, 0, 3);
@@ -605,4 +605,12 @@ BLYNK_WRITE(BLYNK_INTERFACE_MIDIROUTING) {
   DPRINTF(" - MIDI Routing ");
   DPRINTLN(onoff);
   interfaces[currentInterface].midiRouting = onoff;
+}
+
+BLYNK_WRITE(BLYNK_INTERFACE_MIDICLOCK) {
+  int onoff = param.asInt();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - MIDI Clock ");
+  DPRINTLN(onoff);
+  interfaces[currentInterface].midiClock = onoff;
 }

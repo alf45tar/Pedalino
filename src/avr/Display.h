@@ -110,7 +110,7 @@ void screen_update(bool force = false) {
       lcd.print(buf);
       // replace unprintable chars
       for (byte i = 0; i < LCD_COLS; i++)
-        buf[i] = (buf[i] == -1) ? '>' : buf[i];
+        buf[i] = (buf[i] == -1) ? '#' : buf[i];
       blynkLCD.print(0, 1, buf);
     }
     

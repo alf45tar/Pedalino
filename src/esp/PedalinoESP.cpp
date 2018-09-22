@@ -1209,27 +1209,22 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     const char *lcd1     = root["lcd1"];
     const char *lcd2     = root["lcd2"];
     const char *factory_default = root["factory.default"];
-    const char *interface = root["interface"];
-    const char *in        = root["in"];
-    const char *out       = root["out"];
-    const char *thru      = root["thru"];
-    const char *routing   = root["routing"];
-    const char *clock     = root["clock"];
 #ifdef BLYNK
     if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
 #endif
-    if (interface) {
-      byte currentInterface = constrain(*interface, 0, INTERFACES - 1);
-      if (in) interfaces[currentInterface].midiIn = *in;
-      if (out) interfaces[currentInterface].midiOut = *out;
-      if (thru) interfaces[currentInterface].midiThru = *thru;
-      if (routing) interfaces[currentInterface].midiRouting = *routing;
-      if (clock) interfaces[currentInterface].midiClock = *clock;
+    if (root.containsKey("interface")) {
+      byte currentInterface = constrain(root["interface"], 0, INTERFACES - 1);
+      interfaces[currentInterface].midiIn       = root["in"];
+      interfaces[currentInterface].midiOut      = root["out"];
+      interfaces[currentInterface].midiThru     = root["thru"];
+      interfaces[currentInterface].midiRouting  = root["routing"];
+      interfaces[currentInterface].midiClock    = root["clock"];
+      DPRINTLN("Updating EEPROM");
+      int address = 0;
       for (byte i = 0; i < INTERFACES; i++)
         {
-          int address = 0;
           EEPROM.write(address, interfaces[i].midiIn);
           address += sizeof(byte);
           EEPROM.write(address, interfaces[i].midiOut);
@@ -1240,6 +1235,13 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
           address += sizeof(byte);
           EEPROM.write(address, interfaces[i].midiClock);
           address += sizeof(byte);
+          DPRINTLN("Interface %d  %s  %s  %s  %s  %s",
+                    i, 
+                    interfaces[i].midiIn      ? "IN"      : "  ",
+                    interfaces[i].midiOut     ? "OUT"     : "   ",
+                    interfaces[i].midiThru    ? "THRU"    : "    ",
+                    interfaces[i].midiRouting ? "ROUTING" : "       ",
+                    interfaces[i].midiClock   ? "CLOCK"   : "     ");
         }
       EEPROM.commit();
     }
@@ -2389,9 +2391,9 @@ void setup()
   EEPROM.begin(128);
 #endif
   DPRINTLN("Reading EEPROM");
+  int address = 0;
   for (byte i = 0; i < INTERFACES; i++)
     {
-      int address = 0;
       interfaces[i].midiIn = EEPROM.read(address);
       address += sizeof(byte);
       interfaces[i].midiOut = EEPROM.read(address);
@@ -2402,7 +2404,23 @@ void setup()
       address += sizeof(byte);
       interfaces[i].midiClock = EEPROM.read(address);
       address += sizeof(byte);
+      DPRINTLN("Interface %d  %s  %s  %s  %s  %s",
+                i, 
+                interfaces[i].midiIn      ? "IN"      : "  ",
+                interfaces[i].midiOut     ? "OUT"     : "   ",
+                interfaces[i].midiThru    ? "THRU"    : "    ",
+                interfaces[i].midiRouting ? "ROUTING" : "       ",
+                interfaces[i].midiClock   ? "CLOCK"   : "     ");
+
     }
+#ifdef ARDUINO_ARCH_ESP32
+    address = 32;
+    String ssid = EEPROM.readString(address);
+    address += ssid.length() + 1;
+    String password = EEPROM.readString(address);
+    DPRINTLN("SSID     : %s", ssid.c_str());
+    DPRINTLN("Password : %s", password.c_str());
+#endif
 
   // On receiving MIDI data callbacks setup
   serial_midi_connect();
