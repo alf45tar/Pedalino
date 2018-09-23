@@ -21,6 +21,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
+#include <MIDI.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
@@ -28,37 +29,42 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266LLMNR.h>
 #include <ESP8266HTTPUpdateServer.h>
-#endif
 
-#if defined(BLYNK) && defined(ARDUINO_ARCH_ESP8266)
+#ifdef BLYNK
 #include <BlynkSimpleEsp8266.h>
 #endif
+#endif  // ARDUINO_ARCH_ESP8266
 
 #ifdef ARDUINO_ARCH_ESP32
+#include <esp_log.h>
+#include <string>
+
+#ifndef NOWIFI
 #include <WiFi.h>
-//#include <WebServer.h>
 #include <ESPmDNS.h>
-#include <Update.h>
+#endif
+
+#ifndef NOBLE
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include <esp_log.h>
-#include <string>
 #endif
 
-#if defined(BLYNK) && defined(ARDUINO_ARCH_ESP32)
+#ifdef BLYNK
 #include <BlynkSimpleEsp32.h>
 #endif
+#endif  // ARDUINO_ARCH_ESP32
 
+#ifndef NOWIFI
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 
-#include <MIDI.h>
 #include <AppleMidi.h>
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <OSCData.h>
+#endif
 
 //#define PEDALINO_TELNET_DEBUG
 
@@ -135,14 +141,10 @@ ESP8266WebServer        httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 #endif
 
-#ifdef ARDUINO_ARCH_ESP32
-//WebServer               httpServer(80);
-//HTTPUpload              httpUpdater;
-#endif
 
 // Bluetooth LE MIDI interface
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32) && !defined(NOBLE)
 
 #define MIDI_SERVICE_UUID        "03b80e5a-ede8-4b33-a751-6ce34ec4c700"
 #define MIDI_CHARACTERISTIC_UUID "7772e5db-3868-4112-a1a9-f2669d106bf3"
@@ -158,7 +160,9 @@ unsigned long         bleLastOn        = 0;
 
 // WiFi MIDI interface to comunicate with AppleMIDI/RTP-MDI devices
 
+#if defined(ARDUINO_ARCH_ESP32) && !defined(NOWIFI)
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, AppleMIDI); // see definition in AppleMidi_Defs.h
+#endif
 
 bool          appleMidiConnected = false;
 unsigned long wifiLastOn         = 0;
@@ -185,17 +189,21 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SerialMIDI, MIDI, SerialMIDISettings
 
 // ipMIDI
 
+#ifndef NOWIFI
 WiFiUDP                 ipMIDI;
 IPAddress               ipMIDImulticast(225, 0, 0, 37);
 unsigned int            ipMIDIdestPort = 21928;
+#endif
 
 // WiFi OSC comunication
 
+#ifndef NOWIFI
 WiFiUDP                 oscUDP;                  // A UDP instance to let us send and receive packets over UDP
 IPAddress               oscRemoteIp;             // remote IP of an external OSC device or broadcast address
 const unsigned int      oscRemotePort = 9000;    // remote port of an external OSC device
 const unsigned int      oscLocalPort = 8000;     // local port to listen for OSC packets (actually not used for sending)
 OSCMessage              oscMsg;
+#endif
 
 // Interfaces
 
@@ -209,6 +217,7 @@ OSCMessage              oscMsg;
 #define PED_OSC             5
 
 struct interface {
+  char                   name[4];
   byte                   midiIn;          // 0 = disable, 1 = enable
   byte                   midiOut;         // 0 = disable, 1 = enable
   byte                   midiThru;        // 0 = disable, 1 = enable
@@ -216,12 +225,12 @@ struct interface {
   byte                   midiClock;       // 0 = disable, 1 = enable
 };
 
-interface interfaces[INTERFACES] = { 1, 1, 0, 1, 0,
-                                     1, 1, 0, 1, 0,
-                                     1, 1, 0, 1, 0,
-                                     1, 1, 0, 1, 0,
-                                     1, 1, 0, 1, 0,                                     
-                                     1, 1, 0, 1, 0 };   // Interfaces Setup
+interface interfaces[INTERFACES] = { "USB", 1, 1, 0, 1, 0,
+                                     "DIN", 1, 1, 0, 1, 0,
+                                     "RTP", 1, 1, 0, 1, 0,
+                                     "IP ", 1, 1, 0, 1, 0,
+                                     "BLE", 1, 1, 0, 1, 0,                                     
+                                     "OSC", 1, 1, 0, 1, 0 };   // Interfaces Setup
 
 
 void printMIDI(const char *interface, midi::StatusByte status, const byte *data) {
@@ -342,7 +351,27 @@ void printMIDI (const char *interface, const midi::MidiType type, const midi::Ch
 }
 
 #ifdef ARDUINO_ARCH_ESP32
-
+#ifdef NOBLE
+#define BLEMidiReceive(...)
+#define BLESendNoteOn(...)
+#define BLESendNoteOff(...)
+#define BLESendAfterTouchPoly(...)
+#define BLESendControlChange(...)
+#define BLESendProgramChange(...)
+#define BLESendAfterTouch(...)
+#define BLESendPitchBend(...)
+#define BLESendSystemExclusive(...)
+#define BLESendTimeCodeQuarterFrame(...)
+#define BLESendSongPosition(...)
+#define BLESendSongSelect(...)
+#define BLESendTuneRequest(...)
+#define BLESendClock(...)
+#define BLESendStart(...)
+#define BLESendContinue(...)
+#define BLESendStop(...) {}
+#define BLESendActiveSensing(...)
+#define BLESendSystemReset(...)
+#else
 void BLEMidiReceive(uint8_t *, uint8_t);
 
 class MyBLEServerCallbacks: public BLEServerCallbacks {
@@ -363,7 +392,7 @@ class MyBLECharateristicCallbacks: public BLECharacteristicCallbacks {
       if (rxValue.length() > 0)
         if (interfaces[PED_BLEMIDI].midiIn) {
           BLEMidiReceive((uint8_t *)(rxValue.c_str()), rxValue.length());
-          DPRINT("Received %2d bytes: %2h %2h %2h", rxValue.length(), rxValue[2], rxValue[3], rxValue[4]);
+          DPRINT("BLE Received %2d bytes", rxValue.length());
         }        
     }
 };
@@ -725,28 +754,161 @@ void BLESendSystemReset(void)
 {
   BLESendRealTimeMessage(midi::SystemReset);
 }
+#endif  // NOBLE
+#endif  // ARDUINO_ARCH_ESP32
+
+
+#ifdef NOWIFI
+#define AppleMidiSendNoteOn(...)
+#define AppleMidiSendNoteOff(...)
+#define AppleMidiSendAfterTouchPoly(...)
+#define AppleMidiSendControlChange(...)
+#define AppleMidiSendProgramChange(...)
+#define AppleMidiSendAfterTouch(...)
+#define AppleMidiSendPitchBend(...)
+#define AppleMidiSendSystemExclusive(...)
+#define AppleMidiSendTimeCodeQuarterFrame(...)
+#define AppleMidiSendSongPosition(...)
+#define AppleMidiSendSongSelect(...)
+#define AppleMidiSendTuneRequest(...)
+#define AppleMidiSendClock(...)
+#define AppleMidiSendStart(...)
+#define AppleMidiSendContinue(...)
+#define AppleMidiSendStop(...)
+#define AppleMidiSendActiveSensing(...)
+#define AppleMidiSendSystemReset(...)
+#define ipMIDISendChannelMessage1(...)
+#define ipMIDISendChannelMessage2(...)
+#define ipMIDISendSystemCommonMessage1(...)
+#define ipMIDISendSystemCommonMessage2(...)
+#define ipMIDISendRealTimeMessage(...)
+#define ipMIDISendNoteOn(...)
+#define ipMIDISendNoteOff(...)
+#define ipMIDISendAfterTouchPoly(...)
+#define ipMIDISendControlChange(...)
+#define ipMIDISendProgramChange(...)
+#define ipMIDISendAfterTouch(...)
+#define ipMIDISendPitchBend(...)
+#define ipMIDISendSystemExclusive(...)
+#define ipMIDISendTimeCodeQuarterFrame(...)
+#define ipMIDISendSongPosition(...)
+#define ipMIDISendSongSelect(...)
+#define ipMIDISendTuneRequest(...)
+#define ipMIDISendClock(...)
+#define ipMIDISendStart(...)
+#define ipMIDISendContinue(...)
+#define ipMIDISendStop(...)
+#define ipMIDISendActiveSensing(...)
+#define ipMIDISendSystemReset(...)
+#define OSCSendNoteOn(...)
+#define OSCSendNoteOff(...)
+#define OSCSendAfterTouchPoly(...)
+#define OSCSendControlChange(...)
+#define OSCSendProgramChange(...)
+#define OSCSendAfterTouch(...)
+#define OSCSendPitchBend(...)
+#define OSCSendSystemExclusive(...)
+#define OSCSendTimeCodeQuarterFrame(...)
+#define OSCSendSongPosition(...)
+#define OSCSendSongSelect(...)
+#define OSCSendTuneRequest(...)
+#define OSCSendClock(...)
+#define OSCSendStart(...)
+#define OSCSendContinue(...)
+#define OSCSendStop(...)
+#define OSCSendActiveSensing(...)
+#define OSCSendSystemReset(...)
 #else
-#define ble_midi_start_service(...)
-#define BLEMidiReceive(...)
-#define BLESendNoteOn(...)
-#define BLESendNoteOff(...)
-#define BLESendAfterTouchPoly(...)
-#define BLESendControlChange(...)
-#define BLESendProgramChange(...)
-#define BLESendAfterTouch(...)
-#define BLESendPitchBend(...)
-#define BLESendSystemExclusive(...)
-#define BLESendTimeCodeQuarterFrame(...)
-#define BLESendSongPosition(...)
-#define BLESendSongSelect(...)
-#define BLESendTuneRequest(...)
-#define BLESendClock(...)
-#define BLESendStart(...)
-#define BLESendContinue(...)
-#define BLESendStop(...) {}
-#define BLESendActiveSensing(...)
-#define BLESendSystemReset(...)
-#endif
+
+void AppleMidiSendNoteOn(byte note, byte velocity, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOn(note, velocity, channel);
+}
+
+void AppleMidiSendNoteOff(byte note, byte velocity, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOff(note, velocity, channel);
+}
+
+void AppleMidiSendAfterTouchPoly(byte note, byte pressure, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.polyPressure(note, pressure, channel);
+}
+
+void AppleMidiSendControlChange(byte number, byte value, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.controlChange(number, value, channel);
+}
+
+void AppleMidiSendProgramChange(byte number, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.programChange(number, channel);
+}
+
+void AppleMidiSendAfterTouch(byte pressure, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.afterTouch(pressure, channel);
+}
+
+void AppleMidiSendPitchBend(int bend, byte channel)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.pitchBend(bend, channel);
+}
+
+void AppleMidiSendSystemExclusive(byte* array, unsigned size)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.sysEx(array, size);
+}
+
+void AppleMidiSendTimeCodeQuarterFrame(byte data)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.timeCodeQuarterFrame(data);
+}
+
+void AppleMidiSendSongPosition(unsigned int beats)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songPosition(beats);
+}
+
+void AppleMidiSendSongSelect(byte songnumber)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songSelect(songnumber);
+}
+
+void AppleMidiSendTuneRequest(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.tuneRequest();
+}
+
+void AppleMidiSendClock(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.clock();
+}
+
+void AppleMidiSendStart(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.start();
+}
+
+void AppleMidiSendContinue(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI._continue();
+}
+
+void AppleMidiSendStop(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.stop();
+}
+
+void AppleMidiSendActiveSensing(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.activeSensing();
+}
+
+void AppleMidiSendSystemReset(void)
+{
+  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.reset();
+}
 
 
 // Send messages to WiFi ipMIDI interface
@@ -1116,6 +1278,7 @@ void OSCSendSystemReset(void)
   oscMsg.send(oscUDP).empty();
   oscUDP.endPacket();
 }
+#endif  //  NOWIFI
 
 
 // Forward messages received from serial MIDI interface to WiFI interface
@@ -1124,7 +1287,7 @@ void OnSerialMidiNoteOn(byte channel, byte note, byte velocity)
 {
   BLESendNoteOn(note, velocity, channel);
   ipMIDISendNoteOn(note, velocity, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOn(note, velocity, channel);
+  AppleMidiSendNoteOn(note, velocity, channel);
   OSCSendNoteOn(note, velocity, channel);
 }
 
@@ -1132,7 +1295,7 @@ void OnSerialMidiNoteOff(byte channel, byte note, byte velocity)
 {
   BLESendNoteOff(note, velocity, channel);
   ipMIDISendNoteOff(note, velocity, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.noteOff(note, velocity, channel);
+  AppleMidiSendNoteOff(note, velocity, channel);
   OSCSendNoteOff(note, velocity, channel);
 }
 
@@ -1140,7 +1303,7 @@ void OnSerialMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   BLESendAfterTouchPoly(note, pressure, channel);
   ipMIDISendAfterTouchPoly(note, pressure, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.polyPressure(note, pressure, channel);
+  AppleMidiSendAfterTouchPoly(note, pressure, channel);
   OSCSendAfterTouchPoly(note, pressure, channel);
 }
 
@@ -1148,7 +1311,7 @@ void OnSerialMidiControlChange(byte channel, byte number, byte value)
 {
   BLESendControlChange(number, value, channel);
   ipMIDISendControlChange(number, value, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.controlChange(number, value, channel);
+  AppleMidiSendControlChange(number, value, channel);
   OSCSendControlChange(number, value, channel);
 }
 
@@ -1156,7 +1319,7 @@ void OnSerialMidiProgramChange(byte channel, byte number)
 {
   BLESendProgramChange(number, channel);
   ipMIDISendProgramChange(number, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.programChange(number, channel);
+  AppleMidiSendProgramChange(number, channel);
   OSCSendProgramChange(number, channel);
 }
 
@@ -1164,7 +1327,7 @@ void OnSerialMidiAfterTouchChannel(byte channel, byte pressure)
 {
   BLESendAfterTouch(pressure, channel);
   ipMIDISendAfterTouch(pressure, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.afterTouch(pressure, channel);
+  AppleMidiSendAfterTouch(pressure, channel);
   OSCSendAfterTouch(pressure, channel);
 }
 
@@ -1172,7 +1335,7 @@ void OnSerialMidiPitchBend(byte channel, int bend)
 {
   BLESendPitchBend(bend, channel);
   ipMIDISendPitchBend(bend, channel);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.pitchBend(bend, channel);
+  AppleMidiSendPitchBend(bend, channel);
   OSCSendPitchBend(bend, channel);
 }
 
@@ -1235,8 +1398,8 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
           address += sizeof(byte);
           EEPROM.write(address, interfaces[i].midiClock);
           address += sizeof(byte);
-          DPRINTLN("Interface %d  %s  %s  %s  %s  %s",
-                    i, 
+          DPRINTLN("Interface %s:  %s  %s  %s  %s  %s",
+                    interfaces[i].name, 
                     interfaces[i].midiIn      ? "IN"      : "  ",
                     interfaces[i].midiOut     ? "OUT"     : "   ",
                     interfaces[i].midiThru    ? "THRU"    : "    ",
@@ -1261,7 +1424,7 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     else {
       BLESendSystemExclusive(array, size);
       ipMIDISendSystemExclusive(array, size);
-      if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.sysEx(array, size);
+      AppleMidiSendSystemExclusive(array, size);
       OSCSendSystemExclusive(array, size);
     }
   }
@@ -1271,7 +1434,7 @@ void OnSerialMidiTimeCodeQuarterFrame(byte data)
 {
   BLESendTimeCodeQuarterFrame(data);
   ipMIDISendTimeCodeQuarterFrame(data);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.timeCodeQuarterFrame(data);
+  AppleMidiSendTimeCodeQuarterFrame(data);
   OSCSendTimeCodeQuarterFrame(data);
 }
 
@@ -1279,7 +1442,7 @@ void OnSerialMidiSongPosition(unsigned int beats)
 {
   BLESendSongPosition(beats);
   ipMIDISendSongPosition(beats);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songPosition(beats);
+  AppleMidiSendSongPosition(beats);
   OSCSendSongPosition(beats);
 }
 
@@ -1287,7 +1450,7 @@ void OnSerialMidiSongSelect(byte songnumber)
 {
   BLESendSongSelect(songnumber);
   ipMIDISendSongSelect(songnumber);
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.songSelect(songnumber);
+  AppleMidiSendSongSelect(songnumber);
   OSCSendSongSelect(songnumber);
 }
 
@@ -1295,7 +1458,7 @@ void OnSerialMidiTuneRequest(void)
 {
   BLESendTuneRequest();
   ipMIDISendTuneRequest();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.tuneRequest();
+  AppleMidiSendTuneRequest();
   OSCSendTuneRequest();
 }
 
@@ -1303,7 +1466,7 @@ void OnSerialMidiClock(void)
 {
   BLESendClock();
   ipMIDISendClock();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.clock();
+  AppleMidiSendClock();
   OSCSendClock();
 }
 
@@ -1311,7 +1474,7 @@ void OnSerialMidiStart(void)
 {
   BLESendStart();
   ipMIDISendStart();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.start();
+  AppleMidiSendStart();
   OSCSendStart();
 }
 
@@ -1319,7 +1482,7 @@ void OnSerialMidiContinue(void)
 {
   BLESendContinue();
   ipMIDISendContinue();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI._continue();
+  AppleMidiSendContinue();
   OSCSendContinue();
 }
 
@@ -1327,7 +1490,7 @@ void OnSerialMidiStop(void)
 {
   BLESendStop();
   ipMIDISendStop();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.stop();
+  AppleMidiSendStop();
   OSCSendStop();
 }
 
@@ -1335,7 +1498,7 @@ void OnSerialMidiActiveSensing(void)
 {
   BLESendActiveSensing();
   ipMIDISendActiveSensing();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.activeSensing();
+  AppleMidiSendActiveSensing();
   OSCSendActiveSensing();
 }
 
@@ -1343,10 +1506,16 @@ void OnSerialMidiSystemReset(void)
 {
   BLESendSystemReset();
   ipMIDISendSystemReset();
-  if (interfaces[PED_RTPMIDI].midiOut) AppleMIDI.reset();
+  AppleMidiSendSystemReset();
   OSCSendSystemReset();
 }
 
+#ifdef NOWIFI
+#define apple_midi_start(...)
+#define rtpMIDI_listen(...)
+#define ipMIDI_listen(...)
+#define oscUDP_listen(...)
+#else
 
 // Forward messages received from WiFI MIDI interface to serial MIDI interface
 
@@ -1570,7 +1739,6 @@ void apple_midi_start()
   AppleMIDI.OnReceiveReset(OnAppleMidiReceiveReset);
 }
 
-
 // Forward messages received from WiFI OSC interface to serial MIDI interface
 
 void OnOscNoteOn(OSCMessage &msg)
@@ -1590,7 +1758,7 @@ void OnOscControlChange(OSCMessage &msg)
 
 // Listen to incoming OSC messages from WiFi
 
-void oscUPD_listen() {
+void oscUDP_listen() {
   
   if (!interfaces[PED_OSC].midiIn) return;
 
@@ -1610,6 +1778,11 @@ void oscUPD_listen() {
   }
 }
 
+// Listen to incoming AppleMIDI messages from WiFi
+
+inline void rtpMIDI_listen() {
+  AppleMIDI.run();
+}
 
 // Listen to incoming ipMIDI messages from WiFi
 
@@ -1794,7 +1967,6 @@ void ipMIDI_listen() {
     DPRINTMIDI(ipMIDI.remoteIP().toString().c_str(), status, data);
   }
 }
-
 
 #ifdef ARDUINO_ARCH_ESP32
 String translateEncryptionType(wifi_auth_mode_t encryptionType) {
@@ -2221,6 +2393,7 @@ void wifi_connect()
   if (!WiFi.isConnected())
     ap_mode_start();           // switch to AP mode until next reboot
 }
+#endif  // NOWIFI
 
 
 void serial_midi_connect()
@@ -2404,8 +2577,8 @@ void setup()
       address += sizeof(byte);
       interfaces[i].midiClock = EEPROM.read(address);
       address += sizeof(byte);
-      DPRINTLN("Interface %d  %s  %s  %s  %s  %s",
-                i, 
+      DPRINTLN("Interface %s:  %s  %s  %s  %s  %s",
+                interfaces[i].name, 
                 interfaces[i].midiIn      ? "IN"      : "  ",
                 interfaces[i].midiOut     ? "OUT"     : "   ",
                 interfaces[i].midiThru    ? "THRU"    : "    ",
@@ -2413,7 +2586,7 @@ void setup()
                 interfaces[i].midiClock   ? "CLOCK"   : "     ");
 
     }
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32) && !defined(NOWIFI)
     address = 32;
     String ssid = EEPROM.readString(address);
     address += ssid.length() + 1;
@@ -2433,14 +2606,18 @@ void setup()
   SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
 #endif
 
+#ifndef NOBLE
   // BLE MIDI service advertising
   ble_midi_start_service();
   DPRINT("BLE MIDI service advertising started");
+#endif
 
+#ifndef NOWIFI
   // Write SSID/password to flash only if currently used values do not match what is already stored in flash
   WiFi.persistent(false);
   WiFi.onEvent(WiFiEvent);
   wifi_connect();
+#endif
 
 #ifdef BLYNK
   // Connect to Blynk
@@ -2472,6 +2649,7 @@ void loop()
       WIFI_LED_OFF();
     }
   }
+#ifndef NOWIFI
   else
     // led always on if connected to an AP or one or more client connected the the internal AP
     switch (WiFi.getMode()) {
@@ -2485,18 +2663,20 @@ void loop()
         WIFI_LED_OFF();
         break;
     }
+#endif
 
   // Listen to incoming messages from Arduino
-  if (MIDI.read()) DPRINTMIDI("Serial MIDI", MIDI.getType(), MIDI.getChannel(), MIDI.getData1(), MIDI.getData2());
+  if (MIDI.read())
+    DPRINTMIDI("Serial MIDI", MIDI.getType(), MIDI.getChannel(), MIDI.getData1(), MIDI.getData2());
 
   // Listen to incoming AppleMIDI messages from WiFi
-  AppleMIDI.run();
+  rtpMIDI_listen();
 
   // Listen to incoming ipMIDI messages from WiFi
   ipMIDI_listen();
 
   // Listen to incoming OSC UDP messages from WiFi
-  oscUPD_listen();
+  oscUDP_listen();
 
 #ifdef ARDUINO_ARCH_ESP8266
   // Run HTTP Updater
