@@ -160,7 +160,7 @@ unsigned long         bleLastOn        = 0;
 
 // WiFi MIDI interface to comunicate with AppleMIDI/RTP-MDI devices
 
-#if defined(ARDUINO_ARCH_ESP32) && !defined(NOWIFI)
+#ifndef NOWIFI
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, AppleMIDI); // see definition in AppleMidi_Defs.h
 #endif
 
@@ -1815,7 +1815,7 @@ void ipMIDI_listen() {
         velocity = data[1];
         MIDI.sendNoteOff(note, velocity, channel);
         BLESendNoteOff(note, velocity, channel);
-        AppleMIDI.noteOff(note, velocity, channel);
+        AppleMidiSendNoteOff(note, velocity, channel);
         OSCSendNoteOff(note, velocity, channel);
         break;
 
@@ -1825,7 +1825,7 @@ void ipMIDI_listen() {
         velocity = data[1];
         MIDI.sendNoteOn(note, velocity, channel);
         BLESendNoteOn(note, velocity, channel);
-        AppleMIDI.noteOn(note, velocity, channel);
+        AppleMidiSendNoteOn(note, velocity, channel);
         OSCSendNoteOn(note, velocity, channel);
         break;
 
@@ -1835,7 +1835,7 @@ void ipMIDI_listen() {
         pressure = data[1];
         MIDI.sendAfterTouch(note, pressure, channel);
         BLESendAfterTouchPoly(note, pressure, channel);
-        AppleMIDI.polyPressure(note, pressure, channel);
+        AppleMidiSendAfterTouchPoly(note, pressure, channel);
         OSCSendAfterTouchPoly(note, pressure, channel);
         break;
 
@@ -1845,7 +1845,7 @@ void ipMIDI_listen() {
         value   = data[1];
         MIDI.sendControlChange(number, value, channel);
         BLESendControlChange(number, value, channel);
-        AppleMIDI.controlChange(number, value, channel);
+        AppleMidiSendControlChange(number, value, channel);
         OSCSendControlChange(number, value, channel);
         break;
 
@@ -1854,7 +1854,7 @@ void ipMIDI_listen() {
         number  = data[0];
         MIDI.sendProgramChange(number, channel);
         BLESendProgramChange(number, channel);
-        AppleMIDI.programChange(number, channel);
+        AppleMidiSendProgramChange(number, channel);
         OSCSendProgramChange(number, channel);
         break;
 
@@ -1863,7 +1863,7 @@ void ipMIDI_listen() {
         pressure = data[0];
         MIDI.sendAfterTouch(pressure, channel);
         BLESendAfterTouch(pressure, channel);
-        AppleMIDI.afterTouch(pressure, channel);
+        AppleMidiSendAfterTouch(pressure, channel);
         OSCSendAfterTouch(pressure, channel);
         break;
 
@@ -1872,7 +1872,7 @@ void ipMIDI_listen() {
         bend = data[1] << 7 | data[0];
         MIDI.sendPitchBend(bend, channel);
         BLESendPitchBend(bend, channel);
-        AppleMIDI.pitchBend(bend, channel);
+        AppleMidiSendPitchBend(bend, channel);
         OSCSendPitchBend(bend, channel);
         break;
 
@@ -1888,7 +1888,7 @@ void ipMIDI_listen() {
             value = data[0];
             MIDI.sendTimeCodeQuarterFrame(value);
             BLESendTimeCodeQuarterFrame(value);
-            AppleMIDI.timeCodeQuarterFrame(value);
+            AppleMidiSendTimeCodeQuarterFrame(value);
             OSCSendTimeCodeQuarterFrame(value);
             break;
 
@@ -1897,7 +1897,7 @@ void ipMIDI_listen() {
             beats = data[1] << 7 | data[0];
             MIDI.sendSongPosition(beats);
             BLESendSongPosition(beats);
-            AppleMIDI.songPosition(beats);
+            AppleMidiSendSongPosition(beats);
             OSCSendSongPosition(beats);
             break;
 
@@ -1906,56 +1906,56 @@ void ipMIDI_listen() {
             number = data[0];
             MIDI.sendSongSelect(number);
             BLESendSongSelect(number);
-            AppleMIDI.songSelect(number);
+            AppleMidiSendSongSelect(number);
             OSCSendSongSelect(number);
             break;
 
           case midi::TuneRequest:
             MIDI.sendRealTime(midi::TuneRequest);
             BLESendTuneRequest();
-            AppleMIDI.tuneRequest();
+            AppleMidiSendTuneRequest();
             OSCSendTuneRequest();
             break;
 
           case midi::Clock:
             MIDI.sendRealTime(midi::Clock);
             BLESendClock();
-            AppleMIDI.clock();
+            AppleMidiSendClock();
             OSCSendClock();
             break;
 
           case midi::Start:
             MIDI.sendRealTime(midi::Start);
             BLESendStart();
-            AppleMIDI.start();
+            AppleMidiSendStart();
             OSCSendStart();
             break;
           
           case midi::Continue:
             MIDI.sendRealTime(midi::Continue);
             BLESendContinue();
-            AppleMIDI._continue();
+            AppleMidiSendContinue();
             OSCSendContinue();
             break;
 
           case midi::Stop:
             MIDI.sendRealTime(midi::Stop);
             BLESendStop();
-            AppleMIDI.stop();
+            AppleMidiSendStop();
             OSCSendStop();
             break;
 
           case midi::ActiveSensing:
-            MIDI.sendRealTime(midi::Stop);
-            BLESendStop();
-            AppleMIDI.stop();
-            OSCSendStop();
+            MIDI.sendRealTime(midi::ActiveSensing);
+            BLESendActiveSensing();
+            AppleMidiSendActiveSensing();
+            OSCSendActiveSensing();
             break;
 
           case midi::SystemReset:
             MIDI.sendRealTime(midi::SystemReset);
             BLESendSystemReset();
-            AppleMIDI.reset();
+            AppleMidiSendSystemReset();
             OSCSendSystemReset();
             break;
         }
