@@ -24,6 +24,7 @@
 #include <MIDI.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
+#define NOBLE
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -350,7 +351,6 @@ void printMIDI (const char *interface, const midi::MidiType type, const midi::Ch
   printMIDI(interface, status, data);
 }
 
-#ifdef ARDUINO_ARCH_ESP32
 #ifdef NOBLE
 #define BLEMidiReceive(...)
 #define BLESendNoteOn(...)
@@ -755,7 +755,6 @@ void BLESendSystemReset(void)
   BLESendRealTimeMessage(midi::SystemReset);
 }
 #endif  // NOBLE
-#endif  // ARDUINO_ARCH_ESP32
 
 
 #ifdef NOWIFI
