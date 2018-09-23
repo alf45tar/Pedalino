@@ -263,9 +263,11 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 #define  LCD_D5         5
 #define  LCD_D6         6
 #define  LCD_D7         7
-#define  LCD_BACKLIGHT  10    // PWM works only on 2-13, 44, 45, 46
+//#define  LCD_BACKLIGHT  10    // Backlight control issue on D10
+#define  LCD_BACKLIGHT  13      // PWM works only on 2-13, 44, 45, 46
 
-LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
+//LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
+LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 boolean       powersaver = false;
 byte          backlight  = 150;
 
