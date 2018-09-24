@@ -47,6 +47,7 @@ void screen_update(bool force = false) {
 
   static char screen1[LCD_COLS + 1];
   static char screen2[LCD_COLS + 1];
+  byte        f, p;
 
   if (!powersaver) {
     
@@ -100,14 +101,21 @@ void screen_update(bool force = false) {
     memset(buf, 0, sizeof(buf));
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);
     if (lastUsedPedal >= 0 && lastUsedPedal < PEDALS) {
-      strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
-      strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
+      //strncpy(&buf[strlen(buf)], &bar2[0], map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
+      //strncpy(&buf[strlen(buf)], "          ", 10 - map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 10));
+      f = map(pedals[lastUsedPedal].pedalValue[0], 0, MIDI_RESOLUTION - 1, 0, 50);
+      p = f % 5;
+      f = f / 5;
+      strncpy(&buf[strlen(buf)], &bar2[0], f);
     }
     if (force || strcmp(screen2, buf) != 0) {     // do not update if not changed
       memset(screen2, 0, sizeof(screen2));
       strncpy(screen2, buf, LCD_COLS);
       lcd.setCursor(0, 1);
       lcd.print(buf);
+      if (p > 0) lcd.write((byte)(p - 1));
+      for (byte i = 0; i < 10 - f ; i++)
+        lcd.print(" ");
       // replace unprintable chars
       for (byte i = 0; i < LCD_COLS; i++)
         buf[i] = (buf[i] == -1) ? '#' : buf[i];

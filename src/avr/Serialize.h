@@ -99,3 +99,17 @@ void serialize_interface() {
   Serial3.write(0xF7);
   Serial3.flush();
 }
+
+void serialize_wifi_credentials(const char *ssid, const char *password) {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["ssid"]      = ssid;
+  root["password"]  = password;
+  
+  Serial3.write(0xF0);
+  root.printTo(Serial3);
+  Serial3.write(0xF7);
+  Serial3.flush();
+}

@@ -60,6 +60,14 @@
 #define BLYNK_INTERFACE_MIDIROUTING V44
 #define BLYNK_INTERFACE_MIDICLOCK   V45
 
+#define BLYNK_SCANWIFI              V91
+#define BLYNK_SSID                  V92
+#define BLYNK_PASSWORD              V93
+#define BLYNK_WIFICONNECT           V94
+
+String ssid;
+String password;
+
 #define PRINT_VIRTUAL_PIN(vPin)     { DPRINTF("WRITE VirtualPIN "); DPRINT(vPin); }
 
 //ESP8266 wifi(&Serial1);
@@ -613,4 +621,23 @@ BLYNK_WRITE(BLYNK_INTERFACE_MIDICLOCK) {
   DPRINTF(" - MIDI Clock ");
   DPRINTLN(onoff);
   interfaces[currentInterface].midiClock = onoff;
+}
+
+BLYNK_WRITE(BLYNK_SSID) {
+  ssid = param.asStr();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - SSID     : ");
+  DPRINTLN(ssid.c_str());
+}
+
+BLYNK_WRITE(BLYNK_PASSWORD) {
+  password = param.asStr();
+  PRINT_VIRTUAL_PIN(request.pin);
+  DPRINTF(" - Password : ");
+  DPRINTLN(password.c_str());
+}
+
+BLYNK_WRITE(BLYNK_WIFICONNECT) {
+  serialize_wifi_credentials(ssid.c_str(), password.c_str());
+  Blynk.virtualWrite(BLYNK_WIFICONNECT, 0);
 }

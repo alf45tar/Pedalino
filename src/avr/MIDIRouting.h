@@ -97,7 +97,7 @@ void OnUsbMidiSystemExclusive(byte * array, unsigned size)
 {
   DIN_MIDI.sendSysEx(size, array);
   RTP_MIDI.sendSysEx(size, array);
-  MTC.decodeMTCFullFrame(size, array);
+  MTC.decodeMTCFullFrame(size, array);   
 }
 
 void OnUsbMidiTimeCodeQuarterFrame(byte data)
@@ -329,9 +329,50 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
 
 void OnAppleMidiReceiveSysEx(byte *data, unsigned int size)
 {
-  USB_MIDI.sendSysEx(size, data);
-  DIN_MIDI.sendSysEx(size, data);
-  MTC.decodeMTCFullFrame(size, data);
+  char json[size - 1];
+  byte decodedArray[size];
+  unsigned int decodedSize;
+
+  // Extract JSON string
+  memset(json, 0, size - 1);
+  memcpy(json, &data[1], size - 2);
+  DPRINT("JSON: ");
+  DPRINTLN(json);
+
+  // Memory pool for JSON object tree.
+  StaticJsonBuffer<200> jsonBuffer;
+
+  // Root of the object tree.
+  JsonObject& root = jsonBuffer.parseObject(json);
+
+  // Test if parsing succeeds.
+  if (root.success()) {
+    // Fetch values.
+    //   
+    if (root.containsKey("wifi.on")) {
+      
+    }
+    else if (root.containsKey("wifi.connected")) {
+       
+    }
+    else if (root.containsKey("wifi.disconnected")) {
+       
+    }
+    else if (root.containsKey("ble.on")) {
+      
+    }
+    else if (root.containsKey("ble.connected")) {
+      
+    }
+    else if (root.containsKey("ble.disconnected")) {
+      
+    }
+    else {
+      USB_MIDI.sendSysEx(size, data);
+      DIN_MIDI.sendSysEx(size, data);
+      MTC.decodeMTCFullFrame(size, data);
+    }
+  }
 }
 
 void OnAppleMidiReceiveTimeCodeQuarterFrame(byte data)

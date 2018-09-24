@@ -234,8 +234,22 @@ interface interfaces[INTERFACES] = { "USB", 1, 1, 0, 1, 0,
                                      "OSC", 1, 1, 0, 1, 0 };   // Interfaces Setup
 
 
-void printMIDI(const char *interface, midi::StatusByte status, const byte *data) {
-  
+void wifi_connect();
+
+void save_wifi_credentials(String ssid, String password)
+{
+#ifdef ARDUINO_ARCH_ESP32
+  int address = 32;
+  EEPROM.writeString(address, ssid);
+  address += ssid.length() + 1;
+  EEPROM.writeString(address, password);
+  EEPROM.commit();
+  DPRINTLN("WiFi credentials saved into EEPROM");
+#endif
+}
+
+void printMIDI(const char *interface, midi::StatusByte status, const byte *data)
+{
   midi::MidiType  type;
   midi::Channel   channel;
   byte            note, velocity, pressure, number, value;
@@ -1366,12 +1380,11 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
   // Test if parsing succeeds.
   if (root.success()) {
     // Fetch values.
-    //
+    //   
+#ifdef BLYNK
     const char *lcdclear = root["lcd.clear"];
     const char *lcd1     = root["lcd1"];
     const char *lcd2     = root["lcd2"];
-    const char *factory_default = root["factory.default"];
-#ifdef BLYNK
     if (lcdclear) blynkLCD.clear();
     if (lcd1) blynkLCD.print(0, 0, lcd1);
     if (lcd2) blynkLCD.print(0, 1, lcd2);
@@ -1407,19 +1420,17 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
         }
       EEPROM.commit();
     }
-    if (factory_default) {
-#ifdef ARDUINO_ARCH_ESP32
-      int address = 32;
-      EEPROM.writeString(address, "");
-      address += 1;
-      EEPROM.writeString(address, "");
-      EEPROM.commit();
+    else if (root.containsKey("ssid")) {
+       save_wifi_credentials(root["ssid"], root["password"]);
+       wifi_connect();
+    }
+    else if (root.containsKey("factory.default")) {
+      save_wifi_credentials("", "");
       DPRINTLN("EEPROM clear");
       DPRINTLN("ESP restart");
       delay(1000);
       ESP.restart();
-#endif
-}
+    }
     else {
       BLESendSystemExclusive(array, size);
       ipMIDISendSystemExclusive(array, size);
@@ -2295,14 +2306,7 @@ bool smart_config()
     DPRINTLN("SSID        : %s", WiFi.SSID().c_str());
     DPRINTLN("Password    : %s", WiFi.psk().c_str());
 
-#ifdef ARDUINO_ARCH_ESP32
-    int address = 32;
-    EEPROM.writeString(address, WiFi.SSID());
-    address += WiFi.SSID().length() + 1;
-    EEPROM.writeString(address, WiFi.psk());
-    EEPROM.commit();
-    DPRINTLN("AP saved into EEPROM");
-#endif
+    save_wifi_credentials(WiFi.SSID(), WiFi.psk());
   }
   else
     DPRINT("SmartConfig timeout");

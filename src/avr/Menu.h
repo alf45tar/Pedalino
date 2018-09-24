@@ -573,6 +573,12 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
   {
     case MD_Menu::DISP_INIT:
       lcd.begin(LCD_COLS, LCD_ROWS);
+      for (byte i = 0; i < 4; i++)
+        lcd.createChar(i, partial_bar[i]);
+      lcd.createChar(POWERPLUG, power_plug);
+      lcd.createChar(BATTERYLOW, battery_low);
+      lcd.createChar(WIFIICON, wifi_icon);
+      lcd.createChar(BLUETOOTHICON, bluetooth_icon);
       lcd.clear();
       lcd.noCursor();
       blynkLCD.clear();

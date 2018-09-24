@@ -346,5 +346,92 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
+#define POWERPLUG     (byte)4
+#define BATTERYLOW    (byte)5
+#define WIFIICON      (byte)6
+#define BLUETOOTHICON (byte)7
+
+byte partial_bar[4][8] = {
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+
+  B11000,
+  B11000,
+  B11000,
+  B11000,
+  B11000,
+  B11000,
+  B11000,
+  B11000,
+
+  B11100,
+  B11100,
+  B11100,
+  B11100,
+  B11100,
+  B11100,
+  B11100,
+  B11100,
+
+  B11110,
+  B11110,
+  B11110,
+  B11110,
+  B11110,
+  B11110,
+  B11110,
+  B11110
+};
+
+byte power_plug[] = {
+  B01010,
+  B01010,
+  B11111,
+  B10001,
+  B10001,
+  B01110,
+  B00100,
+  B00100
+};
+
+byte battery_low[] = {
+  B01110,
+  B11011,
+  B10001,
+  B10001,
+  B10001,
+  B10001,
+  B10001,
+  B11111
+};
+
+byte bluetooth_icon[] = {
+  B00100,
+  B10110,
+  B01101,
+  B00110,
+  B00110,
+  B01101,
+  B10110,
+  B00100
+};
+
+byte wifi_icon[] = {
+  B00001,
+  B00001,
+  B00011,
+  B00011,
+  B00111,
+  B01111,
+  B01111,
+  B11111
+};
+
 #endif // _PEDALINO_H
 
