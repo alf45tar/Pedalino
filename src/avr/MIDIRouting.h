@@ -40,14 +40,23 @@ void midi_routing()
     
   if (interfaces[PED_APPLEMIDI].midiIn)
     if (RTP_MIDI.read()) {
-      DPRINTF(" MIDI IN RTP -> STATUS ");
-      DPRINT(RTP_MIDI.getType());
-      DPRINTF(" DATA1 ");
-      DPRINT(RTP_MIDI.getData1());
-      DPRINTF(" DATA2 ");
-      DPRINT(RTP_MIDI.getData2());
-      DPRINTF(" CHANNEL ");
-      DPRINTLN(RTP_MIDI.getChannel());
+      if (RTP_MIDI.check())
+        if (RTP_MIDI.isChannelMessage(RTP_MIDI.getType())) {
+          DPRINTF(" MIDI IN RTP -> STATUS ");
+          DPRINT(RTP_MIDI.getType());
+          DPRINTF(" DATA1 ");
+          DPRINT(RTP_MIDI.getData1());
+          DPRINTF(" DATA2 ");
+          DPRINT(RTP_MIDI.getData2());
+          DPRINTF(" CHANNEL ");
+          DPRINTLN(RTP_MIDI.getChannel());
+        }
+        else {
+          switch (RTP_MIDI.getType()) {
+            case midi::SystemExclusive:
+              DPRINTLNF(" MIDI IN RTP -> SYSEXE ");  
+          }
+        }
     }
 }
 
@@ -330,13 +339,11 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
 void OnAppleMidiReceiveSysEx(byte *data, unsigned int size)
 {
   char json[size - 1];
-  byte decodedArray[size];
-  unsigned int decodedSize;
 
   // Extract JSON string
   memset(json, 0, size - 1);
-  memcpy(json, &data[1], size - 2);
-  DPRINT("JSON: ");
+  memcpy(json, &data[1], size - 2);   // discard first and last byte
+  DPRINTLN(size);
   DPRINTLN(json);
 
   // Memory pool for JSON object tree.
@@ -353,19 +360,13 @@ void OnAppleMidiReceiveSysEx(byte *data, unsigned int size)
       
     }
     else if (root.containsKey("wifi.connected")) {
-       
-    }
-    else if (root.containsKey("wifi.disconnected")) {
-       
+       wifiConnected = root["wifi.connected"];
     }
     else if (root.containsKey("ble.on")) {
-      
+
     }
     else if (root.containsKey("ble.connected")) {
-      
-    }
-    else if (root.containsKey("ble.disconnected")) {
-      
+      bleConnected = root["ble.connected"];
     }
     else {
       USB_MIDI.sendSysEx(size, data);

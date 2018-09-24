@@ -346,6 +346,11 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
+bool powerPlug     = false;
+bool batteryLow    = false;
+bool wifiConnected = false;
+bool bleConnected  = false;
+
 #define POWERPLUG     (byte)4
 #define BATTERYLOW    (byte)5
 #define WIFIICON      (byte)6
@@ -413,24 +418,24 @@ byte battery_low[] = {
 
 byte bluetooth_icon[] = {
   B00100,
-  B10110,
-  B01101,
   B00110,
+  B10101,
+  B01110,
+  B01110,
+  B10101,
   B00110,
-  B01101,
-  B10110,
   B00100
 };
 
 byte wifi_icon[] = {
   B00001,
   B00001,
-  B00011,
-  B00011,
-  B00111,
-  B01111,
-  B01111,
-  B11111
+  B00001,
+  B00101,
+  B00101,
+  B10101,
+  B10101,
+  B10101
 };
 
 #endif // _PEDALINO_H

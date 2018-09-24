@@ -47,6 +47,7 @@ void screen_update(bool force = false) {
 
   static char screen1[LCD_COLS + 1];
   static char screen2[LCD_COLS + 1];
+  static int  analog;
   byte        f, p;
 
   if (!powersaver) {
@@ -94,6 +95,11 @@ void screen_update(bool force = false) {
       strncpy(screen1, buf, LCD_COLS);
       lcd.setCursor(0, 0);
       lcd.print(buf);
+      lcd.setCursor(15, 0);
+      if (wifiConnected) lcd.write(WIFIICON);
+      if (bleConnected) lcd.write(BLUETOOTHICON);
+      if (powerPlug) lcd.write(POWERPLUG);
+      if (batteryLow) lcd.write(BATTERYLOW);
       blynkLCD.print(0, 0, buf);
     }
     
@@ -108,9 +114,10 @@ void screen_update(bool force = false) {
       f = f / 5;
       strncpy(&buf[strlen(buf)], &bar2[0], f);
     }
-    if (force || strcmp(screen2, buf) != 0) {     // do not update if not changed
+    if (force || strcmp(screen2, buf) != 0 || analog != pedals[lastUsedPedal].pedalValue[0]) {     // do not update if not changed
       memset(screen2, 0, sizeof(screen2));
       strncpy(screen2, buf, LCD_COLS);
+      analog = pedals[lastUsedPedal].pedalValue[0];
       lcd.setCursor(0, 1);
       lcd.print(buf);
       if (p > 0) lcd.write((byte)(p - 1));

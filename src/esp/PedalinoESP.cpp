@@ -391,11 +391,13 @@ void BLEMidiReceive(uint8_t *, uint8_t);
 class MyBLEServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       bleMidiConnected = true;
+      serialize_ble_status(true);
       DPRINT("BLE client connected");
     };
 
     void onDisconnect(BLEServer* pServer) {
       bleMidiConnected = false;
+      serialize_ble_status(false);
       DPRINT("BLE client disconnected");
     }
 };
@@ -1978,6 +1980,34 @@ void ipMIDI_listen() {
   }
 }
 
+
+void serialize_wifi_status(bool status) {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["wifi.connected"] = status;
+  
+  String jsonString;
+  root.printTo(jsonString);
+  DPRINTLN("%s", jsonString.c_str());
+  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+}
+
+void serialize_ble_status(bool status) {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["ble.connected"] = status;
+  
+  String jsonString;
+  root.printTo(jsonString);
+  DPRINTLN("%s", jsonString.c_str());
+  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+}
+
+
 #ifdef ARDUINO_ARCH_ESP32
 String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 
@@ -2173,6 +2203,8 @@ SYSTEM_EVENT_MAX
           DPRINTLN("Gataway IP  : %s", WiFi.gatewayIP().toString().c_str());
           DPRINTLN("DNS 1       : %s", WiFi.dnsIP(0).toString().c_str());
           DPRINTLN("DNS 2       : %s", WiFi.dnsIP(1).toString().c_str());
+          
+          serialize_wifi_status(true);
 
           // Start mDNS (Multicast DNS) responder (ping pedalino.local)
           if (MDNS.begin(host)) {
@@ -2208,14 +2240,16 @@ SYSTEM_EVENT_MAX
           DPRINTLN("SYSTEM_EVENT_STA_LOST_IP");
           MDNS.end();
           ipMIDI.stop();
-          oscUDP.stop();  
+          oscUDP.stop();
+          serialize_wifi_status(false);
           break;
 
         case SYSTEM_EVENT_STA_DISCONNECTED:
           DPRINTLN("SYSTEM_EVENT_STA_DISCONNECTED");
           MDNS.end();
           ipMIDI.stop();
-          oscUDP.stop();   
+          oscUDP.stop();
+          serialize_wifi_status(false);
           break;
         
         case SYSTEM_EVENT_AP_START:
@@ -2602,6 +2636,9 @@ void setup()
   serial_midi_connect();
   DPRINTLN("Serial MIDI started");
 
+  serialize_wifi_status(false);
+  serialize_ble_status(false);
+  
   pinMode(WIFI_LED, OUTPUT);
 
 #ifdef ARDUINO_ARCH_ESP32
