@@ -142,7 +142,6 @@ ESP8266WebServer        httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 #endif
 
-
 // Bluetooth LE MIDI interface
 
 #if defined(ARDUINO_ARCH_ESP32) && !defined(NOBLE)
@@ -235,6 +234,32 @@ interface interfaces[INTERFACES] = { "USB", 1, 1, 0, 1, 0,
 
 
 void wifi_connect();
+
+void serialize_wifi_status(bool status) {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["wifi.connected"] = status;
+  
+  String jsonString;
+  root.printTo(jsonString);
+  DPRINTLN("%s", jsonString.c_str());
+  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+}
+
+void serialize_ble_status(bool status) {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["ble.connected"] = status;
+  
+  String jsonString;
+  root.printTo(jsonString);
+  DPRINTLN("%s", jsonString.c_str());
+  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+}
 
 void save_wifi_credentials(String ssid, String password)
 {
@@ -1978,33 +2003,6 @@ void ipMIDI_listen() {
     }
     DPRINTMIDI(ipMIDI.remoteIP().toString().c_str(), status, data);
   }
-}
-
-
-void serialize_wifi_status(bool status) {
-
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-
-  root["wifi.connected"] = status;
-  
-  String jsonString;
-  root.printTo(jsonString);
-  DPRINTLN("%s", jsonString.c_str());
-  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
-}
-
-void serialize_ble_status(bool status) {
-
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-
-  root["ble.connected"] = status;
-  
-  String jsonString;
-  root.printTo(jsonString);
-  DPRINTLN("%s", jsonString.c_str());
-  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
 }
 
 
