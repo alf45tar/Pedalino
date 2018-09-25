@@ -338,12 +338,11 @@ void OnAppleMidiReceivePitchBend(byte channel, int bend)
 
 void OnAppleMidiReceiveSysEx(byte *data, unsigned int size)
 {
-  char json[size - 1];
+  char json[size];
 
   // Extract JSON string
-  memset(json, 0, size - 1);
+  memset(json, 0, size);
   memcpy(json, &data[1], size - 2);   // discard first and last byte
-  DPRINTLN(size);
   DPRINTLN(json);
 
   // Memory pool for JSON object tree.

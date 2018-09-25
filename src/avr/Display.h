@@ -60,16 +60,16 @@ void screen_update(bool force = false) {
       switch (m1) {
         case midi::NoteOn:
         case midi::NoteOff:
-          sprintf(&buf[strlen(buf)], "Note%3d/%3d Ch%2d", m2, m3, m4);
+          sprintf(&buf[strlen(buf)], "Note %3d Ch%2d", m2, m4);
           break;
         case midi::ControlChange:
-          sprintf(&buf[strlen(buf)], "CC %3d/%3d Ch %2d", m2, m3, m4);
+          sprintf(&buf[strlen(buf)], "CC%3d/%3dCh%2d", m2, m3, m4);
           break;
         case midi::ProgramChange:
-          sprintf(&buf[strlen(buf)], "PC %3d     Ch %2d", m2, m4);
+          sprintf(&buf[strlen(buf)], "PC%3d    Ch%2d", m2, m4);
           break;
         case midi::PitchBend:
-          sprintf(&buf[strlen(buf)], "PiBend %3d Ch %2d", m2, m4);
+          sprintf(&buf[strlen(buf)], "Pitch%3d Ch%2d", m2, m4);
           break;
       }
     }
@@ -82,7 +82,7 @@ void screen_update(bool force = false) {
           buf[6 + i] = (MTC.getBeat() == i) ? '.' : ' ';
     }
     else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroMTCSlave) {
-      sprintf(&buf[strlen(buf)], "MTC  %02d:%02d:%02d:%02d", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());
+      sprintf(&buf[strlen(buf)], "%02d:%02d:%02d:%02d    ", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());
     }
     else {
       for (byte i = 0; i < LCD_COLS; i++) {
@@ -95,13 +95,15 @@ void screen_update(bool force = false) {
       strncpy(screen1, buf, LCD_COLS);
       lcd.setCursor(0, 0);
       lcd.print(buf);
-      lcd.setCursor(15, 0);
-      if (wifiConnected) lcd.write(WIFIICON);
-      if (bleConnected) lcd.write(BLUETOOTHICON);
-      if (powerPlug) lcd.write(POWERPLUG);
-      if (batteryLow) lcd.write(BATTERYLOW);
       blynkLCD.print(0, 0, buf);
     }
+    lcd.setCursor(13, 0);
+    if (bleConnected || true) lcd.write(BLUETOOTHICON);
+    lcd.setCursor(14, 0);
+    if (wifiConnected) lcd.write(WIFIICON);
+    lcd.setCursor(15, 0);
+    if (powerPlug || true) lcd.write(POWERPLUG);
+    if (batteryLow) lcd.write(BATTERYLOW);
     
     // Line 2
     memset(buf, 0, sizeof(buf));

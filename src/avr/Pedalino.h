@@ -435,7 +435,7 @@ byte wifi_icon[] = {
   B00101,
   B10101,
   B10101,
-  B10101
+  B00000
 };
 
 #endif // _PEDALINO_H

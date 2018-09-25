@@ -237,7 +237,7 @@ void wifi_connect();
 
 void serialize_wifi_status(bool status) {
 
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<100> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
   root["wifi.connected"] = status;
@@ -250,15 +250,15 @@ void serialize_wifi_status(bool status) {
 
 void serialize_ble_status(bool status) {
 
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<100> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
   root["ble.connected"] = status;
   
-  String jsonString;
+  char jsonString[50];
   root.printTo(jsonString);
-  DPRINTLN("%s", jsonString.c_str());
-  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+  DPRINTLN("%s", jsonString);
+  MIDI.sendSysEx(strlen(jsonString), (byte *)jsonString);
 }
 
 void save_wifi_credentials(String ssid, String password)
@@ -1454,6 +1454,8 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     else if (root.containsKey("factory.default")) {
       save_wifi_credentials("", "");
       DPRINTLN("EEPROM clear");
+      serialize_wifi_status(false);
+      serialize_ble_status(false);
       DPRINTLN("ESP restart");
       delay(1000);
       ESP.restart();
