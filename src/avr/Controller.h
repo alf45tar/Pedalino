@@ -151,11 +151,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOn(code, value, channel);
 #endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOn(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut     ||
-            interfaces[PED_IPMIDI].midiOut        ||
-            interfaces[PED_BLUETOOTHMIDI].midiOut ||
-            interfaces[PED_OSC].midiOut)        RTP_MIDI.sendNoteOn(code, value, channel);
+        if (interfaces[PED_DINMIDI].midiOut)    DIN_MIDI.sendNoteOn(code, value, channel);
+        if (interfaces[PED_RTPMIDI].midiOut ||
+            interfaces[PED_IPMIDI].midiOut  ||
+            interfaces[PED_BLEMIDI].midiOut ||
+            interfaces[PED_OSC].midiOut)        ESP_MIDI.sendNoteOn(code, value, channel);
         screen_info(midi::NoteOn, code, value, channel);
       }
       else {
@@ -169,11 +169,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendNoteOff(code, value, channel);
 #endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendNoteOff(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut     ||
-            interfaces[PED_IPMIDI].midiOut        ||
-            interfaces[PED_BLUETOOTHMIDI].midiOut ||
-            interfaces[PED_OSC].midiOut)        RTP_MIDI.sendNoteOff(code, value, channel);
+        if (interfaces[PED_DINMIDI].midiOut)    DIN_MIDI.sendNoteOff(code, value, channel);
+        if (interfaces[PED_RTPMIDI].midiOut ||
+            interfaces[PED_IPMIDI].midiOut  ||
+            interfaces[PED_BLEMIDI].midiOut ||
+            interfaces[PED_OSC].midiOut)        ESP_MIDI.sendNoteOff(code, value, channel);
         screen_info(midi::NoteOff, code, value, channel);
       }
       break;
@@ -191,11 +191,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendControlChange(code, value, channel);
 #endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendControlChange(code, value, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut     ||
-            interfaces[PED_IPMIDI].midiOut        ||
-            interfaces[PED_BLUETOOTHMIDI].midiOut ||
-            interfaces[PED_OSC].midiOut)        RTP_MIDI.sendControlChange(code, value, channel);
+        if (interfaces[PED_DINMIDI].midiOut)    DIN_MIDI.sendControlChange(code, value, channel);
+        if (interfaces[PED_RTPMIDI].midiOut ||
+            interfaces[PED_IPMIDI].midiOut  ||
+            interfaces[PED_BLEMIDI].midiOut ||
+            interfaces[PED_OSC].midiOut)        ESP_MIDI.sendControlChange(code, value, channel);
         screen_info(midi::ControlChange, code, value, channel);
       }
       break;
@@ -211,11 +211,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendProgramChange(code, channel);
 #endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendProgramChange(code, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut     ||
-            interfaces[PED_IPMIDI].midiOut        ||
-            interfaces[PED_BLUETOOTHMIDI].midiOut ||
-            interfaces[PED_OSC].midiOut)        RTP_MIDI.sendProgramChange(code, channel);
+        if (interfaces[PED_DINMIDI].midiOut)    DIN_MIDI.sendProgramChange(code, channel);
+        if (interfaces[PED_RTPMIDI].midiOut ||
+            interfaces[PED_IPMIDI].midiOut  ||
+            interfaces[PED_BLEMIDI].midiOut ||
+            interfaces[PED_OSC].midiOut)        ESP_MIDI.sendProgramChange(code, channel);
         screen_info(midi::ProgramChange, code, 0, channel);
       }
       break;
@@ -232,11 +232,11 @@ void midi_send(byte message, byte code, byte value, byte channel, bool on_off = 
 #else
         if (interfaces[PED_USBMIDI].midiOut)    USB_MIDI.sendPitchBend(bend, channel);
 #endif
-        if (interfaces[PED_LEGACYMIDI].midiOut) DIN_MIDI.sendPitchBend(bend, channel);
-        if (interfaces[PED_APPLEMIDI].midiOut     ||
-            interfaces[PED_IPMIDI].midiOut        ||
-            interfaces[PED_BLUETOOTHMIDI].midiOut ||
-            interfaces[PED_OSC].midiOut)        RTP_MIDI.sendPitchBend(bend, channel);
+        if (interfaces[PED_DINMIDI].midiOut)    DIN_MIDI.sendPitchBend(bend, channel);
+        if (interfaces[PED_RTPMIDI].midiOut ||
+            interfaces[PED_IPMIDI].midiOut  ||
+            interfaces[PED_BLEMIDI].midiOut ||
+            interfaces[PED_OSC].midiOut)        ESP_MIDI.sendPitchBend(bend, channel);
         screen_info(midi::PitchBend, bend, 0, channel);
       }
       break;
@@ -527,16 +527,16 @@ void controller_setup()
     case PED_USBMIDI:
       DPRINTLNF("USB");
       break;
-    case PED_LEGACYMIDI:
-      DPRINTLNF("Legacy MIDI");
+    case PED_DINMIDI:
+      DPRINTLNF("DIN MIDI");
       break;
-    case PED_APPLEMIDI:
-      DPRINTLNF("AppleMIDI");
+    case PED_RTPMIDI:
+      DPRINTLNF("RTP-MIDI");
       break;
     case PED_IPMIDI:
       DPRINTLNF("ipMIDI");
       break;
-    case PED_BLUETOOTHMIDI:
+    case PED_BLEMIDI:
       DPRINTLNF("Bluetooth");
       break;
   }
@@ -748,10 +748,14 @@ void controller_setup()
         }
         else
         {
+          /*
           pedals[i].footSwitch[0]->setDoublePressTime(300);
           pedals[i].footSwitch[0]->setLongPressTime(500);
           pedals[i].footSwitch[0]->setRepeatTime(500);
           pedals[i].footSwitch[0]->enableRepeatResult(true);
+          */
+          pedals[i].footSwitch[0]->enableDoublePress(false);
+          pedals[i].footSwitch[0]->enableLongPress(false);
         }
         break;
 
@@ -760,7 +764,7 @@ void controller_setup()
     }
     DPRINTLNF("");
   }
-  for (byte i = 0; i < 10; i++)
+  for (byte i = 0; i < 100; i++)
     midi_refresh(false);            // to avoid spurious readings
 }
 

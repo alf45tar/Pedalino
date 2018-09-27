@@ -349,8 +349,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       else {
         interfaces[currentInterface].midiThru = vBuf.value;
         interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
-        interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
-        interfaces[PED_APPLEMIDI].midiThru  ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
+        interfaces[PED_DINMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
+        interfaces[PED_RTPMIDI].midiThru  ? ESP_MIDI.turnThruOn() : ESP_MIDI.turnThruOff();
         serialize_interface();
       }
       break;
@@ -600,16 +600,16 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
           case PED_USBMIDI:
             strcpy(line, "USB MIDI");
             break;
-          case PED_LEGACYMIDI:
+          case PED_DINMIDI:
             strcpy(line, "Legacy MIDI");
             break;
-          case PED_APPLEMIDI:
+          case PED_RTPMIDI:
             strcpy(line, "AppleMIDI");
             break;
           case PED_IPMIDI:
             strcpy(line, "ipMIDI");
             break;
-          case PED_BLUETOOTHMIDI:
+          case PED_BLEMIDI:
             strcpy(line, "Bluetooth MIDI");
             break;
           case PED_OSC:

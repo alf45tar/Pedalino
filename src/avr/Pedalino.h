@@ -96,10 +96,10 @@
 #define PED_ANTILOG         2
 
 #define PED_USBMIDI         0
-#define PED_LEGACYMIDI      1
-#define PED_APPLEMIDI       2   // also known as RTP-MIDI protocol
+#define PED_DINMIDI         1
+#define PED_RTPMIDI         2
 #define PED_IPMIDI          3
-#define PED_BLUETOOTHMIDI   4
+#define PED_BLEMIDI         4
 #define PED_OSC             5
 
 #define PED_DISABLE         0
@@ -211,14 +211,14 @@ struct USBSerialMIDISettings : public midi::DefaultSettings
   static const long BaudRate = 1000000;
 };
 
-struct RTPSerialMIDISettings : public midi::DefaultSettings
+struct ESPSerialMIDISettings : public midi::DefaultSettings
 {
   static const long BaudRate = 115200;
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISettings);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, RTP_MIDI, RTPSerialMIDISettings);
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, ESP_MIDI, ESPSerialMIDISettings);
 
 
 // The keys value that works for most LCD Keypad Shield

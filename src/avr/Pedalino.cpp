@@ -62,9 +62,9 @@ void setup(void)
   interfaces[PED_USBMIDI].midiThru ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
 #endif
   DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
-  interfaces[PED_LEGACYMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
-  RTP_MIDI.begin(MIDI_CHANNEL_OMNI);
-  interfaces[PED_APPLEMIDI].midiThru ? RTP_MIDI.turnThruOn() : RTP_MIDI.turnThruOff();
+  interfaces[PED_DINMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
+  ESP_MIDI.begin(MIDI_CHANNEL_OMNI);
+  ESP_MIDI.turnThruOff();
 
   autosensing_setup();
   controller_setup();
