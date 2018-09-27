@@ -1,5 +1,5 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._<br>
-_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives._
+_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
@@ -7,17 +7,17 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 
 Smart wireless MIDI foot controller for guitarists and more.
 
+- Plug-and-play with any MIDI-compatible app on iOS 8 and above as well as OS X Yosemite and above.
 - High customizable using iOS or Android app
-- Multi purpose
-- Battery operated
 - 4 MIDI interface (USB, Bluetooth, WiFi, legacy DIN MIDI IN and MIDI OUT connectors)
 - No extra drivers to connect Windows, macOS, iOS (iPad/iPhone) and Android
 - USB MIDI class-compliant device
-- Bluetooth LE MIDI (iOS compatible)
+- Bluetooth LE MIDI (iOS and macOS compatible)
 - Network MIDI (aka AppleMIDI or RTP-MIDI)
 - ipMIDI
 - Open Sound Control (OSC)
 - IEEE 802.11 b/g/n Wi-Fi 2.4 GHZ with WPA/WPA2 authentication
+- Bluetooth Low Energy 4.0
 - MIDI routing from/to any interface (USB, Bluetooth, WiFi, legacy)
 - MIDI clock master and slave
 - MIDI Time Code (MTC) master and slave
