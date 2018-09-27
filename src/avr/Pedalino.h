@@ -213,24 +213,12 @@ struct USBSerialMIDISettings : public midi::DefaultSettings
 
 struct ESPSerialMIDISettings : public midi::DefaultSettings
 {
-  static const long BaudRate = 115200;
+  static const long BaudRate = 1000000;
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISettings);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, ESP_MIDI, ESPSerialMIDISettings);
-
-
-// The keys value that works for most LCD Keypad Shield
-
-MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
-{
-  {  10, 10, 'R' },  // Right
-  { 130, 15, 'U' },  // Up
-  { 305, 15, 'D' },  // Down
-  { 475, 15, 'L' },  // Left
-  { 720, 15, 'S' },  // Select
-};
 
 
 // LCD display definitions
@@ -268,8 +256,20 @@ MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
 
 //LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
-boolean       powersaver = false;
+
+bool          powersaver = false;
 byte          backlight  = 150;
+
+// The keys value that works for most LCD Keypad Shield
+
+MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
+{
+  {  10, 10, 'R' },  // Right
+  { 130, 15, 'U' },  // Up
+  { 305, 15, 'D' },  // Down
+  { 475, 15, 'L' },  // Left
+  { 720, 15, 'S' },  // Select
+};
 
 // IR Remote receiver
 

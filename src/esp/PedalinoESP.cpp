@@ -169,7 +169,7 @@ unsigned long wifiLastOn         = 0;
 
 // Serial MIDI interface to comunicate with Arduino
 
-#define SERIALMIDI_BAUD_RATE  115200
+#define SERIALMIDI_BAUD_RATE  1000000
 
 struct SerialMIDISettings : public midi::DefaultSettings
 {
@@ -177,15 +177,16 @@ struct SerialMIDISettings : public midi::DefaultSettings
 };
 
 #ifdef ARDUINO_ARCH_ESP8266
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, SerialMIDISettings);
+#define SerialMIDI            Serial
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
 #define SERIALMIDI_RX         16
 #define SERIALMIDI_TX         17
 HardwareSerial                SerialMIDI(2);
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SerialMIDI, MIDI, SerialMIDISettings);
 #endif
+
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, SerialMIDI, MIDI, SerialMIDISettings);
 
 // ipMIDI
 
@@ -234,6 +235,19 @@ interface interfaces[INTERFACES] = { "USB", 1, 1, 0, 1, 0,
 
 
 void wifi_connect();
+
+void serialize_on() {
+
+  StaticJsonBuffer<100> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  root["on"] = true;
+  
+  String jsonString;
+  root.printTo(jsonString);
+  DPRINTLN("%s", jsonString.c_str());
+  MIDI.sendSysEx(jsonString.length(), (byte *)(jsonString.c_str()));
+}
 
 void serialize_wifi_status(bool status) {
 
@@ -376,6 +390,9 @@ void printMIDI(const char *interface, midi::StatusByte status, const byte *data)
             break;
         }
         break;
+      
+      default:
+        break;
     }
 }
 
@@ -384,7 +401,7 @@ void printMIDI (const char *interface, const midi::MidiType type, const midi::Ch
   midi::StatusByte  status;
   byte              data[2];
 
-  status = type | (channel - 1) & 0x0f;
+  status = type | ((channel - 1) & 0x0f);
   data[0] = data1;
   data[1] = data2;
   printMIDI(interface, status, data);
@@ -1382,8 +1399,8 @@ void OnSerialMidiPitchBend(byte channel, int bend)
 void OnSerialMidiSystemExclusive(byte* array, unsigned size)
 {
   char json[size - 1];
-  byte decodedArray[size];
-  unsigned int decodedSize;
+  //byte decodedArray[size];
+  //unsigned int decodedSize;
 
   //decodedSize = midi::decodeSysEx(array, decodedArray, size);
 
@@ -1827,7 +1844,6 @@ inline void rtpMIDI_listen() {
 
 void ipMIDI_listen() {
   
-  int  packetSize;
   byte status, type, channel;
   byte data[2];
   byte note, velocity, pressure, number, value;
@@ -1838,7 +1854,7 @@ void ipMIDI_listen() {
 
   if (!WiFi.isConnected()) return;
 
-  packetSize = ipMIDI.parsePacket();
+  ipMIDI.parsePacket();
 
   while (ipMIDI.available() > 0) {
     
@@ -2632,10 +2648,17 @@ void setup()
     DPRINTLN("Password : %s", password.c_str());
 #endif
 
-  // On receiving MIDI data callbacks setup
-  serial_midi_connect();
+#ifdef ARDUINO_ARCH_ESP8266
+  SerialMIDI.begin(SERIALMIDI_BAUD_RATE);
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+  SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
+#endif
+
+  serial_midi_connect();              // On receiving MIDI data callbacks setup
   DPRINTLN("Serial MIDI started");
 
+  serialize_on();
   serialize_wifi_status(false);
   serialize_ble_status(false);
   
@@ -2643,7 +2666,6 @@ void setup()
 
 #ifdef ARDUINO_ARCH_ESP32
   pinMode(BLE_LED, OUTPUT);
-  SerialMIDI.begin(SERIALMIDI_BAUD_RATE, SERIAL_8N1, SERIALMIDI_RX, SERIALMIDI_TX);
 #endif
 
 #ifndef NOBLE

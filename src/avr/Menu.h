@@ -131,9 +131,9 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 80, "Load Profile",    MD_Menu::MNU_INPUT, II_PROFILE_LOAD },
   { 81, "Copy To Profile", MD_Menu::MNU_INPUT, II_PROFILE_COPY },
   // Options
-  { 90, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
-  { 91, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
-  { 92, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
+  { 90, "IR RC Learn",     MD_Menu::MNU_INPUT, II_IRLEARN },
+  { 91, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
+//  { 92, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
   { 93, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
   { 94, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
@@ -348,9 +348,9 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
       if (bGet) vBuf.value = interfaces[currentInterface].midiThru;
       else {
         interfaces[currentInterface].midiThru = vBuf.value;
-        interfaces[PED_USBMIDI].midiThru    ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
+        interfaces[PED_USBMIDI].midiThru ? USB_MIDI.turnThruOn() : USB_MIDI.turnThruOff();
         interfaces[PED_DINMIDI].midiThru ? DIN_MIDI.turnThruOn() : DIN_MIDI.turnThruOff();
-        interfaces[PED_RTPMIDI].midiThru  ? ESP_MIDI.turnThruOn() : ESP_MIDI.turnThruOff();
+        interfaces[PED_RTPMIDI].midiThru ? ESP_MIDI.turnThruOn() : ESP_MIDI.turnThruOff();
         serialize_interface();
       }
       break;
