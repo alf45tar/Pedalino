@@ -1,5 +1,5 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._<br>
-_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives._
+_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 
