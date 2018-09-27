@@ -169,7 +169,7 @@ unsigned long wifiLastOn         = 0;
 
 // Serial MIDI interface to comunicate with Arduino
 
-#define SERIALMIDI_BAUD_RATE  1000000
+#define SERIALMIDI_BAUD_RATE  115200
 
 struct SerialMIDISettings : public midi::DefaultSettings
 {
@@ -1466,7 +1466,9 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     }
     else if (root.containsKey("ssid")) {
        save_wifi_credentials(root["ssid"], root["password"]);
+#ifndef NOWIFI
        wifi_connect();
+#endif
     }
     else if (root.containsKey("factory.default")) {
       save_wifi_credentials("", "");

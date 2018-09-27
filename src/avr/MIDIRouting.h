@@ -51,13 +51,13 @@ void midi_routing()
           DPRINTF(" CHANNEL ");
           DPRINTLN(ESP_MIDI.getChannel());
         }
-        else if (ESP_MIDI.getType() == midi::SystemExclusive)
-          DPRINTLNF(" MIDI IN RTP -> SYSEXE ");
+        //else if (ESP_MIDI.getType() == midi::SystemExclusive)
+        //  DPRINTLNF(" MIDI IN RTP -> SYSEXE ");
       }
     }
 }
 
-bool EspMidiRouting ()
+bool EspMidiRouting()
 {
   return (interfaces[PED_RTPMIDI].midiRouting || interfaces[PED_IPMIDI].midiRouting || interfaces[PED_BLEMIDI].midiRouting || interfaces[PED_OSC].midiRouting);
 }
@@ -338,48 +338,6 @@ void OnEspMidiReceivePitchBend(byte channel, int bend)
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendPitchBend(bend, channel);
 }
 
-void OnEspMidiReceiveSysEx(byte *data, unsigned int size)
-{
-  char json[size];
-
-  // Extract JSON string
-  memset(json, 0, size);
-  memcpy(json, &data[1], size - 2);   // discard first and last byte
-  DPRINTLN(json);
-
-  // Memory pool for JSON object tree.
-  StaticJsonBuffer<200> jsonBuffer;
-
-  // Root of the object tree.
-  JsonObject& root = jsonBuffer.parseObject(json);
-
-  // Test if parsing succeeds.
-  if (root.success()) {
-    // Fetch values.
-    //   
-    if (root.containsKey("on")) {
-
-    }
-    else if (root.containsKey("wifi.on")) {
-      
-    }
-    else if (root.containsKey("wifi.connected")) {
-       wifiConnected = root["wifi.connected"];
-    }
-    else if (root.containsKey("ble.on")) {
-
-    }
-    else if (root.containsKey("ble.connected")) {
-      bleConnected = root["ble.connected"];
-    }
-    else {
-      if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendSysEx(size, data);
-      if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendSysEx(size, data);
-      MTC.decodeMTCFullFrame(size, data);
-    }
-  }
-}
-
 void OnEspMidiReceiveTimeCodeQuarterFrame(byte data)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendTimeCodeQuarterFrame(data);
@@ -444,6 +402,49 @@ void OnEspMidiReceiveReset(void)
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::SystemReset);
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::SystemReset);
 }
+
+void OnEspMidiReceiveSysEx(byte *data, unsigned int size)
+{
+  char json[size - 1];
+
+  // Extract JSON string
+  memset(json, 0, size - 1);
+  memcpy(json, &data[1], size - 2);   // discard first and last byte
+  DPRINTLN(json);
+
+  // Memory pool for JSON object tree.
+  StaticJsonBuffer<200> jsonBuffer;
+
+  // Root of the object tree.
+  JsonObject& root = jsonBuffer.parseObject(json);
+
+  // Test if parsing succeeds.
+  if (root.success()) {
+    // Fetch values.
+    //   
+    if (root.containsKey("on")) {
+
+    }
+    else if (root.containsKey("wifi.on")) {
+      
+    }
+    else if (root.containsKey("wifi.connected")) {
+       wifiConnected = root["wifi.connected"];
+    }
+    else if (root.containsKey("ble.on")) {
+
+    }
+    else if (root.containsKey("ble.connected")) {
+      bleConnected = root["ble.connected"];
+    }
+    else {
+      if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendSysEx(size, data);
+      if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendSysEx(size, data);
+      MTC.decodeMTCFullFrame(size, data);
+    }
+  }
+}
+
 
 void midi_routing_start()
 {

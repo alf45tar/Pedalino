@@ -98,7 +98,7 @@ void screen_update(bool force = false) {
       blynkLCD.print(0, 0, buf);
     }
     lcd.setCursor(13, 0);
-    if (bleConnected || true) lcd.write(BLUETOOTHICON);
+    if (bleConnected) lcd.write(BLUETOOTHICON);
     lcd.setCursor(14, 0);
     if (wifiConnected) lcd.write(WIFIICON);
     lcd.setCursor(15, 0);

@@ -213,7 +213,7 @@ struct USBSerialMIDISettings : public midi::DefaultSettings
 
 struct ESPSerialMIDISettings : public midi::DefaultSettings
 {
-  static const long BaudRate = 1000000;
+  static const long BaudRate = 115200;
 };
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISettings);
