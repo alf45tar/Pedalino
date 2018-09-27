@@ -319,11 +319,12 @@ void midi_refresh(bool send = true)
                   DPRINT(value);
 
                   b = currentBank;
-                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                  if (value == LOW) {                                                     // LOW = pressed, HIGH = released
                     if (send) midi_send(banks[b][i].midiMessage,
                                         banks[b][i].midiCode,
                                         banks[b][i].midiValue1,
                                         banks[b][i].midiChannel);
+                  }
                   else
                     if (send) midi_send(banks[b][i].midiMessage,
                                         banks[b][i].midiCode,
@@ -349,11 +350,12 @@ void midi_refresh(bool send = true)
                   DPRINT(value);
 
                   b = (currentBank + 1) % BANKS;
-                  if (value == LOW)                                                         // LOW = pressed, HIGH = released
+                  if (value == LOW) {                                                      // LOW = pressed, HIGH = released
                     if (send) midi_send(banks[b][i].midiMessage,
                                         banks[b][i].midiCode,
                                         banks[b][i].midiValue1,
                                         banks[b][i].midiChannel);
+                  }
                   else
                     if (send) midi_send(banks[b][i].midiMessage,
                                         banks[b][i].midiCode,

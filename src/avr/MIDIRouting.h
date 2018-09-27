@@ -40,7 +40,7 @@ void midi_routing()
     
   if (interfaces[PED_RTPMIDI].midiIn)
     if (ESP_MIDI.read()) {
-      if (ESP_MIDI.check())
+      if (ESP_MIDI.check()) {
         if (ESP_MIDI.isChannelMessage(ESP_MIDI.getType())) {
           DPRINTF(" MIDI IN RTP -> STATUS ");
           DPRINT(ESP_MIDI.getType());
@@ -51,12 +51,9 @@ void midi_routing()
           DPRINTF(" CHANNEL ");
           DPRINTLN(ESP_MIDI.getChannel());
         }
-        else {
-          switch (ESP_MIDI.getType()) {
-            case midi::SystemExclusive:
-              DPRINTLNF(" MIDI IN RTP -> SYSEXE ");  
-          }
-        }
+        else if (ESP_MIDI.getType() == midi::SystemExclusive)
+          DPRINTLNF(" MIDI IN RTP -> SYSEXE ");
+      }
     }
 }
 
@@ -68,115 +65,115 @@ bool EspMidiRouting ()
 void OnUsbMidiNoteOn(byte channel, byte note, byte velocity)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendNoteOn(note, velocity, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendNoteOn(note, velocity, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendNoteOn(note, velocity, channel);
 }
 
 void OnUsbMidiNoteOff(byte channel, byte note, byte velocity)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendNoteOff(note, velocity, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendNoteOff(note, velocity, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendNoteOff(note, velocity, channel);
 }
 
 void OnUsbMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendAfterTouch(note, pressure, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendAfterTouch(note, pressure, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendAfterTouch(note, pressure, channel);
 }
 
 void OnUsbMidiControlChange(byte channel, byte number, byte value)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendControlChange(number, value, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendControlChange(number, value, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendControlChange(number, value, channel);
 }
 
 void OnUsbMidiProgramChange(byte channel, byte number)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendProgramChange(number, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendProgramChange(number, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendProgramChange(number, channel);
 }
 
 void OnUsbMidiAfterTouchChannel(byte channel, byte pressure)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendAfterTouch(pressure, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendAfterTouch(pressure, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendAfterTouch(pressure, channel);
 }
 
 void OnUsbMidiPitchBend(byte channel, int bend)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendPitchBend(bend, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendPitchBend(bend, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendPitchBend(bend, channel);
 }
 
 void OnUsbMidiSystemExclusive(byte * array, unsigned size)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendSysEx(size, array);
-  if (EspMidiRouting)                      ESP_MIDI.sendSysEx(size, array);
+  if (EspMidiRouting())                    ESP_MIDI.sendSysEx(size, array);
   MTC.decodeMTCFullFrame(size, array);   
 }
 
 void OnUsbMidiTimeCodeQuarterFrame(byte data)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendTimeCodeQuarterFrame(data);
-  if (EspMidiRouting)                      ESP_MIDI.sendTimeCodeQuarterFrame(data);
+  if (EspMidiRouting())                    ESP_MIDI.sendTimeCodeQuarterFrame(data);
   MTC.decodMTCQuarterFrame(data);
 }
 
 void OnUsbMidiSongPosition(unsigned int beats)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendSongPosition(beats);
-  if (EspMidiRouting)                      ESP_MIDI.sendSongPosition(beats);
+  if (EspMidiRouting())                    ESP_MIDI.sendSongPosition(beats);
 }
 
 void OnUsbMidiSongSelect(byte songnumber)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendSongSelect(songnumber);
-  if (EspMidiRouting)                      ESP_MIDI.sendSongSelect(songnumber);
+  if (EspMidiRouting())                    ESP_MIDI.sendSongSelect(songnumber);
 }
 
 void OnUsbMidiTuneRequest(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendTuneRequest();
-  if (EspMidiRouting)                      ESP_MIDI.sendTuneRequest();
+  if (EspMidiRouting())                    ESP_MIDI.sendTuneRequest();
 }
 
 void OnUsbMidiClock(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::Clock);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Clock);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Clock);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) bpm = MTC.tapTempo();
 }
 
 void OnUsbMidiStart(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::Start);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Start);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Start);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendPlay();
 }
 
 void OnUsbMidiContinue(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::Continue);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Continue);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Continue);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendContinue();
 }
 
 void OnUsbMidiStop(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::Stop);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Stop);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Stop);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendStop();
 }
 
 void OnUsbMidiActiveSensing(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::ActiveSensing);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::ActiveSensing);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::ActiveSensing);
 }
 
 void OnUsbMidiSystemReset(void)
 {
   if (interfaces[PED_DINMIDI].midiRouting) DIN_MIDI.sendRealTime(midi::SystemReset);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::SystemReset);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::SystemReset);
 }
 
 
@@ -185,115 +182,115 @@ void OnUsbMidiSystemReset(void)
 void OnDinMidiNoteOn(byte channel, byte note, byte velocity)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendNoteOn(note, velocity, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendNoteOn(note, velocity, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendNoteOn(note, velocity, channel);
 }
 
 void OnDinMidiNoteOff(byte channel, byte note, byte velocity)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendNoteOff(note, velocity, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendNoteOff(note, velocity, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendNoteOff(note, velocity, channel);
 }
 
 void OnDinMidiAfterTouchPoly(byte channel, byte note, byte pressure)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendAfterTouch(note, pressure, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendAfterTouch(note, pressure, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendAfterTouch(note, pressure, channel);
 }
 
 void OnDinMidiControlChange(byte channel, byte number, byte value)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendControlChange(number, value, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendControlChange(number, value, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendControlChange(number, value, channel);
 }
 
 void OnDinMidiProgramChange(byte channel, byte number)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendProgramChange(number, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendProgramChange(number, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendProgramChange(number, channel);
 }
 
 void OnDinMidiAfterTouchChannel(byte channel, byte pressure)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendAfterTouch(pressure, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendAfterTouch(pressure, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendAfterTouch(pressure, channel);
 }
 
 void OnDinMidiPitchBend(byte channel, int bend)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendPitchBend(bend, channel);
-  if (EspMidiRouting)                      ESP_MIDI.sendPitchBend(bend, channel);
+  if (EspMidiRouting())                    ESP_MIDI.sendPitchBend(bend, channel);
 }
 
 void OnDinMidiSystemExclusive(byte * array, unsigned size)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendSysEx(size, array);
-  if (EspMidiRouting)                      ESP_MIDI.sendSysEx(size, array);
+  if (EspMidiRouting())                    ESP_MIDI.sendSysEx(size, array);
   MTC.decodeMTCFullFrame(size, array);
 }
 
 void OnDinMidiTimeCodeQuarterFrame(byte data)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendTimeCodeQuarterFrame(data);
-  if (EspMidiRouting)                      ESP_MIDI.sendTimeCodeQuarterFrame(data);
+  if (EspMidiRouting())                    ESP_MIDI.sendTimeCodeQuarterFrame(data);
   MTC.decodMTCQuarterFrame(data);
 }
 
 void OnDinMidiSongPosition(unsigned int beats)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendSongPosition(beats);
-  if (EspMidiRouting)                      ESP_MIDI.sendSongPosition(beats);
+  if (EspMidiRouting())                    ESP_MIDI.sendSongPosition(beats);
 }
 
 void OnDinMidiSongSelect(byte songnumber)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendSongSelect(songnumber);
-  if (EspMidiRouting)                      ESP_MIDI.sendSongSelect(songnumber);
+  if (EspMidiRouting())                    ESP_MIDI.sendSongSelect(songnumber);
 }
 
 void OnDinMidiTuneRequest(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendTuneRequest();
-  if (EspMidiRouting)                      ESP_MIDI.sendTuneRequest();
+  if (EspMidiRouting())                    ESP_MIDI.sendTuneRequest();
 }
 
 void OnDinMidiClock(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::Clock);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Clock);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Clock);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) bpm = MTC.tapTempo();
 }
 
 void OnDinMidiStart(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::Start);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Start);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Start);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendPlay();
 }
 
 void OnDinMidiContinue(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::Continue);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Continue);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Continue);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendContinue();
 }
 
 void OnDinMidiStop(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::Stop);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::Stop);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::Stop);
   if (MTC.getMode() == MidiTimeCode::SynchroClockSlave) MTC.sendStop();
 }
 
 void OnDinMidiActiveSensing(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::ActiveSensing);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::ActiveSensing);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::ActiveSensing);
 }
 
 void OnDinMidiSystemReset(void)
 {
   if (interfaces[PED_USBMIDI].midiRouting) USB_MIDI.sendRealTime(midi::SystemReset);
-  if (EspMidiRouting)                      ESP_MIDI.sendRealTime(midi::SystemReset);
+  if (EspMidiRouting())                    ESP_MIDI.sendRealTime(midi::SystemReset);
 }
 
 
