@@ -2,6 +2,7 @@ _I know. You are thinking: "yet another MIDI controller with Arduino"._<br>
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
 
 # Pedalino™
 
