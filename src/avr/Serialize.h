@@ -19,7 +19,7 @@ void serialize_lcd1(const char *l) {
   //byte          encodedSysEx[128];
   //unsigned int  encodedSize;
 
-  root["lcd1"] = l;
+  root["lcd1"] = String(l);
 
   Serial3.write(0xF0);
   root.printTo(Serial3);
@@ -46,7 +46,7 @@ void serialize_lcd2(const char *l) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
-  root["lcd2"] = l;
+  root["lcd2"] = String(l);
 
   Serial3.write(0xF0);
   root.printTo(Serial3);
@@ -105,8 +105,8 @@ void serialize_wifi_credentials(const char *ssid, const char *password) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
-  root["ssid"]      = ssid;
-  root["password"]  = password;
+  root["ssid"]      = String(ssid);
+  root["password"]  = String(password);
   
   Serial3.write(0xF0);
   root.printTo(Serial3);
