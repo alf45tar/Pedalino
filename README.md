@@ -1,10 +1,10 @@
-_I know. You are thinking: "yet another MIDI controller with Arduino"._<br>
+# Pedalino™
+
+_I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
-
-# Pedalino™
 
 Smart wireless MIDI foot controller for guitarists and more.
 
@@ -58,7 +58,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Simulate footswitch push via IR remote control
 - Use any spare IR remote control
 - Smart Config technology to help users connect to a Wi-Fi network through simple app on a smartphone.
-- Firmware update via HTTP (http://pedalino.local/update)
+- Firmware update via HTTP (<http://pedalino.local/update>)
 
 ## iOS and Android App
 
@@ -181,7 +181,7 @@ Pedalino like some of the more sophisticated effects and controllers incorporate
 
 ## Auto Sensing
 
-Most of them are plug-and-play because Pedalino will recognize via auto-sensing feature. 
+Most of them are plug-and-play because Pedalino will recognize via auto-sensing feature.
 
 Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
@@ -211,7 +211,6 @@ mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in t
 
 ![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-HighSpeed-Jumper.svg)
 
-
 ## How to connect Pedalino to a WiFi network
 
 AppleMIDI, ipMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n WiFi with WPA/WPA2 authentication (only 2.4 GHz).
@@ -219,18 +218,20 @@ AppleMIDI, ipMIDI and Open Sound Control (OSC) protocol requires a network conne
 Pedalino implements Smart Config technology via [Espressif’s ESP-TOUCH protocol](https://www.espressif.com/en/products/software/esp-touch/overview) to help users connect embedded devices to a WiFi network through simple configuration on a smartphone.
 
 Tested apps for configure SSID and password are:
+
 - [ESP8266 SmartConfig](https://play.google.com/store/apps/details?id=com.cmmakerclub.iot.esptouch) for Android
+
 - [SmartConfig](https://itunes.apple.com/us/app/smartconfig/id1233975749?platform=iphone&preserveScrollPosition=true#platform/iphone) for iOS
 
 Boot procedure
 
 - On power on Pedalino will try to connect to the last know access point (double blinking led)
 - If it cannot connect to the last used access point within 15 seconds it enters into Smart Config mode (slow blinking led)
-- Start one of the tested apps to configure SSID and password 
+- Start one of the tested apps to configure SSID and password
 - If it doesn't receive any SSID and password during the next 30 seconds it switch to AP mode (led off)
 - In AP mode Pedalino create a WiFi network called 'Pedalino' waiting connection from clients. No password required. Led is off until a client connect to AP.
 - Led is on when Pedalino is connected to an AP or a client is connected to Pedalino AP.
-- Led will start fast blinking when Pedalino is partecipating to an AppleMIDI session. 
+- Led will start fast blinking when Pedalino is partecipating to an AppleMIDI session.
 - Reboot Pedalino to restart the procedure.
 
 You can reset the last know access point via menu.
@@ -243,10 +244,10 @@ Pedalino is a session listener over WiFi. It does not support session initiation
 
 Pedalino is designed to be compatible with:
 
-  - macOS computer
-  - iOS devices
-  - [rtpMIDI](https://www.tobias-erichsen.de/software/rtpmidi.html) for Windows
-  - [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows
+- macOS computer
+- iOS devices
+- [rtpMIDI](https://www.tobias-erichsen.de/software/rtpmidi.html) for Windows
+- [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows
 
 ## ipMIDI
 
@@ -254,10 +255,10 @@ Pedalino can route MIDI over your Ethernet or WiFi network, using [ipMIDI](https
 
 Pedalino is designed to be compatible with:
 
-  - [ipMIDI](https://www.nerds.de/en/ipmidi.html) for Windows/macOS
-  - [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows/macOS
-  - [QmidiNet](https://qmidinet.sourceforge.io) for Linux
-  - [multimidicast](http://llg.cubic.org/tools/multimidicast) for Linux
+- [ipMIDI](https://www.nerds.de/en/ipmidi.html) for Windows/macOS
+- [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for Windows/macOS
+- [QmidiNet](https://qmidinet.sourceforge.io) for Linux
+- [multimidicast](http://llg.cubic.org/tools/multimidicast) for Linux
 
 I prefers [mnet MIDIhub](https://www.humatic.de/htools/mnet/man.htm) for both RTP-MIDI and ipMIDI protocols. It is free and it works very well under Windows.
 
@@ -319,12 +320,12 @@ ESP-01S|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/s
 NodeMCU DEVKIT V1.0|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None
 DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None
 
-Arduino and ESP8266/ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) or [PlatformIO IDE](https://platformio.org/platformio-ide). All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too. [PlatformIO IDE](https://platformio.org/platformio-ide) will install requested libraries on-the-fly during build process. 
+Arduino and ESP8266/ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) or [PlatformIO IDE](https://platformio.org/platformio-ide). All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too. [PlatformIO IDE](https://platformio.org/platformio-ide) will install requested libraries on-the-fly during build process.
 
 Instructions for installing an USB class-compliant MIDI firmware for the ATmega16U2 can be found [here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller).
 
 ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). The easy way is to use an Arduino Uno/Mega as USB to Serial adapter. Connect a jumper from RESET to GND and Arduino is now a TTL-serial-to-USB converter.  RX0, TX0, and GND are the connections. Connect Arduino RX0 to ESP-01S RX (RX to RX is not an error), TX0 to TX and GND to GND. ESP8266 is 5V tolerant on RX and TX pins. Remember that Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation. 3.3V can be obtained from 5V pin using a power supply module or with an external power source.
-An USB to Serial adapter is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to http://pedalino.local/update.
+An USB to Serial adapter is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to <http://pedalino.local/update>.
 
 Many different procedures can be used and many tutorials are available on internet including YouTube video.
 
@@ -337,7 +338,7 @@ Many different procedures can be used and many tutorials are available on intern
 1. Install [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
 2. Run the following commands from View->Command Palette (Ctrl+Shift+P)
     - Git: Clone  
-    - You will be asked for the URL of the remote repository (https://github.com/alf45tar/Pedalino) and the parent directory under which to put the local repository.
+    - You will be asked for the URL of the remote repository (<https://github.com/alf45tar/Pedalino>) and the parent directory under which to put the local repository.
     - PlaftormIO: Build
     - PlatformIO: Upload
 
@@ -361,6 +362,6 @@ That's all folks.
 - [ ] Add rotary encoders
 - [ ] User guide
 
-# Copyright
+## Copyright
 
 Copyright 2017-2018 alf45tar
