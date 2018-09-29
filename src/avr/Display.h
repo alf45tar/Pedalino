@@ -48,6 +48,8 @@ void screen_update(bool force = false) {
   static char screen1[LCD_COLS + 1];
   static char screen2[LCD_COLS + 1];
   static int  analog;
+  static byte batteryLevel = 0;
+
   byte        f, p;
 
   if (!powersaver) {
@@ -97,14 +99,27 @@ void screen_update(bool force = false) {
       lcd.print(buf);
       blynkLCD.print(0, 0, buf);
     }
-    lcd.setCursor(13, 0);
-    if (bleConnected) lcd.write(BLUETOOTHICON);
-    lcd.setCursor(14, 0);
-    if (wifiConnected) lcd.write(WIFIICON);
-    lcd.setCursor(15, 0);
-    if (powerPlug || true) lcd.write(POWERPLUG);
-    if (batteryLow) lcd.write(BATTERYLOW);
     
+    if (bleConnected) {
+      lcd.setCursor(13, 0);
+      lcd.write(BLUETOOTHICON);
+    }  
+    if (wifiConnected) {
+      lcd.setCursor(14, 0);
+      lcd.write(WIFIICON);
+    }
+    if (powerPlug) {
+      lcd.setCursor(15, 0);
+      lcd.write(POWERPLUG);
+    }
+    byte newLevel = (millis() % 3500) / 500;
+    if (batteryLevel != newLevel) {
+      batteryLevel = newLevel;
+      lcd.createChar(BATTERYLEVEL, battery[batteryLevel]);      
+      lcd.setCursor(15, 0);
+      lcd.write(BATTERYLEVEL);
+    }
+
     // Line 2
     memset(buf, 0, sizeof(buf));
     sprintf(&buf[strlen(buf)], "Bank%2d", currentBank + 1);

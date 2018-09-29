@@ -352,7 +352,7 @@ bool wifiConnected = false;
 bool bleConnected  = false;
 
 #define POWERPLUG     (byte)4
-#define BATTERYLOW    (byte)5
+#define BATTERYLEVEL  (byte)5
 #define WIFIICON      (byte)6
 #define BLUETOOTHICON (byte)7
 
@@ -394,6 +394,71 @@ byte partial_bar[4][8] = {
   B11110
 };
 
+byte battery[7][8] = {
+  B01110,
+  B11011,
+  B10001,
+  B10001,
+  B10001,
+  B10001,
+  B10001,
+  B11111,
+
+  B01110,
+  B11011,
+  B10001,
+  B10001,
+  B10001,
+  B10001,
+  B11111,
+  B11111,
+
+  B01110,
+  B11011,
+  B10001,
+  B10001,
+  B10001,
+  B11111,
+  B11111,
+  B11111,
+
+  B01110,
+  B11011,
+  B10001,
+  B10001,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+
+  B01110,
+  B11011,
+  B10001,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+
+  B01110,
+  B11011,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+
+  B01110,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111
+};
+
 byte power_plug[] = {
   B01010,
   B01010,
@@ -403,17 +468,6 @@ byte power_plug[] = {
   B01110,
   B00100,
   B00100
-};
-
-byte battery_low[] = {
-  B01110,
-  B11011,
-  B10001,
-  B10001,
-  B10001,
-  B10001,
-  B10001,
-  B11111
 };
 
 byte bluetooth_icon[] = {

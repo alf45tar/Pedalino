@@ -67,10 +67,8 @@
 #include <OSCData.h>
 #endif
 
-//#define PEDALINO_TELNET_DEBUG
-
 #ifdef PEDALINO_TELNET_DEBUG
-#include "RemoteDebug.h"          // Remote debug over telnet - not recommended for production, only for development    
+#include <RemoteDebug.h>          // Remote debug over telnet - not recommended for production, only for development    
 RemoteDebug Debug;
 #endif
 
@@ -89,6 +87,11 @@ RemoteDebug Debug;
 #define LOG_TAG           "PedalinoESP"
 #define DPRINT(...)       ESP_LOGI(LOG_TAG, __VA_ARGS__)
 #define DPRINTLN(...)     ESP_LOGI(LOG_TAG, __VA_ARGS__)
+#endif
+
+#ifdef PEDALINO_TELNET_DEBUG
+#define DPRINT(...)       rdebugI(__VA_ARGS__)
+#define DPRINTLN(...)     rdebugIln(__VA_ARGS__)
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -570,13 +573,12 @@ void BLEMidiReceive(uint8_t *buffer, uint8_t bufferSize)
   //Pointers used to search through payload.
   uint8_t lPtr = 0;
   uint8_t rPtr = 0;
-  //lastStatus used to capture runningStatus
-  uint8_t lastStatus;
   //Decode first packet -- SHALL be "Full MIDI message"
   lPtr = 2; //Start at first MIDI status -- SHALL be "MIDI status"
   //While statement contains incrementing pointers and breaks when buffer size exceeded.
   while (1) {
-    lastStatus = buffer[lPtr];
+    //lastStatus used to capture runningStatus
+    uint8_t lastStatus = buffer[lPtr];
     if ( (buffer[lPtr] < 0x80) ) {
       //Status message not present, bail
       return;
@@ -1472,6 +1474,9 @@ void OnSerialMidiSystemExclusive(byte* array, unsigned size)
     }
     else if (root.containsKey("factory.default")) {
       save_wifi_credentials("", "");
+#ifndef NOWIFI      
+      WiFi.disconnect(true);
+#endif
       DPRINTLN("EEPROM clear");
       serialize_wifi_status(false);
       serialize_ble_status(false);

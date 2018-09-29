@@ -576,7 +576,7 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       for (byte i = 0; i < 4; i++)
         lcd.createChar(i, partial_bar[i]);
       lcd.createChar(POWERPLUG, power_plug);
-      lcd.createChar(BATTERYLOW, battery_low);
+      lcd.createChar(BATTERYLEVEL, battery[0]);
       lcd.createChar(WIFIICON, wifi_icon);
       lcd.createChar(BLUETOOTHICON, bluetooth_icon);
       lcd.clear();
@@ -1039,7 +1039,6 @@ void menu_setup()
 
 void menu_run() 
 {
-  
   static bool prevMenuRun = true;
 
   // Detect if we need to initiate running normal user code
@@ -1056,8 +1055,10 @@ void menu_run()
     if (navigation(dummy) == MD_Menu::NAV_SEL)
       M.runMenu(true);
   }
-  if (!M.isInMenu()) screen_update();
-  else lcd.noCursor();
+  if (!M.isInMenu())
+    screen_update();
+  else
+    lcd.noCursor();
 
   M.runMenu();   // just run the menu code
 }
