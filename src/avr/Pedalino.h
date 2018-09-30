@@ -220,6 +220,7 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial,  USB_MIDI, USBSerialMIDISett
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, ESP_MIDI, ESPSerialMIDISettings);
 
+bool serialPassthrough = false;   // Serial passthrough between Serial and Serial3 to upload firmware on ESP01
 
 // LCD display definitions
 //

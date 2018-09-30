@@ -91,13 +91,35 @@ void setup(void)
 
 void loop(void)
 {
-  // Display menu on request
-  menu_run();
+  if (serialPassthrough) {
+    
+    static bool startSerialPassthrough = true;
+    
+    if (startSerialPassthrough) {
+      lcd.clear();
+      lcd.print("Firmware upload");
+      lcd.setCursor(0, 1);
+      lcd.print("Reset to stop");
+      startSerialPassthrough = false;
+    }
 
-  // Process Blynk messages
-  Blynk.run();
+    if (Serial.available()) {         // If anything comes in Serial (USB),
+      Serial3.write(Serial.read());   // read it and send it out Serial3
+    }
 
-  // Check whether the input has changed since last time, if so, send the new value over MIDI
-  midi_refresh();
-  midi_routing();
+    if (Serial3.available()) {        // If anything comes in Serial3
+      Serial.write(Serial3.read());   // read it and send it out Serial (USB)
+    }
+  }
+  else {
+    // Display menu on request
+    menu_run();
+
+    // Process Blynk messages
+    Blynk.run();
+
+    // Check whether the input has changed since last time, if so, send the new value over MIDI
+    midi_refresh();
+    midi_routing();
+  }
 }

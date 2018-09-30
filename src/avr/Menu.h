@@ -67,7 +67,8 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet);
 #define II_MIDITIMECODE   54
 #define II_BPM            55
 #define II_TIMESIGNATURE  56
-#define II_DEFAULT        57
+#define II_SERIALPASS     57
+#define II_DEFAULT        58
 
 // Global menu data and definitions
 
@@ -82,7 +83,7 @@ const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
   { M_INTERFACESETUP, "Interface Setup", 60, 65, 0 },
   { M_TEMPO,          "Tempo",           70, 72, 0 },
   { M_PROFILE,        "Profiles",        80, 81, 0 },
-  { M_OPTIONS,        "Options",         90, 94, 0 }
+  { M_OPTIONS,        "Options",         90, 95, 0 }
 };
 
 // Menu Items ----------
@@ -135,7 +136,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 91, "IR RC Clear",     MD_Menu::MNU_INPUT, II_IRCLEAR },
 //  { 92, "LCD Backlight",   MD_Menu::MNU_INPUT, II_BACKLIGHT },
   { 93, "WiFi Reset",      MD_Menu::MNU_INPUT, II_WIFIRESET },
-  { 94, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
+  { 94, "Firmware upload", MD_Menu::MNU_INPUT, II_SERIALPASS },
+  { 95, "Factory default", MD_Menu::MNU_INPUT, II_DEFAULT }
 };
 
 // Input Items ---------
@@ -192,6 +194,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { II_MIDITIMECODE,  ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listMidiTimeCode },
   { II_BPM,           ">40-300:   " , MD_Menu::INP_INT,   mnuValueRqst,  3, 1, 0,                300, 40, 10, nullptr },
   { II_TIMESIGNATURE, ""            , MD_Menu::INP_LIST,  mnuValueRqst, 14, 0, 0,                  0, 0,  0, listTimeSignature },
+  { II_SERIALPASS,    "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr },
   { II_DEFAULT,       "Confirm"     , MD_Menu::INP_RUN,   mnuValueRqst,  0, 0, 0,                  0, 0,  0, nullptr }
 };
 
@@ -536,6 +539,17 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
     case II_WIFIRESET:
       if (!bGet) {
         serialize_factory_default();
+      }
+      r = nullptr;
+      break;
+
+    case II_SERIALPASS:
+      if (!bGet) {
+        serialPassthrough = true;
+        Serial.end();
+        Serial3.end();
+        Serial.begin(115200);
+        Serial3.begin(115200);
       }
       r = nullptr;
       break;
