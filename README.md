@@ -112,7 +112,7 @@ The rest is not mandatory but it depends of which features you want to support.
 
 ### OPTION 1 - WiFi only
 
-![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266_bb.png)
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-LCDKeypadShield_bb.png)
 
 Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LPA7-HyU).
 
