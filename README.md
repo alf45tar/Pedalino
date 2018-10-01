@@ -317,17 +317,21 @@ Board|Microcontroller|Firmware|Flashing software|Flashing hardware
 -----|-----|-----|-----|-----
 Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
 ESP-01S|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega
-NodeMCU DEVKIT V1.0|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None
 DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None
 
-Arduino and ESP8266/ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) or [PlatformIO IDE](https://platformio.org/platformio-ide). All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too. [PlatformIO IDE](https://platformio.org/platformio-ide) will install requested libraries on-the-fly during build process.
+Arduino and ESP32 board flash update is very easy and straithforward. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) or [PlatformIO IDE](https://platformio.org/platformio-ide). All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) too. [PlatformIO IDE](https://platformio.org/platformio-ide) will install requested libraries on-the-fly during build process.
 
 Instructions for installing an USB class-compliant MIDI firmware for the ATmega16U2 can be found [here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller).
 
-ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). The easy way is to use an Arduino Uno/Mega as USB to Serial adapter. Connect a jumper from RESET to GND and Arduino is now a TTL-serial-to-USB converter.  RX0, TX0, and GND are the connections. Connect Arduino RX0 to ESP-01S RX (RX to RX is not an error), TX0 to TX and GND to GND. ESP8266 is 5V tolerant on RX and TX pins. Remember that Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation. 3.3V can be obtained from 5V pin using a power supply module or with an external power source.
-An USB to Serial adapter is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to <http://pedalino.local/update>.
+ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). The easy way is to use the Arduino Mega as USB to Serial adapter wtihout any modification to Pedalino. From Pedalino menu select Options->Firmware Update to activate the USB to Serial mode. Flash ESP-01S as usual using Arduino IDE with the following parameters:
 
-Many different procedures can be used and many tutorials are available on internet including YouTube video.
+Port|Arduino Mega COM port
+Port Speed|115200
+Reset Mode|none
+
+If you use PlatformioIO just set your COM port into platformio.ini.
+
+USB to Serial adapter mode is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to <http://pedalino.local/update>.
 
 ## Build and upload software
 
