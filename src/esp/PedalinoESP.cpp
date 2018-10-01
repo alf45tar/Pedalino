@@ -77,7 +77,6 @@ RemoteDebug Debug;
 
 #if defined(ARDUINO_ARCH_ESP8266) && defined(DEBUG_ESP_PORT)
 #define SERIALDEBUG       DEBUG_ESP_PORT
-#define WIFI_LED          0                     // ESP8266 only: onboard LED on GPIO2 is shared with Serial1 TX
 #define DPRINT(...)       DEBUG_ESP_PORT.printf( __VA_ARGS__ )
 #define DPRINTLN(...)     DEBUG_ESP_PORT.printf( __VA_ARGS__ )
 #endif
@@ -97,6 +96,7 @@ RemoteDebug Debug;
 #ifdef ARDUINO_ARCH_ESP8266
 #define BLE_LED_OFF()
 #define BLE_LED_ON()
+#define WIFI_LED       2      // Onboard LED on GPIO2 is shared with Serial1 TX
 #define WIFI_LED_OFF() digitalWrite(WIFI_LED, HIGH)
 #define WIFI_LED_ON()  digitalWrite(WIFI_LED, LOW)
 #endif

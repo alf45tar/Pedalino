@@ -189,7 +189,7 @@ Auto-sensing will also enable automatic calibration. After each power on cycle m
 
 ## USB MIDI
 
-A MIDI firware for Arduino Uno/Mega is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1 Mbps). HIDUINO can works with minimal changes.
+An USB class-compliant MIDI firmware for Arduino Uno/Mega (ATmega16U2) is required for using USB MIDI. Pedalino is tested with mocoLUFA because it supports dual mode boot (USB-MIDI or Arduino-Serial) and high-speed mode (1 Mbps). HIDUINO can works with minimal changes.
 
 More information can be obtained in the following links:
 
@@ -311,50 +311,15 @@ Pedalino is able to converts incoming OSC messages to MIDI events and outgoing M
 
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
 
-## Build and upload software
-
-### PlatformIO (recommended)
-
-[PlatformIO](https://platformio.org) is the recommended IDE for Pedalino build and upload.
-
-1. Install [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
-2. Run the following commands from View->Command Palette (Ctrl+Shift+P)
-    - Git: Clone  
-    - You will be asked for the URL of the remote repository (<https://github.com/alf45tar/Pedalino>) and the parent directory under which to put the local repository.
-    - PlaftormIO: Build
-    - PlatformIO: Upload
-
-That's all folks.
-
-### Arduino IDE
-
-[Arduino IDE](https://www.arduino.cc/en/Guide/Environment) can be used for Pedalino build and upload but it requires more manual steps for libraries installation.
-
 ## Firmware update
 
 Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashed with the right firmware before using Pedalino.
 
-Model|Board|Microcontroller|Firmware|Flashing software|Flashing hardware
------|-----|-----|-----|-----|-----
-Both|Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None
-A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega
-B|DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None
-
-Arduino and ESP32 board flash update is very easy and straithforward via USB. It allows you to upload code without using any additional hardware inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment) or [PlatformIO IDE](https://platformio.org/platformio-ide). All the requested libraries can be installed using the [Library Manager](https://www.arduino.cc/en/Guide/Libraries) inside the [Arduino IDE](https://www.arduino.cc/en/Guide/Environment). [PlatformIO IDE](https://platformio.org/platformio-ide) will install requested libraries on-the-fly during build process.
-
-Instructions for installing an USB class-compliant MIDI firmware for the ATmega16U2 can be found [here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller).
-
-ESP-01S module is usually shipped with AT-Command firmware and flashing a new firmware requires an USB to Serial adapter as outlined [here](https://arduino-esp8266.readthedocs.io/en/latest/boards.html#minimal-hardware-setup-for-bootloading-and-usage). The easy way is to use the Arduino Mega as USB to Serial adapter wtihout any modification to Pedalino. From Pedalino menu select Options->Firmware Update to activate the USB to Serial mode. Flash ESP-01S as usual using Arduino IDE or PlatformiIO with the following parameters:
-
-Parameter|Value
------|-----
-upload_port|Arduino Mega COM port
-upload_speed|115200
-upload_resetmethod|none
-
-If you use PlatformioIO just set your COM port into platformio.ini.
-
-USB to Serial adapter mode is required just for the first firmware update. Once connected to WiFi, as outlined above, the ESP-01S module can be updated connecting your browser to <http://pedalino.local/update>.
+Model|Board|Microcontroller|Firmware|Flashing software|Flashing hardware|Instructions
+-----|-----|-----|-----|-----|-----|-----
+Both|Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)<hr>[Click here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller)
+A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega|[Click here](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP-01S)
+B|DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None|
 
 ## Commercial alternatives
 
