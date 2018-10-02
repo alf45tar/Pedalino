@@ -1,4 +1,5 @@
 # Pedalino™
+<img src="logo/Pedalino_Transparent.png" width="180"/>
 
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
