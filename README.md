@@ -85,12 +85,12 @@ The rest is not mandatory but it depends of which features you want to support.
 - MIDI IN interface
   - 6N137 Single-Channel High Speed Optocoupler (6N138 may works too)
 
-- WIFI only (OPTION 1)
-  - Any ESP8266/ESP12 board supported by [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino) with a serial interface available. We suggest a development board due to USB connection and 5V compatibility.
+- WIFI only (Model A)
+  - Any ESP8266/ESP12 board supported by [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino) with a serial interface available. A development board provide direct USB connection and 5V compatibility.
   - Tested on [ESP8266 ESP-01S](https://en.wikipedia.org/wiki/ESP8266) 1M WiFi module and YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
   
-- WIFI and Bluetooth (OPTION 2)
+- WIFI and Bluetooth MIDI (Model B)
   - Any ESP32 board supported by [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32) with a serial interface available (usually Serial2 on standard development board because Serial is connected to USB and Serial1 cannot be connected during reset)
   - Tested on [DOIT ESP32 DevKit V1](https://github.com/SmartArduino/SZDOITWiKi/wiki/ESP8266---ESP32) 4M dual-mode Wi-Fi and Bluetooth module
   - [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32)
@@ -121,6 +121,16 @@ Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LP
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
 
 Both models use HM-10 Bluetooth LE module to connect the app.
+
+## Firmware update
+
+Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashed with the right firmware before using Pedalino.
+
+Model|Board|Microcontroller|Firmware|Flashing software|Flashing hardware|Instructions
+-----|-----|-----|-----|-----|-----|-----
+Both|Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)<hr>[Click here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller)
+A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega|[Click here](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP-01S)
+B|DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)
 
 ## Pedal Wiring
 
@@ -310,16 +320,6 @@ Reset|/pedalino/midi/reset/||||
 Pedalino is able to converts incoming OSC messages to MIDI events and outgoing MIDI events to OSC messages.
 
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
-
-## Firmware update
-
-Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashed with the right firmware before using Pedalino.
-
-Model|Board|Microcontroller|Firmware|Flashing software|Flashing hardware|Instructions
------|-----|-----|-----|-----|-----|-----
-Both|Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)<hr>[Click here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller)
-A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega|[Click here](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP-01S)
-B|DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)
 
 ## Commercial alternatives
 
