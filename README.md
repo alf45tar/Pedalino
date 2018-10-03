@@ -1,4 +1,5 @@
 # Pedalino™
+<img src="logo/Pedalino_Transparent.png" width="180"/>
 
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
@@ -129,7 +130,7 @@ Pedalino is using 2 boards and 3 microcontrollers. All of them need to be flashe
 Model|Board|Microcontroller|Firmware|Flashing software|Flashing hardware|Instructions
 -----|-----|-----|-----|-----|-----|-----
 Both|Arduino Mega 2560|ATmega2560<hr>ATmega16U2|[Pedalino](https://github.com/alf45tar/Pedalino/tree/master/src/avr)<hr>[MocoLUFA](https://github.com/kuwatay/mocolufa)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)<hr>[Atmel's flip programmer](http://www.microchip.com/developmenttools/productdetails.aspx?partno=flip)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)<hr>[Click here](https://www.arduino.cc/en/Hacking/DFUProgramming8U2) and [here](https://github.com/tttapa/MIDI_controller)
-A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega|[Click here](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP-01S)
+A|ESP-01S 1M|ESP8266|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|Arduino Mega|[Click here](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module)
 B|DOIT ESP32 DevKit V1|ESP32|[PedalinoESP](https://github.com/alf45tar/Pedalino/tree/master/src/esp)|[Arduino IDE](https://www.arduino.cc/en/Main/Software)/[PlatformIO IDE](https://platformio.org/platformio-ide)|None|[Click here](https://github.com/alf45tar/Pedalino/wiki/Build-and-upload-software)
 
 ## Pedal Wiring
@@ -213,13 +214,13 @@ mocoLUFA firmware boots in USB MIDI mode by default.
 
 Arduino-Serial mode is required to upload a new sketch into main Arduino ATmega2560 microcontroller.
 
-To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Reset is required to swicth the firmware mode.
+To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Reset is required to switch the firmware mode.
 
 ![ArduinoSerialJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-ArduinoSerial-Jumper.svg)
 
 ### mocoLUFA high speed mode
 
-mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in the code. A jumper betwen PIN 1 (MISO) and PIN 3 (SCK) on ICSP connector for ATmega16U2 enable the 1 Mbps speed. Pedalino USB MIDI works at 1 Mbps (1.000.000 bps).
+mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in the code. A jumper between PIN 1 (MISO) and PIN 3 (SCK) on ICSP connector for ATmega16U2 enable the 1 Mbps speed. Pedalino USB MIDI works at 1 Mbps (1.000.000 bps).
 
 ![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-HighSpeed-Jumper.svg)
 
