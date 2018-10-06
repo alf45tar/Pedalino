@@ -115,14 +115,15 @@ The rest is not mandatory but it depends of which features you want to support.
 ## Pedalino™ Breadboard Prototype
 
 ### MODEL A - WiFi only
-
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-LCDKeypadShield_bb.png)
 
 ### MODEL B - WiFi and Bluetooth MIDI
-
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
 
 Both models use HM-10 Bluetooth LE module to connect the app.
+
+### First prototype
+![](https://github.com/alf45tar/Pedalino/blob/master/images/first-prototype-model-a.jpg)
 
 ## Firmware update
 
