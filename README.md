@@ -3,6 +3,8 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
+Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
+
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA&t=60s)
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
@@ -111,8 +113,6 @@ The rest is not mandatory but it depends of which features you want to support.
   - HM-10 (or compatible like HC-08) Bluetooth UART Communication Module
 
 ## Pedalino™ Breadboard Prototype
-
-Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
 
 ### MODEL A - WiFi only
 
