@@ -118,8 +118,6 @@ The rest is not mandatory but it depends of which features you want to support.
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-LCDKeypadShield_bb.png)
 
-Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LPA7-HyU).
-
 ### MODEL B - WiFi and Bluetooth MIDI
 
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
