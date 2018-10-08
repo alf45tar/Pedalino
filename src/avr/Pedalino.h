@@ -42,12 +42,15 @@
 
 #include "MidiTimeCode.h"
 
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
+#define ARDUINO_UNO
+#define PROFILES           1
+#define BANKS              2
+#define PEDALS             4
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
+#define ARDUINO_MEGA
 #define PROFILES           3
 #define BANKS             10
-
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
-#define PEDALS             8
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
 #define PEDALS            16
 #endif
 
@@ -204,6 +207,26 @@ byte   timeSignature          = PED_TIMESIGNATURE_4_4;
 MidiTimeCode  MTC;
 unsigned int  bpm             = 120;
 
+
+// Serial ports definition
+
+#ifdef ARDUINO_UNO
+#include <SoftwareSerial.h>
+SoftwareSerial  Serial2(6, 7);
+SoftwareSerial  Serial3(8, 9);
+#ifndef NOBLYNK
+#define BLE_RX_PIN  10
+#define BLE_TX_PIN  11
+SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
+#endif
+#endif
+
+#ifdef ARDUINO_MEGA
+#define bluetooth Serial1
+#endif
+
+
+
 // MIDI interfaces definition
 
 struct USBSerialMIDISettings : public midi::DefaultSettings
@@ -221,6 +244,17 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial3, ESP_MIDI, ESPSerialMIDISettings);
 
 bool serialPassthrough = false;   // Serial passthrough between Serial and Serial3 to upload firmware on ESP01
+
+
+// Software reset via watchdog
+
+#include <avr/io.h>
+#include <avr/wdt.h>
+
+#define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
+
+
+#ifndef ARDUINO_MEGA_
 
 // LCD display definitions
 //
@@ -324,25 +358,6 @@ enum IRCODES {IRC_ON_OFF = 0,
 IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
 decode_results  results;
 unsigned long   ircustomcode[IR_CUSTOM_CODES];
-
-// BLE receiver
-
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
-#include <SoftwareSerial.h>
-#define BLE_RX_PIN  10
-#define BLE_TX_PIN  11
-SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
-#define bluetooth Serial1
-#endif
-
-// Software reset via watchdog
-
-#include <avr/io.h>
-#include <avr/wdt.h>
-
-#define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
-
 
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -492,6 +507,7 @@ byte wifi_icon[] = {
   B10101,
   B00000
 };
+#endif
 
 #endif // _PEDALINO_H
 

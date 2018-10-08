@@ -8,9 +8,6 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-#define DEBUG_PEDALINO
-//#define BLYNK_DEBUG
-
 #include "Pedalino.h"
 #include "Serialize.h"
 #include "Controller.h"
@@ -19,6 +16,27 @@
 #include "MIDIRouting.h"
 #include "Display.h"
 #include "Menu.h"
+
+void serial_pass_run()
+{
+  static bool startSerialPassthrough = true;
+    
+  if (startSerialPassthrough) {
+    lcd.clear();
+    lcd.print("Firmware upload");
+    lcd.setCursor(0, 1);
+    lcd.print("Reset to stop");
+    startSerialPassthrough = false;
+  }
+
+  if (Serial.available()) {         // If anything comes in Serial (USB),
+    Serial3.write(Serial.read());   // read it and send it out Serial3
+  }
+
+  if (Serial3.available()) {        // If anything comes in Serial3
+    Serial.write(Serial3.read());   // read it and send it out Serial (USB)
+  }
+}
 
 // Standard setup() and loop()
 
@@ -77,46 +95,21 @@ void setup(void)
   irrecv.enableIRIn();                            // Start the IR receiver
   irrecv.blink13(true);
 
-  bluetooth.begin(9600);                          // Start the Bluetooth receiver
-  bluetooth.println(F("AT+NAME=Pedalino™"));      // Set bluetooth device name
-  Blynk.config(bluetooth, blynkAuthToken);
-
-  //Serial1.begin(115200);
-  //delay(10);
-
-  //Blynk.begin(blynkAuthToken, wifi, "MyGuest", "0123456789");
-
+  blynk_config();
   menu_setup();
 }
 
 void loop(void)
 {
   if (serialPassthrough) {
-    
-    static bool startSerialPassthrough = true;
-    
-    if (startSerialPassthrough) {
-      lcd.clear();
-      lcd.print("Firmware upload");
-      lcd.setCursor(0, 1);
-      lcd.print("Reset to stop");
-      startSerialPassthrough = false;
-    }
-
-    if (Serial.available()) {         // If anything comes in Serial (USB),
-      Serial3.write(Serial.read());   // read it and send it out Serial3
-    }
-
-    if (Serial3.available()) {        // If anything comes in Serial3
-      Serial.write(Serial3.read());   // read it and send it out Serial (USB)
-    }
+    serial_pass_run();
   }
   else {
     // Display menu on request
     menu_run();
 
     // Process Blynk messages
-    Blynk.run();
+    blynk_run();
 
     // Check whether the input has changed since last time, if so, send the new value over MIDI
     midi_refresh();

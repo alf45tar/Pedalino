@@ -97,7 +97,9 @@ void screen_update(bool force = false) {
       strncpy(screen1, buf, LCD_COLS);
       lcd.setCursor(0, 0);
       lcd.print(buf);
+#ifndef NOBLYNK
       blynkLCD.print(0, 0, buf);
+#endif
     }
     
     if (bleConnected) {
@@ -143,7 +145,9 @@ void screen_update(bool force = false) {
       // replace unprintable chars
       for (byte i = 0; i < LCD_COLS; i++)
         buf[i] = (buf[i] == -1) ? '#' : buf[i];
+#ifndef NOBLYNK
       blynkLCD.print(0, 1, buf);
+#endif
     }
     
     if (selectBank) {
