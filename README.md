@@ -4,6 +4,10 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
+Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
+
+[![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
+
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
 
@@ -65,7 +69,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 The app made with [Blynk](https://www.blynk.cc) is on the way. Here some images.
 
-<img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-live.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-bank.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-pedal.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-interface.png" width="280"/>
+<img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-live.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-bank.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-pedal.png" width="280"/>
 
 ## Bill of materials
 
@@ -86,12 +90,12 @@ The rest is not mandatory but it depends of which features you want to support.
 - MIDI IN interface
   - 6N137 Single-Channel High Speed Optocoupler (6N138 may works too)
 
-- WIFI only (OPTION 1)
-  - Any ESP8266/ESP12 board supported by [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino) with a serial interface available. We suggest a development board due to USB connection and 5V compatibility.
+- WIFI only (Model A)
+  - Any ESP8266/ESP12 board supported by [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino) with a serial interface available. A development board provide direct USB connection and 5V compatibility.
   - Tested on [ESP8266 ESP-01S](https://en.wikipedia.org/wiki/ESP8266) 1M WiFi module and YL-46 AMS1117 3.3V Power Supply Module (Arduino 3.3V pin cannot provide enough current for the ESP-01S stable operation)
   - [Arduino core for ESP8266 WiFi chip](https://github.com/esp8266/Arduino)
   
-- WIFI and Bluetooth (OPTION 2)
+- WIFI and Bluetooth MIDI (Model B)
   - Any ESP32 board supported by [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32) with a serial interface available (usually Serial2 on standard development board because Serial is connected to USB and Serial1 cannot be connected during reset)
   - Tested on [DOIT ESP32 DevKit V1](https://github.com/SmartArduino/SZDOITWiKi/wiki/ESP8266---ESP32) 4M dual-mode Wi-Fi and Bluetooth module
   - [Arduino core for ESP32 WiFi chip](https://github.com/espressif/arduino-esp32)
@@ -112,16 +116,15 @@ The rest is not mandatory but it depends of which features you want to support.
 ## Pedalino™ Breadboard Prototype
 
 ### MODEL A - WiFi only
-
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-LCDKeypadShield_bb.png)
 
-Have a look the video of a working prototype on [YouTube](https://youtu.be/9d6LPA7-HyU).
-
 ### MODEL B - WiFi and Bluetooth MIDI
-
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
 
 Both models use HM-10 Bluetooth LE module to connect the app.
+
+### First prototype
+![](https://github.com/alf45tar/Pedalino/blob/master/images/first-prototype-model-a.jpg)
 
 ## Firmware update
 

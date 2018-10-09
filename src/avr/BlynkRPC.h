@@ -8,12 +8,18 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
+#ifdef NOBLYNK
+#define blynk_config(...)
+#define blynk_run(...)
+#define blynk_refresh(...)
+#else
 //
 //  Use Serial BLE modules (HM-10, HC-08) to connect your project to Blynk.
 
 #define BLYNK_USE_DIRECT_CONNECT
 #define BLYNK_NO_BUILTIN                // Disable built-in analog & digital pin operations
 #define BLYNK_NO_FLOAT                  // Disable float operations
+#define BLYNK_USE_128_VPINS             // Force-enable 128 virtual pins
 
 #ifdef SERIALDEBUG
 #define BLYNK_PRINT SERIALDEBUG
@@ -77,6 +83,18 @@ WidgetLCD  blynkLCD(V0);
 void screen_update(boolean);
 
 void update_current_profile_eeprom();
+
+void blynk_config()
+{
+  bluetooth.begin(9600);                          // Start the Bluetooth receiver
+  bluetooth.println(F("AT+NAME=Pedalino™"));      // Set bluetooth device name
+  Blynk.config(bluetooth, blynkAuthToken);
+}
+
+inline void blynk_run()
+{
+  Blynk.run();
+}
 
 void blynk_refresh_bank()
 {
@@ -641,3 +659,5 @@ BLYNK_WRITE(BLYNK_WIFICONNECT) {
   serialize_wifi_credentials(ssid.c_str(), password.c_str());
   Blynk.virtualWrite(BLYNK_WIFICONNECT, 0);
 }
+
+#endif  // NOBLYNK

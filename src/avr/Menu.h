@@ -595,12 +595,16 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.createChar(BLUETOOTHICON, bluetooth_icon);
       lcd.clear();
       lcd.noCursor();
+#ifndef NOBLYNK
       blynkLCD.clear();
+#endif
       break;
 
     case MD_Menu::DISP_CLEAR:
       lcd.clear();
+#ifndef NOBLYNK
       blynkLCD.clear();
+#endif
       break;
 
     case MD_Menu::DISP_L0:
@@ -636,7 +640,9 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         line[i] = ' ';
       lcd.setCursor(0, 0);
       lcd.print(line);
+#ifndef NOBLYNK
       blynkLCD.print(0, 0, line);
+#endif
       break;
 
     case MD_Menu::DISP_L1:
@@ -646,7 +652,9 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
         line[i] = ' ';
       lcd.setCursor(0, 1);
       lcd.print(line);
+#ifndef NOBLYNK
       blynkLCD.print(0, 1, line);
+#endif
       break;
   }
 
