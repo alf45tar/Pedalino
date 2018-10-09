@@ -80,7 +80,12 @@ String password;
 
 const char blynkAuthToken[] = "31795677450a4ac088805d6d914bc747";
 WidgetLCD  blynkLCD(V0);
+
+#ifdef NOLCD
+#define screen_update(...)
+#else
 void screen_update(boolean);
+#endif
 
 void update_current_profile_eeprom();
 

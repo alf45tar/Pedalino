@@ -265,7 +265,7 @@ void update_eeprom()
 void read_eeprom()
 {
   int offset = 0;
-  char signature[LCD_COLS + 1];
+  char signature[sizeof(SIGNATURE) + 1];
   byte saved_version;
 
   load_factory_default();

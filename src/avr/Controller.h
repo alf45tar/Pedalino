@@ -9,7 +9,11 @@
  */
 
 
+#ifdef NOLCD
+#define screen_info(...)
+#else
 void screen_info(byte, byte, byte, byte);
+#endif
 
 //
 //  Autosensing setup
@@ -773,6 +777,9 @@ void controller_setup()
 //
 // Calibration for analog controllers
 //
+#ifdef NOLCD
+#define calibrate(...)
+#else
 void calibrate()
 {
   unsigned long start = millis();
@@ -808,6 +815,7 @@ void calibrate()
     lcd.print(pedals[currentPedal].expMax);
   }
 }
+#endif  // NOLCD
 
 //
 //

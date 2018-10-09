@@ -12,6 +12,23 @@
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
 
+#define INTERFACES         6
+
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
+#define ARDUINO_UNO
+#define PROFILES           1
+#define BANKS              2
+#define PEDALS             5
+#define NOLCD
+#define NOBLYNK
+#undef  DEBUG_PEDALINO
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
+#define ARDUINO_MEGA
+#define PROFILES           3
+#define BANKS             10
+#define PEDALS            16
+#endif
+
 #ifdef DEBUG_PEDALINO
 #define SERIALDEBUG       Serial
 #define DPRINT(v)         SERIALDEBUG.print(v)
@@ -31,9 +48,12 @@
 
 #include <EEPROM.h>                     // https://www.arduino.cc/en/Reference/EEPROM
 #include <MIDI.h>                       // https://github.com/FortySevenEffects/arduino_midi_library
-#include <MD_Menu.h>                    // https://github.com/MajicDesigns/MD_Menu
-#include <MD_UISwitch.h>                // https://github.com/MajicDesigns/MD_UISwitch
 #include <ResponsiveAnalogRead.h>       // https://github.com/dxinteractive/ResponsiveAnalogRead
+#include <MD_UISwitch.h>                // https://github.com/MajicDesigns/MD_UISwitch
+
+#ifndef NOLCD
+#include <MD_Menu.h>                    // https://github.com/MajicDesigns/MD_Menu
+#endif
 
 #define DEBOUNCE_INTERVAL 20
 #define BOUNCE_LOCK_OUT                 // This method is a lot more responsive, but does not cancel noise.
@@ -42,22 +62,8 @@
 
 #include "MidiTimeCode.h"
 
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
-#define ARDUINO_UNO
-#define PROFILES           1
-#define BANKS              2
-#define PEDALS             4
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
-#define ARDUINO_MEGA
-#define PROFILES           3
-#define BANKS             10
-#define PEDALS            16
-#endif
-
 #define PIN_D(x)            23+2*x      // map 0..15 to 23,25,...53
 #define PIN_A(x)            PIN_A0+x    // map 0..15 to A0, A1,...A15
-
-#define INTERFACES          6
 
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
@@ -194,18 +200,22 @@ bank      banks[BANKS][PEDALS];     // Banks Setup
 pedal     pedals[PEDALS];           // Pedals Setup
 interface interfaces[INTERFACES];   // Interfaces Setup
 
-byte   currentProfile         = 0;
-byte   currentBank            = 0;
-byte   currentPedal           = 0;
-byte   currentInterface       = PED_USBMIDI;
-byte   lastUsedSwitch         = 0xFF;
-byte   lastUsedPedal          = 0xFF;
-bool   selectBank             = true;
-byte   currentMidiTimeCode    = PED_MTC_MASTER_24;
-byte   timeSignature          = PED_TIMESIGNATURE_4_4;
+byte  currentProfile          = 0;
+byte  currentBank             = 0;
+byte  currentPedal            = 0;
+byte  currentInterface        = PED_USBMIDI;
+byte  lastUsedSwitch          = 0xFF;
+byte  lastUsedPedal           = 0xFF;
+bool  selectBank              = true;
+byte  currentMidiTimeCode     = PED_MTC_MASTER_24;
+byte  timeSignature           = PED_TIMESIGNATURE_4_4;
 
 MidiTimeCode  MTC;
 unsigned int  bpm             = 120;
+
+byte  backlight               = 150;
+bool  wifiConnected           = false;
+bool  bleConnected            = false;
 
 
 // Serial ports definition
@@ -224,7 +234,6 @@ SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
 #ifdef ARDUINO_MEGA
 #define bluetooth Serial1
 #endif
-
 
 
 // MIDI interfaces definition
@@ -254,7 +263,19 @@ bool serialPassthrough = false;   // Serial passthrough between Serial and Seria
 #define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
 
 
-#ifndef ARDUINO_MEGA_
+// The keys value that works for most LCD Keypad Shield
+
+MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
+{
+  {  10, 10, 'R' },  // Right
+  { 130, 15, 'U' },  // Up
+  { 305, 15, 'D' },  // Down
+  { 475, 15, 'L' },  // Left
+  { 720, 15, 'S' },  // Select
+};
+
+
+#ifndef NOLCD
 
 // LCD display definitions
 //
@@ -292,80 +313,13 @@ bool serialPassthrough = false;   // Serial passthrough between Serial and Seria
 //LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_BACKLIGHT, POSITIVE);
 LiquidCrystal lcd(LCD_RS, LCD_ENA, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
-bool          powersaver = false;
-byte          backlight  = 150;
-
-// The keys value that works for most LCD Keypad Shield
-
-MD_UISwitch_Analog::uiAnalogKeys_t kt[] =
-{
-  {  10, 10, 'R' },  // Right
-  { 130, 15, 'U' },  // Up
-  { 305, 15, 'D' },  // Down
-  { 475, 15, 'L' },  // Left
-  { 720, 15, 'S' },  // Select
-};
-
-// IR Remote receiver
-
-#include <IRremote.h>
-
-#define RECV_PIN       24     // connect Y to this PIN, G to GND, R to 5V
-#define RECV_LED_PIN   26
-
-#define IR_ON_OFF   0xFFA25D
-#define IR_OK       0xFF02FD
-#define IR_ESC      0xFFE21D
-#define IR_LEFT     0xFFC23D
-#define IR_RIGHT    0xFF22DD
-#define IR_UP       0xFFA857
-#define IR_DOWN     0xFF629D
-#define IR_SWITCH   0xFFB04F
-#define IR_KEY_1    0xFF30CF
-#define IR_KEY_2    0xFF18E7
-#define IR_KEY_3    0xFF7A85
-#define IR_KEY_4    0xFF10EF
-#define IR_KEY_5    0xFF38C7
-#define IR_KEY_6    0xFF5AA5
-#define IR_KEY_7    0xFF42BD
-#define IR_KEY_8    0xFF4AB5
-#define IR_KEY_9    0xFF52AD
-#define IR_KEY_0    0xFF6897
-
-enum IRCODES {IRC_ON_OFF = 0,
-              IRC_OK,
-              IRC_ESC,
-              IRC_LEFT,
-              IRC_RIGHT,
-              IRC_UP,
-              IRC_DOWN,
-              IRC_SWITCH,
-              IRC_KEY_1,
-              IRC_KEY_2,
-              IRC_KEY_3,
-              IRC_KEY_4,
-              IRC_KEY_5,
-              IRC_KEY_6,
-              IRC_KEY_7,
-              IRC_KEY_8,
-              IRC_KEY_9,
-              IRC_KEY_0,
-              IR_CUSTOM_CODES
-             };
-
-#define REPEAT_TO_SKIP  4     // Number of REPEAT codes to skip before start repeat
-
-IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
-decode_results  results;
-unsigned long   ircustomcode[IR_CUSTOM_CODES];
+bool powersaver = false;
 
 const char bar1[]  = {49, 50, 51, 52, 53, 54, 55, 56, 57, 48};
 const char bar2[]  = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 bool powerPlug     = false;
 bool batteryLow    = false;
-bool wifiConnected = false;
-bool bleConnected  = false;
 
 #define POWERPLUG     (byte)4
 #define BATTERYLEVEL  (byte)5
@@ -508,6 +462,59 @@ byte wifi_icon[] = {
   B00000
 };
 #endif
+
+// IR Remote receiver
+
+#include <IRremote.h>
+
+#define RECV_PIN       24     // connect Y to this PIN, G to GND, R to 5V
+#define RECV_LED_PIN   26
+
+#define IR_ON_OFF   0xFFA25D
+#define IR_OK       0xFF02FD
+#define IR_ESC      0xFFE21D
+#define IR_LEFT     0xFFC23D
+#define IR_RIGHT    0xFF22DD
+#define IR_UP       0xFFA857
+#define IR_DOWN     0xFF629D
+#define IR_SWITCH   0xFFB04F
+#define IR_KEY_1    0xFF30CF
+#define IR_KEY_2    0xFF18E7
+#define IR_KEY_3    0xFF7A85
+#define IR_KEY_4    0xFF10EF
+#define IR_KEY_5    0xFF38C7
+#define IR_KEY_6    0xFF5AA5
+#define IR_KEY_7    0xFF42BD
+#define IR_KEY_8    0xFF4AB5
+#define IR_KEY_9    0xFF52AD
+#define IR_KEY_0    0xFF6897
+
+enum IRCODES {IRC_ON_OFF = 0,
+              IRC_OK,
+              IRC_ESC,
+              IRC_LEFT,
+              IRC_RIGHT,
+              IRC_UP,
+              IRC_DOWN,
+              IRC_SWITCH,
+              IRC_KEY_1,
+              IRC_KEY_2,
+              IRC_KEY_3,
+              IRC_KEY_4,
+              IRC_KEY_5,
+              IRC_KEY_6,
+              IRC_KEY_7,
+              IRC_KEY_8,
+              IRC_KEY_9,
+              IRC_KEY_0,
+              IR_CUSTOM_CODES
+             };
+
+#define REPEAT_TO_SKIP  4     // Number of REPEAT codes to skip before start repeat
+
+IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
+decode_results  results;
+unsigned long   ircustomcode[IR_CUSTOM_CODES];
 
 #endif // _PEDALINO_H
 

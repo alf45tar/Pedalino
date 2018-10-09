@@ -8,7 +8,10 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-
+#ifdef NOLCD
+#define menu_setup(...)
+#define menu_run(...)
+#else
 #include "NoteNumbers.h"
 #include "ControlChange.h"
 
@@ -1049,6 +1052,9 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
 void menu_setup() 
 {
+  pinMode(LCD_BACKLIGHT, OUTPUT);
+  analogWrite(LCD_BACKLIGHT, backlight);
+
   display(MD_Menu::DISP_INIT);
   M.begin();
   M.setMenuWrap(true);
@@ -1084,3 +1090,6 @@ void menu_run()
 
   M.runMenu();   // just run the menu code
 }
+
+
+#endif  // NOLCD

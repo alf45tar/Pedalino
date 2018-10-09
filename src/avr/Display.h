@@ -8,7 +8,9 @@
  *                                                        https://github.com/alf45tar/Pedalino
  */
 
-
+#ifdef NOLCD
+#define screen_update()
+#else
 #define LCD_LINE1_PERSISTENCE   1500;
 
 byte m1, m2, m3, m4;
@@ -25,7 +27,7 @@ void screen_info(byte b1, byte b2, byte b3, byte b4)
 }
 
 
-char foot_char (byte footswitch)
+char foot_char(byte footswitch)
 {
   footswitch = constrain(footswitch, 0, PEDALS - 1);
   if (pedals[footswitch].function != PED_MIDI) return ' ';
@@ -158,4 +160,6 @@ void screen_update(bool force = false) {
       lcd.noCursor();
   }
 }
+
+#endif  // NOLCD
 
