@@ -1052,6 +1052,9 @@ MD_Menu::userNavAction_t navigation(uint16_t &incDelta)
 
 void menu_setup() 
 {
+  irrecv.enableIRIn();                            // Start the IR receiver
+  irrecv.blink13(true);
+  
   pinMode(LCD_BACKLIGHT, OUTPUT);
   analogWrite(LCD_BACKLIGHT, backlight);
 

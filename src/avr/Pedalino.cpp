@@ -90,10 +90,6 @@ void setup(void)
   controller_setup();
   mtc_setup();
   midi_routing_start();
-
-  irrecv.enableIRIn();                            // Start the IR receiver
-  irrecv.blink13(true);
-
   blynk_config();
   menu_setup();
 }

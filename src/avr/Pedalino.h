@@ -12,21 +12,24 @@
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
 
-#define INTERFACES         6
+#define INTERFACES        6
+#define PROFILES          3
 
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)     // Arduino UNO, NANO
 #define ARDUINO_UNO
-#define PROFILES           1
-#define BANKS              2
-#define PEDALS             5
+#define BANKS             5
+#define PEDALS            8
+#define PIN_D(x)          2+x         // map 0..7 to 2..9
+#define PIN_A(x)          PIN_A0+x    // map 0..7 to A0..A7
 #define NOLCD
 #define NOBLYNK
 #undef  DEBUG_PEDALINO
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)  // Arduino MEGA, MEGA2560
 #define ARDUINO_MEGA
-#define PROFILES           3
 #define BANKS             10
 #define PEDALS            16
+#define PIN_D(x)          23+2*x      // map 0..15 to 23,25,...53
+#define PIN_A(x)          PIN_A0+x    // map 0..15 to A0, A1,...A15
 #endif
 
 #ifdef DEBUG_PEDALINO
@@ -61,9 +64,6 @@
 #include <Bounce2.h>                    // https://github.com/thomasfredericks/Bounce2
 
 #include "MidiTimeCode.h"
-
-#define PIN_D(x)            23+2*x      // map 0..15 to 23,25,...53
-#define PIN_A(x)            PIN_A0+x    // map 0..15 to A0, A1,...A15
 
 #define PED_PROGRAM_CHANGE  0
 #define PED_CONTROL_CHANGE  1
@@ -461,7 +461,7 @@ byte wifi_icon[] = {
   B10101,
   B00000
 };
-#endif
+
 
 // IR Remote receiver
 
@@ -515,6 +515,8 @@ enum IRCODES {IRC_ON_OFF = 0,
 IRrecv          irrecv(RECV_PIN, RECV_LED_PIN);
 decode_results  results;
 unsigned long   ircustomcode[IR_CUSTOM_CODES];
+
+#endif
 
 #endif // _PEDALINO_H
 

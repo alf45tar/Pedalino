@@ -102,8 +102,10 @@ void load_factory_default()
         PED_DISABLE  // MIDI clock
     };
 
+#ifndef NOLCD
   for (byte c = 0; c < IR_CUSTOM_CODES; c++)
     ircustomcode[c] = 0xFFFFFE;
+#endif
 }
 
 //
@@ -242,6 +244,7 @@ void update_eeprom()
   DPRINTF("Current MTC:       0x");
   DPRINTLN2(currentMidiTimeCode, HEX);
 
+#ifndef NOLCD
   DPRINTF("[0x");
   DPRINT2(offset, HEX);
   DPRINTF("] ");
@@ -255,6 +258,7 @@ void update_eeprom()
     EEPROM.put(offset, ircustomcode[c]);
     offset += sizeof(unsigned long);
   }
+#endif
 
   blynk_refresh();
 }
@@ -391,6 +395,7 @@ void read_eeprom()
   DPRINTF("Current MTC:       0x");
   DPRINTLN2(currentMidiTimeCode, HEX);
 
+#ifndef NOLCD
   DPRINTF("[0x");
   DPRINT2(offset, HEX);
   DPRINTF("] ");
@@ -404,6 +409,7 @@ void read_eeprom()
     EEPROM.get(offset, ircustomcode[c]);
     offset += sizeof(unsigned long);
   }
+#endif
 
   blynk_refresh();
 }
