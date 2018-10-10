@@ -9,6 +9,7 @@ cache:
         - "~/.platformio"
 
 env:
+    - PLATFORMIO_CI_SRC=src/avr PLATFORMIO_CI_EXTRA_ARGS="--board=uno --project-option='lib_ignore=RobotIRremote'"
     - PLATFORMIO_CI_SRC=src/avr PLATFORMIO_CI_EXTRA_ARGS="--board=megaatmega2560 --project-option='lib_ignore=RobotIRremote'"
     - PLATFORMIO_CI_SRC=src/esp PLATFORMIO_CI_EXTRA_ARGS="--board=esp01_1m"
     - PLATFORMIO_CI_SRC=src/esp PLATFORMIO_CI_EXTRA_ARGS="--board=esp12e"
