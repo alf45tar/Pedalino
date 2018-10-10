@@ -48,7 +48,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 ## Features
 
 - Support for digital foot switches (momentary or latch), analog expression pedals and jog wheels (rotary encoders)
-- 10 banks of 16 controllers each (up to 8 controllers for lite version)
+- 10 banks of 16 controllers each
 - 3 user configuration profiles
 - Each port can connect 1 expression pedal or up to 3 foot switches for a maximum of 48 foot switches.
 - MIDI output via USB MIDI, Bluetooth, classic MIDI OUT connector, AppleMIDI (also known as RTP-MIDI) or ipMIDI via Wi-Fi
@@ -123,7 +123,13 @@ The rest is not mandatory but it depends of which features you want to support.
 
 Model A and B use HM-10 Bluetooth LE module to connect the app.
 
-### MODEL C - Arduino UNO + ESP8266 - WiFi only
+### MODEL C - Arduino UNO R3 + ESP8266 - WiFi only
+Due to memory limit of Arduino Uno R3 some of the features cannot be supported. We eliminated the superfluous ones and kept the most interesting ones. All the interfaces are supported up to 5 banks and 8 controllers.
+
+- No LCD
+- No app
+- No IR remote control
+
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-Uno_bb.png)
 
 ### First prototype
@@ -338,7 +344,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 
 ## ToDo
 
-- [ ] Lite version for Arduino Uno R3
+- [X] Lite version for Arduino Uno R3
 - [ ] Add rotary encoders
 - [ ] User guide
 
