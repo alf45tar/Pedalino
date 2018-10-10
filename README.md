@@ -121,7 +121,10 @@ The rest is not mandatory but it depends of which features you want to support.
 ### MODEL B - WiFi and Bluetooth MIDI
 ![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP32-LCDKeypadShield_bb.png)
 
-Both models use HM-10 Bluetooth LE module to connect the app.
+Model A and B use HM-10 Bluetooth LE module to connect the app.
+
+### MODEL C - Arduino UNO + ESP8266 - WiFi only
+![Fritzing](https://github.com/alf45tar/Pedalino/blob/master/images/PedalinoESP8266-Uno_bb.png)
 
 ### First prototype
 ![](https://github.com/alf45tar/Pedalino/blob/master/images/first-prototype-model-a.jpg)

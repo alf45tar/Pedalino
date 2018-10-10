@@ -222,13 +222,8 @@ bool  bleConnected            = false;
 
 #ifdef ARDUINO_UNO
 #include <SoftwareSerial.h>
-SoftwareSerial  Serial2(6, 7);
-SoftwareSerial  Serial3(8, 9);
-#ifndef NOBLYNK
-#define BLE_RX_PIN  10
-#define BLE_TX_PIN  11
-SoftwareSerial  bluetooth(BLE_RX_PIN, BLE_TX_PIN);
-#endif
+SoftwareSerial  Serial2(10, 9);
+SoftwareSerial  Serial3(12, 11);
 #endif
 
 #ifdef ARDUINO_MEGA
