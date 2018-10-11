@@ -2055,6 +2055,195 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 }
 #endif
 
+String  etatGpio[4] = {"OFF","OFF","OFF","OFF"};
+String  theme = "bootstrap";
+float   t = 0 ;
+float   h = 0 ;
+float   p = 0;
+
+String getPage(){
+  //Return a string containing the HTML code of the page
+  String page = "<html charset=UTF-8><head><meta http-equiv='refresh' content='60' name='viewport' content='width=device-width, initial-scale=1'/>";
+  page += "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>";
+  if ( theme == "bootstrap" ) {
+    page += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>";
+  } else {
+    page += "<link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/";
+    page += theme;
+    page += "/bootstrap.min.css' rel='stylesheet'>";
+  }
+  page += "<title>Pedalino - https://github.com/alf45tar/Pedalino</title></head><body>";
+  page += "<div class='container-fluid'>";
+  page +=   "<div class='row'>";
+  page +=     "<div class='col-md-12'>";
+  page +=       "<h1>Pedalino&trade;</h1>";
+  page +=       "<h3>Complete wireless MIDI foot controller for guitarists and more</h3>";
+  page +=       "<ul class='nav nav-pills'>";
+  page +=         "<li class='active'>";
+  page +=           "<a href='#'> <span class='badge pull-right'>";
+  page +=           t;
+  page +=           "</span> Live</a>";
+  page +=         "</li><li>";
+  page +=           "<a href='#'> <span class='badge pull-right'>";
+  page +=           h;
+  page +=           "</span> Banks</a>";
+  page +=         "</li><li>";
+  page +=           "<a href='#'> <span class='badge pull-right'>";
+  page +=           p;
+  page +=           "</span> Pedals</a></li>";
+  page +=       "</ul>";
+  page +=       "<table class='table'>";
+  page +=         "<thead><tr><th>Capteur</th><th>Mesure</th><th>Valeur</th><th>Valeur pr&eacute;c&eacute;dente</th></tr></thead>";
+  page +=         "<tbody>";
+  page +=           "<tr><td>DHT22</td><td>Temp&eacute;rature</td><td>";
+  page +=             t;
+  page +=             "&deg;C</td><td>";
+  page +=             "-</td></tr>";
+  page +=           "<tr class='active'><td>DHT22</td><td>Humidit&eacute;</td><td>";
+  page +=             h;
+  page +=             "%</td><td>";
+  page +=             "-</td></tr>";
+  page +=           "<tr><td>BMP180</td><td>Pression atmosph&eacute;rique</td><td>";
+  page +=             p;
+  page +=             "mbar</td><td>";
+  page +=             "-</td></tr>";
+  page +=       "</tbody></table>";
+  page +=       "<h3>GPIO</h3>";
+  page +=       "<div class='row'>";
+  page +=         "<div class='col-md-4'><h4 class ='text-left'>D5 ";
+  page +=           "<span class='badge'>";
+  page +=           etatGpio[0];
+  page +=         "</span></h4></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D5' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D5' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
+  page +=         "<div class='col-md-4'><h4 class ='text-left'>D6 ";
+  page +=           "<span class='badge'>";
+  page +=           etatGpio[1];
+  page +=         "</span></h4></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D6' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D6' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
+  page +=         "<div class='col-md-4'><h4 class ='text-left'>D7 ";
+  page +=           "<span class='badge'>";
+  page +=           etatGpio[2];
+  page +=         "</span></h4></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D7' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D7' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
+  page +=         "<div class='col-md-4'><h4 class ='text-left'>D8 ";
+  page +=           "<span class='badge'>";
+  page +=           etatGpio[3];
+  page +=         "</span></h4></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D8' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
+  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D8' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
+  page +=       "</div>";
+  page +=   "<div class='row'>";
+  page +=     "<div class='col-md-4'>";
+  page +=       "<form method='POST' name='selecttheme' id='selecttheme'/>"; 
+  page +=       "<input class='span' id='choixtheme' name='theme' type='hidden'>";
+  page +=       "<div class='btn-group'>";
+  page +=         "<button class='btn btn-default'>Change the theme</button>";
+  page +=         "<button data-toggle='dropdown' class='btn btn-default dropdown-toggle'><span class='caret'></span></button>";
+  page +=         "<ul class='dropdown-menu'>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"bootstrap\"); $(\"#selecttheme\").submit()'><a href='#'>Boostrap</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"cerulean\"); $(\"#selecttheme\").submit()'><a href='#'>Cerulean</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"cosmo\"); $(\"#selecttheme\").submit()'><a href='#'>Cosmo</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"cyborg\"); $(\"#selecttheme\").submit()'><a href='#'>Cyborg</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"darkly\"); $(\"#selecttheme\").submit()'><a href='#'>Darkly</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"flatly\"); $(\"#selecttheme\").submit()'><a href='#'>Flatly</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"journal\"); $(\"#selecttheme\").submit()'><a href='#'>Journal</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"lumen\"); $(\"#selecttheme\").submit()'><a href='#'>Lumen</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"paper\"); $(\"#selecttheme\").submit()'><a href='#'>Paper</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"readable\"); $(\"#selecttheme\").submit()'><a href='#'>Readable</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"sandstone\"); $(\"#selecttheme\").submit()'><a href='#'>Sandstone</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"simplex\"); $(\"#selecttheme\").submit()'><a href='#'>Simplex</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"slate\"); $(\"#selecttheme\").submit()'><a href='#'>Slate</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"spacelab\"); $(\"#selecttheme\").submit()'><a href='#'>Spacelab</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"superhero\"); $(\"#selecttheme\").submit()'><a href='#'>Superhero</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"united\"); $(\"#selecttheme\").submit()'><a href='#'>United</a></li>";
+  page +=           "<li onclick='$(\"#choixtheme\").val(\"yeti\"); $(\"#selecttheme\").submit()'><a href='#'>Yeti</a></li>";
+  page +=         "</ul>";
+  page +=       "</div>";
+  page +=       "</form></div>";
+  page +=       "<div class='col-md-8'>";
+  page +=         "<p><a href='https://github.com/alf45tar/Pedalino'>https://github.com/alf45tar/Pedalino</p>";
+  page +=       "</div>";
+  page +=   "</div>"; 
+  page += "</div></div></div>";
+  page += "</body></html>";
+  return page;
+}
+
+void http_handle_theme(){
+  theme = httpServer.arg("theme");
+  httpServer.send ( 200, "text/html", getPage() );
+}
+
+void updateGPIO(int gpio, String DxValue) {
+  if ( DxValue == "1" ) {
+    etatGpio[gpio] = "On";
+    httpServer.send ( 200, "text/html", getPage() );
+  } else if ( DxValue == "0" ) {
+    etatGpio[gpio] = "Off";
+    httpServer.send ( 200, "text/html", getPage() );
+  } else {
+  }  
+}
+
+void handleD5() {
+  String D5Value; 
+  updateGPIO(0,httpServer.arg("D5")); 
+}
+
+void handleD6() {
+  String D6Value; 
+  updateGPIO(1,httpServer.arg("D6")); 
+}
+
+void handleD7() {
+  String D7Value; 
+  updateGPIO(2,httpServer.arg("D7")); 
+}
+
+void handleD8() {
+  String D8Value; 
+  updateGPIO(3,httpServer.arg("D8")); 
+}
+
+void http_handle_root(){ 
+  if ( httpServer.hasArg("theme") ) {
+    http_handle_theme();
+  } else if ( httpServer.hasArg("D5") ) {
+    handleD5();
+  } else if ( httpServer.hasArg("D6") ) {
+    handleD6();
+  } else if ( httpServer.hasArg("D7") ) {
+    handleD7();
+  } else if ( httpServer.hasArg("D8") ) {
+    handleD8();
+  } else {
+    httpServer.send ( 200, "text/html", getPage() );
+  }  
+}
+
+void http_handle_not_found() {
+
+  String message = "File Not Found\n\n";
+
+  message += "URI: ";
+  message += httpServer.uri();
+  message += "\nMethod: ";
+  message += (httpServer.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += httpServer.args();
+  message += "\n";
+
+  for (uint8_t i = 0; i < httpServer.args(); i++) {
+    message += " " + httpServer.argName(i) + ": " + httpServer.arg(i) + "\n";
+  }
+
+  httpServer.send(404, "text/plain", message);
+}
+
+
 
 void WiFiEvent(WiFiEvent_t event) {
 
@@ -2117,6 +2306,10 @@ typedef enum WiFiEvent
 
           // Start firmawre update via HTTP (connect to http://pedalino.local/update)
           httpUpdater.setup(&httpServer);
+
+          // 
+          httpServer.on("/", http_handle_root);
+          httpServer.onNotFound(http_handle_not_found);
           httpServer.begin();
           MDNS.addService("_http", "_tcp", 80);
           DPRINTLN("HTTP server started");

@@ -345,6 +345,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 ## ToDo
 
 - [X] Lite version for Arduino Uno R3
+- [ ] Modern HTTP configuration interface
 - [ ] Add rotary encoders
 - [ ] User guide
 
