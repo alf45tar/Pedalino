@@ -2056,7 +2056,10 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 #endif
 
 String  etatGpio[4] = {"OFF","OFF","OFF","OFF"};
-String  theme = "bootstrap";
+String  theme = "sandstone";
+String  bank  = "1";
+String  pedal = "1";
+String  interface = "1";
 float   t = 0 ;
 float   h = 0 ;
 float   p = 0;
@@ -2172,56 +2175,367 @@ String getPage(){
   return page;
 }
 
-void http_handle_theme(){
-  theme = httpServer.arg("theme");
-  httpServer.send ( 200, "text/html", getPage() );
-}
-
-void updateGPIO(int gpio, String DxValue) {
-  if ( DxValue == "1" ) {
-    etatGpio[gpio] = "On";
-    httpServer.send ( 200, "text/html", getPage() );
-  } else if ( DxValue == "0" ) {
-    etatGpio[gpio] = "Off";
-    httpServer.send ( 200, "text/html", getPage() );
+String get_top_page() {
+  
+  String page = "";
+  
+  page += "<html lang='en'>";
+  page += "<head>";
+  page += "<title>Pedalino&trade;</title>";
+  page += "<meta charset='utf-8'>";
+  page += "<meta name='viewport' content='widtd=device-widtd, initial-scale=1'>";
+  if ( theme == "bootstrap" ) {
+    page += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>";
   } else {
+    page += "<link href='https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/";
+    page += theme;
+    page += "/bootstrap.min.css' rel='stylesheet'>";
+  }
+  page += "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>";
+  page += "<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>";
+  page += "<script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>";
+  page += "</head>";
+
+  page += "<body>";
+  page += "<div class='container-fluid'>";
+
+  page += "<nav class='navbar navbar-expand-lg navbar-light bg-light'>";
+  page += "<a class='navbar-brand' href='/'>Pedalino&trade;</a>";
+  page += "<button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>";
+  page += "<span class='navbar-toggler-icon'></span>";
+  page += "</button>";
+  page += "<div class='collapse navbar-collapse' id='navbarNavDropdown'>";
+  page += "<ul class='navbar-nav mr-auto'>";
+  //page += "<li class='nav-item'>";
+  //page += "<a class='nav-link' href='/'>Home <span class='sr-only'>(current)</span></a>";
+  //page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/live'>Live</a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/banks'>Banks</a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/pedals'>Pedals</a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/interfaces'>Interfaces</a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<form class='form-inline my-2 my-lg-0'>";
+  page += "<button class='btn btn-primary my-2 my-sm-0' type='button'>Apply</button> ";
+  page += "<button class='btn btn-primary my-2 my-sm-0' type='button'>Save</button>";
+  page += "</form>";
+  page += "</li>";
+  page += "</ul>";
+  page += "</div>";
+  page += "</nav>";
+
+  return page;
+}
+
+String get_footer_page() {
+  
+  String page = "";
+  
+  page += "</div>";
+  page += "</body>";
+  page += "</html>";
+
+  return page;
+}
+
+String get_root_page() {
+  
+  String page = "";
+  
+  page += get_top_page();
+  
+  page += get_footer_page();
+
+  return page;
+}
+
+String get_banks_page() {
+  
+  String page = "";
+  
+  page += get_top_page();
+/*
+  page += "<div class='container-fluid'>";
+  
+  page += "<h1>Pedalino&trade;</h1>";
+  page += "<div class='row'>";
+  page += "<div class='col'>";
+  page += "<ul class='nav nav-pills'>";
+  page += "<li class='nav-item'><a class='nav-link' href='/live'>Live</a></li>";
+  page += "<li class='nav-item active'><a class='nav-link' href='/banks'>Banks</a></li>";
+  page += "<li class='nav-item'><a class='nav-link' href='/pedals'>Pedals</a></li>";
+  page += "<li class='nav-item'><a class='nav-link' href='/interfaces'>Interfaces</a></li>";
+  page += "<li class='nav-item dropdown'>";
+  page +=       "<form method='POST' name='selecttheme' id='selecttheme'/>"; 
+  page +=       "<input class='span' id='choixtheme' name='theme' type='hidden'>";
+  page += "<a class='nav-link dropdown-toggle' data-toggle='dropdown' href='#'>Theme</a>";
+  //page += "<div class='dropdown-menu'>";
+  //page += "<a class='dropdown-item' href='#''>Link 1</a>";
+  page += "<ul class='dropdown-menu'>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"bootstrap\"); $(\"#selecttheme\").submit()'><a href='#'>Boostrap</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"cerulean\"); $(\"#selecttheme\").submit()'><a href='#'>Cerulean</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"cosmo\"); $(\"#selecttheme\").submit()'><a href='#'>Cosmo</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"cyborg\"); $(\"#selecttheme\").submit()'><a href='#'>Cyborg</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"darkly\"); $(\"#selecttheme\").submit()'><a href='#'>Darkly</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"flatly\"); $(\"#selecttheme\").submit()'><a href='#'>Flatly</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"journal\"); $(\"#selecttheme\").submit()'><a href='#'>Journal</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"lumen\"); $(\"#selecttheme\").submit()'><a href='#'>Lumen</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"paper\"); $(\"#selecttheme\").submit()'><a href='#'>Paper</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"readable\"); $(\"#selecttheme\").submit()'><a href='#'>Readable</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"sandstone\"); $(\"#selecttheme\").submit()'><a href='#'>Sandstone</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"simplex\"); $(\"#selecttheme\").submit()'><a href='#'>Simplex</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"slate\"); $(\"#selecttheme\").submit()'><a href='#'>Slate</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"spacelab\"); $(\"#selecttheme\").submit()'><a href='#'>Spacelab</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"superhero\"); $(\"#selecttheme\").submit()'><a href='#'>Superhero</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"united\"); $(\"#selecttheme\").submit()'><a href='#'>United</a></li>";
+  page += "<li onclick='$(\"#choixtheme\").val(\"yeti\"); $(\"#selecttheme\").submit()'><a href='#'>Yeti</a></li>";
+  page += "</ul>";
+  //page += "</div>";
+  page +=       "</form>";
+  page += "</li>";
+  page += "</ul>";
+  page += "</div>";
+  page += "<div class='col' align='right'><button type='button' class='btn btn-primary'>Apply</button> <button type='button' class='btn btn-primary'>Save</button></div>";
+  page += "</div>";
+*/
+/*
+  page += "<nav class='navbar navbar-expand-lg navbar-light bg-light'>";
+  page += "<a class='navbar-brand' href='#'>Pedalino&trade;</a>";
+  page += "<button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>";
+  page += "<span class='navbar-toggler-icon'></span>";
+  page += "</button>";
+  page += "<div class='collapse navbar-collapse' id='navbarNavDropdown'>";
+  page += "<ul class='navbar-nav'>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/'>Home <span class='sr-only'>(current)</span></a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/live'>Live</a>";
+  page += "</li>";
+  page += "<li class='nav-item active'>";
+  page += "<a class='nav-link' href='/banks'>Banks</a>";
+  page += "</li>";
+  page += "<li class='nav-item'>";
+  page += "<a class='nav-link' href='/pedals'>Pedals</a>";
+  page += "</li>";
+  page += "<li class='nav-item dropdown'>";
+  page += "<form method='POST' name='selecttheme' id='selecttheme'/>"; 
+  page += "<input class='span' id='choixtheme' name='theme' type='hidden'>";
+  page += "<a class='nav-link dropdown-toggle' href='#' id='navbarDropdownMenuLink' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Theme</a>";
+  page += "<div class='dropdown-menu' aria-labelledby='navbarDropdownMenuLink'>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"bootstrap\"); $(\"#selecttheme\").submit()' href='#'>Boostrap</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"cerulean\"); $(\"#selecttheme\").submit()' href='#'>Cerulean</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"cosmo\"); $(\"#selecttheme\").submit()' href='#'>Cosmo</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"cyborg\"); $(\"#selecttheme\").submit()' href='#'>Cyborg</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"darkly\"); $(\"#selecttheme\").submit()' href='#'>Darkly</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"flatly\"); $(\"#selecttheme\").submit()' href='#'>Flatly</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"journal\"); $(\"#selecttheme\").submit()' href='#'>Journal</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"lumen\"); $(\"#selecttheme\").submit()' href='#'>Lumen</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"paper\"); $(\"#selecttheme\").submit()' href='#'>Paper</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"readable\"); $(\"#selecttheme\").submit()' href='#'>Readable</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"sandstone\"); $(\"#selecttheme\").submit()' href='#'>Sandstone</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"simplex\"); $(\"#selecttheme\").submit()' href='#'>Simplex</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"slate\"); $(\"#selecttheme\").submit()' href='#'>Slate</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"spacelab\"); $(\"#selecttheme\").submit()' href='#'>Spacelab</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"superhero\"); $(\"#selecttheme\").submit()' href='#'>Superhero</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"united\"); $(\"#selecttheme\").submit()' href='#'>United</a>";
+  page += "<a class='dropdown-item' onclick='$(\"#choixtheme\").val(\"yeti\"); $(\"#selecttheme\").submit()' href='#'>Yeti</a>";
+  page += "</div>";
+  page += "</form>";
+  page += "</li>";
+  page += "</ul>";
+  page += "<form class='form-inline'>";
+  page += "<button class='btn btn-primary' type='button'>Apply</button>";
+  page += "<button class='btn btn-primary' type='button'>Save</button>";
+  page += "</form>";
+  page += "</div>";
+  page += "</nav>";
+ */ 
+  page += "<h3>Banks</h3>";
+
+  page += "<div class='btn-group'>";
+  page += "<form><button type='button submit' class='btn " + (bank == "1" ? String("btn-primary") : String("")) + "' name='bank' value='1'>1</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "2" ? String("btn-primary") : String("")) + "' name='bank' value='2'>2</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "3" ? String("btn-primary") : String("")) + "' name='bank' value='3'>3</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "4" ? String("btn-primary") : String("")) + "' name='bank' value='4'>4</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "5" ? String("btn-primary") : String("")) + "' name='bank' value='5'>5</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "6" ? String("btn-primary") : String("")) + "' name='bank' value='6'>6</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "7" ? String("btn-primary") : String("")) + "' name='bank' value='7'>7</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "8" ? String("btn-primary") : String("")) + "' name='bank' value='8'>8</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank == "9" ? String("btn-primary") : String("")) + "' name='bank' value='9'>9</button></form>";
+  page += "<form><button type='button submit' class='btn " + (bank =="10" ? String("btn-primary") : String("")) + "' name='bank' value='10'>10</button></form>";
+  page += "</div>";
+
+  page += "<table class='table-responsive-sm table-borderless'>";
+  page += "<tbody><tr><td>Pedal</td><td>Message</td><td>Channel</td><td>Code</td><td>Single Press</td><td>Double Press</td><td>Long Press</td></tr>";
+  for (unsigned int i = 1; i <= 16; i++) {
+    page += "<tr align='center' valign='center'>";
+
+    page += "<td>" + String(i) + "</td>";
+
+    page += "<td><div class='form-group'>";
+	  page += "<select class='custom-select-sm' id='message" + String(i) + "'>";
+	  page += "<option>Program Change</option>";
+	  page += "<option>Control Change</option>";
+	  page += "<option>Note On/Off</option>";
+	  page += "<option>Pitch Bend</option>";
+	  page += "</select>";
+	  page += "</div></td>";
+		
+    page += "<td><div class='form-group'>";
+		page += "<select class='custom-select-sm' id='channel'" + String(i) + ">";
+		page += "<option>1</option>";
+		page += "<option>2</option>";
+		page += "<option>3</option>";
+		page += "<option>4</option>";
+		page += "<option>5</option>";
+		page += "<option>6</option>";
+		page += "<option>7</option>";
+		page += "<option>8</option>";
+		page += "<option>9</option>";
+		page += "<option>10</option>";
+		page += "<option>11</option>";
+		page += "<option>12</option>";
+		page += "<option>13</option>";
+		page += "<option>14</option>";
+		page += "<option>15</option>";
+		page += "<option>16</option>";
+		page += "</select>";
+		page += "</div></td>";
+		
+    page += "<td><div class='form-group'>";
+		page += "<input type='number' class='custom-select-sm' name='code' min='0' max='127'>";
+		page += "</div></td>";
+
+    page += "<td><div class='form-group'>";
+		page += "<input type='number' class='custom-select-sm' name='code1' min='0' max='127'>";
+		page += "</div></td>";
+
+    page += "<td><div class='form-group'>";
+		page += "<input type='number' class='custom-select-sm' name='code2' min='0' max='127'>";
+		page += "</div></td>";
+
+    page += "<td><div class='form-group'>";
+		page += "<input type='number' class='custom-select-sm' name='code3' min='0' max='127'>";
+		page += "</div></td>";
+		        
+    page += "</tr>";
   }  
+  page += "</tbody>";
+  page += "</table>";
+
+  page += get_footer_page();
+
+  return page;
 }
 
-void handleD5() {
-  String D5Value; 
-  updateGPIO(0,httpServer.arg("D5")); 
+String get_pedals_page() {
+
+  String page = "";
+
+  page += get_top_page();
+  
+  page += "<h3>Pedals</h3>";
+
+  page += "<table class='table-responsive-sm table-borderless'>";
+  page += "<tbody><tr><td>Pedal</td><td>Mode</td><td>Function</td><td>Autosensing</td><td>Single Press</td><td>Double Press</td><td>Long Press</td></tr>";
+  for (unsigned int i = 1; i <= 8; i++) {
+    page += "<tr align='center' valign='center'>";
+
+    page += "<td>" + String(i) + "</td>";
+    
+    page += "<td><div class='form-group'>";
+	  page += "<select class='custom-select-sm' id='mode" + String(i) + "'>";
+	  page += "<option>None</option>";
+	  page += "<option>Momentary</option>";
+	  page += "<option>Latch</option>";
+	  page += "<option>Analog</option>";
+    page += "<option>Jog Wheel</option>";
+    page += "<option>Ladder</option>";
+    page += "<option>Momentary 3</option>";
+    page += "<option>Momentary 2</option>";
+    page += "<option>Latch 2</option>";
+	  page += "</select>";
+	  page += "</div></td>";
+
+    page += "<td><div class='form-group'>";
+	  page += "<select class='custom-select-sm' id='function" + String(i) + "'>";
+	  page += "<option>MIDI</option>";
+	  page += "<option>Bank+</option>";
+	  page += "<option>Bank-</option>";
+	  page += "<option></option>";
+    page += "<option></option>";
+    page += "<option></option>";
+    page += "<option></option>";
+    page += "<option></option>";
+    page += "<option></option>";
+	  page += "</select>";
+	  page += "</div></td>";
+
+		page +=	"<td><div class='custom-control custom-checkbox'>";
+		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='autosensing" + String(i) + "'>";
+		page += "<label class='custom-control-label' for='customCheck'></label>";
+		page +=	"</div></td>";
+
+    page +=	"<td><div class='custom-control custom-checkbox'>";
+		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='singlepress" + String(i) + "'>";
+		page += "<label class='custom-control-label' for='customCheck'></label>";
+		page +=	"</div></td>";
+
+    page +=	"<td><div class='custom-control custom-checkbox'>";
+		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='doublepress" + String(i) + "'>";
+		page += "<label class='custom-control-label' for='customCheck'></label>";
+		page +=	"</div></td>";
+
+    page +=	"<td><div class='custom-control custom-checkbox'>";
+		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='longpress" + String(i) + "'>";
+		page += "<label class='custom-control-label' for='customCheck'></label>";
+		page +=	"</div></td>";
+  }
+  page += "</tbody>";
+  page += "</table>";
+
+  page += get_footer_page();
+
+  return page;
 }
 
-void handleD6() {
-  String D6Value; 
-  updateGPIO(1,httpServer.arg("D6")); 
-}
-
-void handleD7() {
-  String D7Value; 
-  updateGPIO(2,httpServer.arg("D7")); 
-}
-
-void handleD8() {
-  String D8Value; 
-  updateGPIO(3,httpServer.arg("D8")); 
-}
-
-void http_handle_root(){ 
-  if ( httpServer.hasArg("theme") ) {
-    http_handle_theme();
-  } else if ( httpServer.hasArg("D5") ) {
-    handleD5();
-  } else if ( httpServer.hasArg("D6") ) {
-    handleD6();
-  } else if ( httpServer.hasArg("D7") ) {
-    handleD7();
-  } else if ( httpServer.hasArg("D8") ) {
-    handleD8();
+void http_handle_root() { 
+  
+  if (httpServer.hasArg("theme")) {
+    theme = httpServer.arg("theme");
+    httpServer.send(200, "text/html", get_root_page());
+  } else if (httpServer.hasArg("bank")) {
+    bank = httpServer.arg("bank");
+    httpServer.send(200, "text/html", get_banks_page());
   } else {
-    httpServer.send ( 200, "text/html", getPage() );
-  }  
+    httpServer.send(200, "text/html", get_root_page());
+  }
+  return; 
+}
+
+void http_handle_banks() {
+  if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
+  if (httpServer.hasArg("bank"))  bank  = httpServer.arg("bank");
+  httpServer.send(200, "text/html", get_banks_page());
+}
+
+void http_handle_pedals() {
+  if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
+  httpServer.send(200, "text/html", get_pedals_page());
+}
+
+void http_handle_interfaces() {
+  if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
+  if (httpServer.hasArg("interface")) interface = httpServer.arg("interface");
+  httpServer.send(200, "text/html", get_pedals_page());
 }
 
 void http_handle_not_found() {
@@ -2309,6 +2623,9 @@ typedef enum WiFiEvent
 
           // 
           httpServer.on("/", http_handle_root);
+          httpServer.on("/banks", http_handle_banks);
+          httpServer.on("/pedals", http_handle_pedals);
+          httpServer.on("/interfaces", http_handle_interfaces);
           httpServer.onNotFound(http_handle_not_found);
           httpServer.begin();
           MDNS.addService("_http", "_tcp", 80);
