@@ -2055,6 +2055,7 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 }
 #endif
 
+#ifdef ARDUINO_ARCH_ESP8266
 String  etatGpio[4] = {"OFF","OFF","OFF","OFF"};
 String  theme = "sandstone";
 String  bank  = "1";
@@ -2556,7 +2557,7 @@ void http_handle_not_found() {
 
   httpServer.send(404, "text/plain", message);
 }
-
+#endif
 
 
 void WiFiEvent(WiFiEvent_t event) {
