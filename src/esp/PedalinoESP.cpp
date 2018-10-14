@@ -2055,182 +2055,67 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 }
 #endif
 
-#ifdef ARDUINO_ARCH_ESP8266
-String  etatGpio[4] = {"OFF","OFF","OFF","OFF"};
+#ifndef NOWEBCONFIG
 String  theme = "sandstone";
 String  bank  = "1";
-String  pedal = "1";
-String  interface = "1";
-float   t = 0 ;
-float   h = 0 ;
-float   p = 0;
 
-String getPage(){
-  //Return a string containing the HTML code of the page
-  String page = "<html charset=UTF-8><head><meta http-equiv='refresh' content='60' name='viewport' content='width=device-width, initial-scale=1'/>";
-  page += "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>";
-  if ( theme == "bootstrap" ) {
-    page += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>";
-  } else {
-    page += "<link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/";
-    page += theme;
-    page += "/bootstrap.min.css' rel='stylesheet'>";
-  }
-  page += "<title>Pedalino - https://github.com/alf45tar/Pedalino</title></head><body>";
-  page += "<div class='container-fluid'>";
-  page +=   "<div class='row'>";
-  page +=     "<div class='col-md-12'>";
-  page +=       "<h1>Pedalino&trade;</h1>";
-  page +=       "<h3>Complete wireless MIDI foot controller for guitarists and more</h3>";
-  page +=       "<ul class='nav nav-pills'>";
-  page +=         "<li class='active'>";
-  page +=           "<a href='#'> <span class='badge pull-right'>";
-  page +=           t;
-  page +=           "</span> Live</a>";
-  page +=         "</li><li>";
-  page +=           "<a href='#'> <span class='badge pull-right'>";
-  page +=           h;
-  page +=           "</span> Banks</a>";
-  page +=         "</li><li>";
-  page +=           "<a href='#'> <span class='badge pull-right'>";
-  page +=           p;
-  page +=           "</span> Pedals</a></li>";
-  page +=       "</ul>";
-  page +=       "<table class='table'>";
-  page +=         "<thead><tr><th>Capteur</th><th>Mesure</th><th>Valeur</th><th>Valeur pr&eacute;c&eacute;dente</th></tr></thead>";
-  page +=         "<tbody>";
-  page +=           "<tr><td>DHT22</td><td>Temp&eacute;rature</td><td>";
-  page +=             t;
-  page +=             "&deg;C</td><td>";
-  page +=             "-</td></tr>";
-  page +=           "<tr class='active'><td>DHT22</td><td>Humidit&eacute;</td><td>";
-  page +=             h;
-  page +=             "%</td><td>";
-  page +=             "-</td></tr>";
-  page +=           "<tr><td>BMP180</td><td>Pression atmosph&eacute;rique</td><td>";
-  page +=             p;
-  page +=             "mbar</td><td>";
-  page +=             "-</td></tr>";
-  page +=       "</tbody></table>";
-  page +=       "<h3>GPIO</h3>";
-  page +=       "<div class='row'>";
-  page +=         "<div class='col-md-4'><h4 class ='text-left'>D5 ";
-  page +=           "<span class='badge'>";
-  page +=           etatGpio[0];
-  page +=         "</span></h4></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D5' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D5' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
-  page +=         "<div class='col-md-4'><h4 class ='text-left'>D6 ";
-  page +=           "<span class='badge'>";
-  page +=           etatGpio[1];
-  page +=         "</span></h4></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D6' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D6' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
-  page +=         "<div class='col-md-4'><h4 class ='text-left'>D7 ";
-  page +=           "<span class='badge'>";
-  page +=           etatGpio[2];
-  page +=         "</span></h4></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D7' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D7' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
-  page +=         "<div class='col-md-4'><h4 class ='text-left'>D8 ";
-  page +=           "<span class='badge'>";
-  page +=           etatGpio[3];
-  page +=         "</span></h4></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D8' value='1' class='btn btn-success btn-lg'>ON</button></form></div>";
-  page +=         "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='D8' value='0' class='btn btn-danger btn-lg'>OFF</button></form></div>";
-  page +=       "</div>";
-  page +=   "<div class='row'>";
-  page +=     "<div class='col-md-4'>";
-  page +=       "<form method='POST' name='selecttheme' id='selecttheme'/>"; 
-  page +=       "<input class='span' id='choixtheme' name='theme' type='hidden'>";
-  page +=       "<div class='btn-group'>";
-  page +=         "<button class='btn btn-default'>Change the theme</button>";
-  page +=         "<button data-toggle='dropdown' class='btn btn-default dropdown-toggle'><span class='caret'></span></button>";
-  page +=         "<ul class='dropdown-menu'>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"bootstrap\"); $(\"#selecttheme\").submit()'><a href='#'>Boostrap</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"cerulean\"); $(\"#selecttheme\").submit()'><a href='#'>Cerulean</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"cosmo\"); $(\"#selecttheme\").submit()'><a href='#'>Cosmo</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"cyborg\"); $(\"#selecttheme\").submit()'><a href='#'>Cyborg</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"darkly\"); $(\"#selecttheme\").submit()'><a href='#'>Darkly</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"flatly\"); $(\"#selecttheme\").submit()'><a href='#'>Flatly</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"journal\"); $(\"#selecttheme\").submit()'><a href='#'>Journal</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"lumen\"); $(\"#selecttheme\").submit()'><a href='#'>Lumen</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"paper\"); $(\"#selecttheme\").submit()'><a href='#'>Paper</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"readable\"); $(\"#selecttheme\").submit()'><a href='#'>Readable</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"sandstone\"); $(\"#selecttheme\").submit()'><a href='#'>Sandstone</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"simplex\"); $(\"#selecttheme\").submit()'><a href='#'>Simplex</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"slate\"); $(\"#selecttheme\").submit()'><a href='#'>Slate</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"spacelab\"); $(\"#selecttheme\").submit()'><a href='#'>Spacelab</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"superhero\"); $(\"#selecttheme\").submit()'><a href='#'>Superhero</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"united\"); $(\"#selecttheme\").submit()'><a href='#'>United</a></li>";
-  page +=           "<li onclick='$(\"#choixtheme\").val(\"yeti\"); $(\"#selecttheme\").submit()'><a href='#'>Yeti</a></li>";
-  page +=         "</ul>";
-  page +=       "</div>";
-  page +=       "</form></div>";
-  page +=       "<div class='col-md-8'>";
-  page +=         "<p><a href='https://github.com/alf45tar/Pedalino'>https://github.com/alf45tar/Pedalino</p>";
-  page +=       "</div>";
-  page +=   "</div>"; 
-  page += "</div></div></div>";
-  page += "</body></html>";
-  return page;
-}
-
-String get_top_page() {
+String get_top_page(byte p = 0) {
   
   String page = "";
   
-  page += "<html lang='en'>";
-  page += "<head>";
-  page += "<title>Pedalino&trade;</title>";
-  page += "<meta charset='utf-8'>";
-  page += "<meta name='viewport' content='widtd=device-widtd, initial-scale=1'>";
+  page += F("<html lang='en'>");
+  page += F("<head>");
+  page += F("<title>Pedalino&trade;</title>");
+  page += F("<meta charset='utf-8'>");
+  page += F("<meta name='viewport' content='widtd=device-widtd, initial-scale=1'>");
   if ( theme == "bootstrap" ) {
-    page += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>";
+    page += F("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>");
   } else {
-    page += "<link href='https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/";
+    page += F("<link href='https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/");
     page += theme;
-    page += "/bootstrap.min.css' rel='stylesheet'>";
+    page += F("/bootstrap.min.css' rel='stylesheet'>");
   }
-  page += "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>";
-  page += "<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>";
-  page += "<script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>";
-  page += "</head>";
+  page += F("<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>");
+  page += F("<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>");
+  page += F("<script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>");
+  page += F("</head>");
 
-  page += "<body>";
-  page += "<div class='container-fluid'>";
+  page += F("<body>");
+  page += F("<p></p>");
+  page += F("<div class='container-fluid'>");
 
-  page += "<nav class='navbar navbar-expand-lg navbar-light bg-light'>";
-  page += "<a class='navbar-brand' href='/'>Pedalino&trade;</a>";
-  page += "<button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>";
-  page += "<span class='navbar-toggler-icon'></span>";
-  page += "</button>";
-  page += "<div class='collapse navbar-collapse' id='navbarNavDropdown'>";
-  page += "<ul class='navbar-nav mr-auto'>";
-  //page += "<li class='nav-item'>";
-  //page += "<a class='nav-link' href='/'>Home <span class='sr-only'>(current)</span></a>";
-  //page += "</li>";
-  page += "<li class='nav-item'>";
-  page += "<a class='nav-link' href='/live'>Live</a>";
-  page += "</li>";
-  page += "<li class='nav-item'>";
-  page += "<a class='nav-link' href='/banks'>Banks</a>";
-  page += "</li>";
-  page += "<li class='nav-item'>";
-  page += "<a class='nav-link' href='/pedals'>Pedals</a>";
-  page += "</li>";
-  page += "<li class='nav-item'>";
-  page += "<a class='nav-link' href='/interfaces'>Interfaces</a>";
-  page += "</li>";
-  page += "<li class='nav-item'>";
-  page += "<form class='form-inline my-2 my-lg-0'>";
-  page += "<button class='btn btn-primary my-2 my-sm-0' type='button'>Apply</button> ";
-  page += "<button class='btn btn-primary my-2 my-sm-0' type='button'>Save</button>";
-  page += "</form>";
-  page += "</li>";
-  page += "</ul>";
-  page += "</div>";
-  page += "</nav>";
+  page += F("<nav class='navbar navbar-expand-lg navbar-light bg-light'>");
+  page += F("<a class='navbar-brand' href='/'>Pedalino&trade;</a>");
+  page += F("<button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>");
+  page += F("<span class='navbar-toggler-icon'></span>");
+  page += F("</button>");
+  page += F("<div class='collapse navbar-collapse' id='navbarNavDropdown'>");
+  page += F("<ul class='navbar-nav mr-auto'>");
+  page += F("<li class='nav-item");
+  page += (p == 1 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/live'>Live</a>");
+  page += F("</li>");
+  page += F("<li class='nav-item");
+  page += (p == 2 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/banks'>Banks</a>");
+  page += F("</li>");
+  page += F("<li class='nav-item");
+  page += (p == 3 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/pedals'>Pedals</a>");
+  page += F("</li>");
+  page += F("<li class='nav-item");
+  page += (p == 4 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/interfaces'>Interfaces</a>");
+  page += F("</li>");
+  page += F("<li class='nav-item'>");
+  page += F("<form class='form-inline my-2 my-lg-0'>");
+  page += F("<button class='btn btn-primary my-2 my-sm-0' type='button'>Apply</button> ");
+  page += F("<button class='btn btn-primary my-2 my-sm-0' type='button'>Save</button>");
+  page += F("</form>");
+  page += F("</li>");
+  page += F("</ul>");
+  page += F("</div>");
+  page += F("</nav>");
 
   return page;
 }
@@ -2239,9 +2124,9 @@ String get_footer_page() {
   
   String page = "";
   
-  page += "</div>";
-  page += "</body>";
-  page += "</html>";
+  page += F("</div>");
+  page += F("</body>");
+  page += F("</html>");
 
   return page;
 }
@@ -2261,7 +2146,7 @@ String get_banks_page() {
   
   String page = "";
   
-  page += get_top_page();
+  page += get_top_page(2);
 /*
   page += "<div class='container-fluid'>";
   
@@ -2359,78 +2244,93 @@ String get_banks_page() {
   page += "</div>";
   page += "</nav>";
  */ 
-  page += "<h3>Banks</h3>";
 
-  page += "<div class='btn-group'>";
-  page += "<form><button type='button submit' class='btn " + (bank == "1" ? String("btn-primary") : String("")) + "' name='bank' value='1'>1</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "2" ? String("btn-primary") : String("")) + "' name='bank' value='2'>2</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "3" ? String("btn-primary") : String("")) + "' name='bank' value='3'>3</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "4" ? String("btn-primary") : String("")) + "' name='bank' value='4'>4</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "5" ? String("btn-primary") : String("")) + "' name='bank' value='5'>5</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "6" ? String("btn-primary") : String("")) + "' name='bank' value='6'>6</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "7" ? String("btn-primary") : String("")) + "' name='bank' value='7'>7</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "8" ? String("btn-primary") : String("")) + "' name='bank' value='8'>8</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank == "9" ? String("btn-primary") : String("")) + "' name='bank' value='9'>9</button></form>";
-  page += "<form><button type='button submit' class='btn " + (bank =="10" ? String("btn-primary") : String("")) + "' name='bank' value='10'>10</button></form>";
-  page += "</div>";
+  page += F( "<div class='btn-group'>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "1" ? String("btn-primary") : String("")) + F("' name='bank' value='1'>1</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "2" ? String("btn-primary") : String("")) + F("' name='bank' value='2'>2</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "3" ? String("btn-primary") : String("")) + F("' name='bank' value='3'>3</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "4" ? String("btn-primary") : String("")) + F("' name='bank' value='4'>4</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "5" ? String("btn-primary") : String("")) + F("' name='bank' value='5'>5</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "6" ? String("btn-primary") : String("")) + F("' name='bank' value='6'>6</button></form>");
+  page += F( "<form><button type='button submit' class='btn ");
+  page += (bank == "7" ? String("btn-primary") : String("")) + F("' name='bank' value='7'>7</button></form>");
+  page += F("<form><button type='button submit' class='btn ");
+  page += (bank == "8" ? String("btn-primary") : String("")) + F("' name='bank' value='8'>8</button></form>");
+  page += F("<form><button type='button submit' class='btn ");
+  page += (bank == "9" ? String("btn-primary") : String("")) + F("' name='bank' value='9'>9</button></form>");
+  page += F("<form><button type='button submit' class='btn ");
+  page += (bank =="10" ? String("btn-primary") : String("")) + F("' name='bank' value='10'>10</button></form>");
+  page += F("</div>");
 
-  page += "<table class='table-responsive-sm table-borderless'>";
-  page += "<tbody><tr><td>Pedal</td><td>Message</td><td>Channel</td><td>Code</td><td>Single Press</td><td>Double Press</td><td>Long Press</td></tr>";
+  page += F("<table class='table-responsive-sm table-borderless'>");
+  page += F("<tbody><tr><td>Pedal</td><td>Message</td><td>Channel</td><td>Code</td><td>Value 1</td><td>Value 2</td><td>Value 3</td></tr>");
   for (unsigned int i = 1; i <= 16; i++) {
-    page += "<tr align='center' valign='center'>";
+    page += F("<tr align='center' valign='center'>");
 
-    page += "<td>" + String(i) + "</td>";
+    page += F("<td>");
+    page += String(i);
+    page += F("</td>");
 
-    page += "<td><div class='form-group'>";
-	  page += "<select class='custom-select-sm' id='message" + String(i) + "'>";
-	  page += "<option>Program Change</option>";
-	  page += "<option>Control Change</option>";
-	  page += "<option>Note On/Off</option>";
-	  page += "<option>Pitch Bend</option>";
-	  page += "</select>";
-	  page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+	  page += F("<select class='custom-select-sm' id='message");
+    page += String(i);
+    page += F("'>");
+	  page += F("<option>Program Change</option>");
+	  page += F("<option>Control Change</option>");
+	  page += F("<option>Note On/Off</option>");
+	  page += F("<option>Pitch Bend</option>");
+	  page += F("</select>");
+	  page += F("</div></td>");
 		
-    page += "<td><div class='form-group'>";
-		page += "<select class='custom-select-sm' id='channel'" + String(i) + ">";
-		page += "<option>1</option>";
-		page += "<option>2</option>";
-		page += "<option>3</option>";
-		page += "<option>4</option>";
-		page += "<option>5</option>";
-		page += "<option>6</option>";
-		page += "<option>7</option>";
-		page += "<option>8</option>";
-		page += "<option>9</option>";
-		page += "<option>10</option>";
-		page += "<option>11</option>";
-		page += "<option>12</option>";
-		page += "<option>13</option>";
-		page += "<option>14</option>";
-		page += "<option>15</option>";
-		page += "<option>16</option>";
-		page += "</select>";
-		page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+		page += F("<select class='custom-select-sm' id='channel");
+    page += String(i);
+    page += F("'>");
+		page += F("<option>1</option>");
+		page += F("<option>2</option>");
+		page += F("<option>3</option>");
+		page += F("<option>4</option>");
+		page += F("<option>5</option>");
+		page += F("<option>6</option>");
+		page += F("<option>7</option>");
+		page += F("<option>8</option>");
+		page += F("<option>9</option>");
+		page += F("<option>10</option>");
+		page += F("<option>11</option>");
+		page += F("<option>12</option>");
+		page += F("<option>13</option>");
+		page += F("<option>14</option>");
+		page += F("<option>15</option>");
+		page += F("<option>16</option>");
+		page += F("</select>");
+		page += F("</div></td>");
 		
-    page += "<td><div class='form-group'>";
-		page += "<input type='number' class='custom-select-sm' name='code' min='0' max='127'>";
-		page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+		page += F("<input type='number' class='custom-select-sm' name='code' min='0' max='127'>");
+		page += F("</div></td>");
 
-    page += "<td><div class='form-group'>";
-		page += "<input type='number' class='custom-select-sm' name='code1' min='0' max='127'>";
-		page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+		page += F("<input type='number' class='custom-select-sm' name='code1' min='0' max='127'>");
+		page += F("</div></td>");
 
-    page += "<td><div class='form-group'>";
-		page += "<input type='number' class='custom-select-sm' name='code2' min='0' max='127'>";
-		page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+		page += F("<input type='number' class='custom-select-sm' name='code2' min='0' max='127'>");
+		page += F("</div></td>");
 
-    page += "<td><div class='form-group'>";
-		page += "<input type='number' class='custom-select-sm' name='code3' min='0' max='127'>";
-		page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+		page += F("<input type='number' class='custom-select-sm' name='code3' min='0' max='127'>");
+		page += F("</div></td>");
 		        
-    page += "</tr>";
+    page += F("</tr>");
   }  
-  page += "</tbody>";
-  page += "</table>";
+  page += F("</tbody>");
+  page += F("</table>");
 
   page += get_footer_page();
 
@@ -2441,67 +2341,154 @@ String get_pedals_page() {
 
   String page = "";
 
-  page += get_top_page();
-  
-  page += "<h3>Pedals</h3>";
+  page += get_top_page(3);
 
-  page += "<table class='table-responsive-sm table-borderless'>";
-  page += "<tbody><tr><td>Pedal</td><td>Mode</td><td>Function</td><td>Autosensing</td><td>Single Press</td><td>Double Press</td><td>Long Press</td></tr>";
-  for (unsigned int i = 1; i <= 8; i++) {
-    page += "<tr align='center' valign='center'>";
+  page += F("<table class='table-responsive-sm table-borderless'>");
+  page += F("<tbody><tr><td>Pedal</td><td>Mode</td><td>Function</td><td>Autosensing</td><td>Single<br>Press</td><td>Double<br>Press</td><td>Long<br>Press</td></tr>");
+  for (unsigned int i = 1; i <= 16; i++) {
+    page += F("<tr align='center' valign='center'>");
 
-    page += "<td>" + String(i) + "</td>";
+    page += F("<td>");
+    page += String(i);
+    page += F("</td>");
     
-    page += "<td><div class='form-group'>";
-	  page += "<select class='custom-select-sm' id='mode" + String(i) + "'>";
-	  page += "<option>None</option>";
-	  page += "<option>Momentary</option>";
-	  page += "<option>Latch</option>";
-	  page += "<option>Analog</option>";
-    page += "<option>Jog Wheel</option>";
-    page += "<option>Ladder</option>";
-    page += "<option>Momentary 3</option>";
-    page += "<option>Momentary 2</option>";
-    page += "<option>Latch 2</option>";
-	  page += "</select>";
-	  page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+	  page += F("<select class='custom-select-sm' id='mode");
+    page += String(i);
+    page += F("'>");
+	  page += F("<option>None</option>");
+	  page += F("<option>Momentary</option>");
+	  page += F("<option>Latch</option>");
+	  page += F("<option>Analog</option>");
+    page += F("<option>Jog Wheel</option>");
+    page += F("<option>Ladder</option>");
+    page += F("<option>Momentary 3</option>");
+    page += F("<option>Momentary 2</option>");
+    page += F("<option>Latch 2</option>");
+	  page += F("</select>");
+	  page += F("</div></td>");
 
-    page += "<td><div class='form-group'>";
-	  page += "<select class='custom-select-sm' id='function" + String(i) + "'>";
-	  page += "<option>MIDI</option>";
-	  page += "<option>Bank+</option>";
-	  page += "<option>Bank-</option>";
-	  page += "<option></option>";
-    page += "<option></option>";
-    page += "<option></option>";
-    page += "<option></option>";
-    page += "<option></option>";
-    page += "<option></option>";
-	  page += "</select>";
-	  page += "</div></td>";
+    page += F("<td><div class='form-group'>");
+	  page += F("<select class='custom-select-sm' id='function");
+    page += String(i);
+    page += F("'>");
+	  page += F("<option>MIDI</option>");
+	  page += F("<option>Bank+</option>");
+	  page += F("<option>Bank-</option>");
+	  page += F("<option></option>");
+    page += F("<option></option>");
+    page += F("<option></option>");
+    page += F("<option></option>");
+    page += F("<option></option>");
+    page += F("<option></option>");
+	  page += F("</select>");
+	  page += F("</div></td>");
 
-		page +=	"<td><div class='custom-control custom-checkbox'>";
-		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='autosensing" + String(i) + "'>";
-		page += "<label class='custom-control-label' for='customCheck'></label>";
-		page +=	"</div></td>";
+		page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='autoCheck");
+    page += String(i) + F("' name='autosensing") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='autoCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
 
-    page +=	"<td><div class='custom-control custom-checkbox'>";
-		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='singlepress" + String(i) + "'>";
-		page += "<label class='custom-control-label' for='customCheck'></label>";
-		page +=	"</div></td>";
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='singleCheck");
+    page += String(i) + F("' name='singlepress") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='singleCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
 
-    page +=	"<td><div class='custom-control custom-checkbox'>";
-		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='doublepress" + String(i) + "'>";
-		page += "<label class='custom-control-label' for='customCheck'></label>";
-		page +=	"</div></td>";
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='doubleCheck");
+    page += String(i) + F("' name='doublepress") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='doubleCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
 
-    page +=	"<td><div class='custom-control custom-checkbox'>";
-		page += "<input type='checkbox' class='custom-control-input' id='customCheck' name='longpress" + String(i) + "'>";
-		page += "<label class='custom-control-label' for='customCheck'></label>";
-		page +=	"</div></td>";
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='longCheck");
+    page += String(i) + F("' name='longpress") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='longCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
   }
-  page += "</tbody>";
-  page += "</table>";
+  page += F("</tbody>");
+  page += F("</table>");
+
+  page += get_footer_page();
+
+  return page;
+}
+
+String get_interfaces_page() {
+
+  String page = "";
+
+  page += get_top_page(4);
+
+  page += F("<table class='table-responsive-sm table-borderless'>");
+  page += F("<tbody><tr><td> </td><td>IN</td><td>OUT</td><td>THRU</td><td>Routing</td><td>Clock</td></tr>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<tr align='center' valign='center'>");
+
+    switch (i) {
+      case 1:
+        page += F("<td>USB</td>");
+        break;
+      case 2:
+        page += F("<td>DIN</td>");
+        break;
+      case 3:
+        page += F("<td>RTP-MIDI</td>");
+        break;
+      case 4:
+        page += F("<td>IPMIDI</td>");
+        break;
+      case 5:
+        page += F("<td>Bluetooth LE</td>");
+        break;
+      case 6:
+        page += F("<td>OSC</td>");
+        break;
+    }
+
+		page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='autoCheck");
+    page += String(i) + F("' name='autosensing") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='autoCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
+
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='singleCheck");
+    page += String(i) + F("' name='singlepress") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='singleCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
+
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='doubleCheck");
+    page += String(i) + F("' name='doublepress") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='doubleCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
+
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='longCheck");
+    page += String(i) + "' name='longpress" + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='longCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
+
+    page += F("<td><div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='clockCheck");
+    page += String(i) + F("' name='clock") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='clockCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div></td>");
+  }
+  page += F("</tbody>");
+  page += F("</table>");
 
   page += get_footer_page();
 
@@ -2535,8 +2522,7 @@ void http_handle_pedals() {
 
 void http_handle_interfaces() {
   if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
-  if (httpServer.hasArg("interface")) interface = httpServer.arg("interface");
-  httpServer.send(200, "text/html", get_pedals_page());
+  httpServer.send(200, "text/html", get_interfaces_page());
 }
 
 void http_handle_not_found() {
@@ -2622,12 +2608,13 @@ typedef enum WiFiEvent
           // Start firmawre update via HTTP (connect to http://pedalino.local/update)
           httpUpdater.setup(&httpServer);
 
-          // 
+#ifndef NOWEBCONFIG
           httpServer.on("/", http_handle_root);
           httpServer.on("/banks", http_handle_banks);
           httpServer.on("/pedals", http_handle_pedals);
           httpServer.on("/interfaces", http_handle_interfaces);
           httpServer.onNotFound(http_handle_not_found);
+#endif
           httpServer.begin();
           MDNS.addService("_http", "_tcp", 80);
           DPRINTLN("HTTP server started");
