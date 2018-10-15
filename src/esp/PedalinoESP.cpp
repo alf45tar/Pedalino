@@ -2056,28 +2056,26 @@ String translateEncryptionType(wifi_auth_mode_t encryptionType) {
 #endif
 
 #ifndef NOWEBCONFIG
-String  theme = "sandstone";
+String  theme = "bootstrap";
 String  bank  = "1";
 
 String get_top_page(byte p = 0) {
   
   String page = "";
   
+  page += F("<!doctype html>");
   page += F("<html lang='en'>");
   page += F("<head>");
   page += F("<title>Pedalino&trade;</title>");
   page += F("<meta charset='utf-8'>");
-  page += F("<meta name='viewport' content='widtd=device-widtd, initial-scale=1'>");
+  page += F(" <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>");
   if ( theme == "bootstrap" ) {
-    page += F("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>");
+    page += F("<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css' integrity='sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO' crossorigin='anonymous'>");
   } else {
-    page += F("<link href='https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/");
+    page += F("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootswatch/4.1.3/");
     page += theme;
-    page += F("/bootstrap.min.css' rel='stylesheet'>");
+    page += F("/bootstrap.min.css' crossorigin='anonymous'>");
   }
-  page += F("<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>");
-  page += F("<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>");
-  page += F("<script src='https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>");
   page += F("</head>");
 
   page += F("<body>");
@@ -2125,6 +2123,9 @@ String get_footer_page() {
   String page = "";
   
   page += F("</div>");
+  page += F("<script src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo' crossorigin='anonymous'></script>");
+  page += F("<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js' integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49' crossorigin='anonymous'></script>");
+  page += F("<script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js' integrity='sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy' crossorigin='anonymous'></script>");
   page += F("</body>");
   page += F("</html>");
 
@@ -2425,7 +2426,7 @@ String get_interfaces_page() {
   String page = "";
 
   page += get_top_page(4);
-
+/*
   page += F("<table class='table-responsive-sm table-borderless'>");
   page += F("<tbody><tr><td> </td><td>IN</td><td>OUT</td><td>THRU</td><td>Routing</td><td>Clock</td></tr>");
   for (unsigned int i = 1; i <= 6; i++) {
@@ -2489,7 +2490,90 @@ String get_interfaces_page() {
   }
   page += F("</tbody>");
   page += F("</table>");
+*/
+  page += F("<p></p>");
+  page += F("<div class='row'>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>USB MIDI</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>Legacy MIDI</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>RTP-MIDI</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>IPMIDI</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>BLE MIDI</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>OSC</span>");
+  page += F("</div>");
+  page += F("</div>");
 
+  page += F("<div class='row'>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<div class='col-1'>");
+    page += F("<div class='custom-control custom-checkbox'>");
+	  page += F("<input type='checkbox' class='custom-control-input' id='inCheck");
+    page += String(i) + F("' name='in") + String(i) + F("'>");
+	  page += F("<label class='custom-control-label' for='inCheck");
+    page += String(i) + F("'>In</label>");
+	  page += F("</div>");
+    page += F("</div>");
+  }
+  page += F("</div>");
+  page += F("<div class='row'>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<div class='col-1'>");
+    page += F("<div class='custom-control custom-checkbox'>");
+	  page += F("<input type='checkbox' class='custom-control-input' id='outCheck");
+    page += String(i) + F("' name='out") + String(i) + F("'>");
+	  page += F("<label class='custom-control-label' for='outCheck");
+    page += String(i) + F("'>Out</label>");
+	  page += F("</div>");
+    page += F("</div>");
+  }
+  page += F("</div>");
+  page += F("<div class='row'>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<div class='col-1'>");
+    page += F("<div class='custom-control custom-checkbox'>");
+	  page += F("<input type='checkbox' class='custom-control-input' id='thruCheck");
+    page += String(i) + F("' name='thru") + String(i) + F("'>");
+	  page += F("<label class='custom-control-label' for='thruCheck");
+    page += String(i) + F("'>Thru</label>");
+	  page += F("</div>");
+    page += F("</div>");
+  }
+  page += F("</div>");
+  page += F("<div class='row'>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<div class='col-1'>");
+    page += F("<div class='custom-control custom-checkbox'>");
+	  page += F("<input type='checkbox' class='custom-control-input' id='routingCheck");
+    page += String(i) + F("' name='routing") + String(i) + F("'>");
+	  page += F("<label class='custom-control-label' for='routingCheck");
+    page += String(i) + F("'>Routing</label>");
+	  page += F("</div>");
+    page += F("</div>");
+  }
+  page += F("</div>");
+  page += F("<div class='row'>");
+  for (unsigned int i = 1; i <= 6; i++) {
+    page += F("<div class='col-1'>");
+    page += F("<div class='custom-control custom-checkbox'>");
+	  page += F("<input type='checkbox' class='custom-control-input' id='clockCheck");
+    page += String(i) + F("' name='clock") + String(i) + F("'>");
+	  page += F("<label class='custom-control-label' for='clockCheck");
+    page += String(i) + F("'>Clock</label>");
+	  page += F("</div>");
+    page += F("</div>");
+  }
+  page += F("</div>");
+  
   page += get_footer_page();
 
   return page;
