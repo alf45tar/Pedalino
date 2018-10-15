@@ -55,6 +55,8 @@
 #ifdef BLYNK
 #include <BlynkSimpleEsp32.h>
 #endif
+
+#define NOWEBCONFIG   // temporary
 #endif  // ARDUINO_ARCH_ESP32
 
 #ifndef NOWIFI
