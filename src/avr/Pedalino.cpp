@@ -60,16 +60,33 @@ void setup(void)
 
 #endif
 
-  // Reset to factory default if RIGHT key is pressed and hold for 5 seconds at power on
+  // Reset to factory default if RIGHT key is pressed and hold for alt least 8 seconds at power on
+  // Enter serial passthrough mode if RIGHT key is pressed adn hold for less than 8 seconds at power on
   pinMode(A0, INPUT_PULLUP);
   unsigned long milliStart = millis();
-  while ((digitalRead(A0) == LOW) && ((millis() - milliStart) < 5000)) {
+  unsigned long duration = 0;
+#ifndef NOLCD
+    lcd.clear();
+#endif 
+  while ((digitalRead(A0) == LOW) && (duration < 8500)) {
     DPRINT("#");
+#ifndef NOLCD
+    lcd.setCursor(duration / 500, 0);
+    lcd.print("#");
+#endif
     delay(100);
+    duration = millis() - milliStart;
   }
   DPRINTLN("");
-  if (digitalRead(A0) == LOW) {
+  if ((digitalRead(A0) == HIGH) && (duration > 100 && duration < 8500)) {
+    DPRINTLN("Serial passthrough mode for ESP firmware update and monitor");
+    serialPassthrough = true;
+  } else if ((digitalRead(A0) == LOW) && (duration >= 8500)) {
     DPRINTLN("Reset EEPROM to factory default");
+#ifndef NOLCD
+    lcd.setCursor(0, 1);
+    lcd.print("Factory default");
+#endif
     load_factory_default();
     update_eeprom();
   }
