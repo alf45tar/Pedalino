@@ -58,6 +58,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Invert polarity via software
 - Individual automatic calibration of expression pedals. Manual fine tuning is not usually requested.
 - Transform a linear expression pedal into log expression pedal and vice versa
+- Configuration using a Bootstrap based responsive and mobile-first web interface (http://pedalino.local)
 - Configuration via IR remote control
 - Change bank via IR remote control
 - Simulate footswitch push via IR remote control
@@ -124,8 +125,12 @@ The rest is not mandatory but it depends of which features you want to support.
 Model A and B use HM-10 Bluetooth LE module to connect the app.
 
 ### MODEL C - Arduino UNO R3 + ESP8266 - WiFi only
-Due to memory limit of Arduino Uno R3 some of the features cannot be supported. We eliminated the superfluous ones and kept the most interesting ones. All the interfaces are supported up to 5 banks and 8 controllers.
+Due to memory limit of Arduino Uno R3 some of the features cannot be supported. We eliminated the superfluous ones and kept the most interesting ones.
 
+- All the interfaces (USB, Bluetooth, WiFi, legacy DIN MIDI IN and MIDI OUT connectors) and protocols (NetworkMIDI, IPMIDI and OSC) are supported
+- 5 banks of 8 controllers each
+- 3 profiles
+- Configuration via web interface only
 - No LCD
 - No app
 - No IR remote control
