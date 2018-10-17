@@ -2107,13 +2107,10 @@ String get_top_page(byte p = 0) {
   page += (p == 4 ? F(" active'>") : F("'>"));
   page += F("<a class='nav-link' href='/interfaces'>Interfaces</a>");
   page += F("</li>");
-  page += F("<li class='nav-item'>");
+  page += F("</ul>");
   page += F("<form class='form-inline my-2 my-lg-0'>");
-  page += F("<button class='btn btn-primary my-2 my-sm-0' type='button'>Apply</button> ");
   page += F("<button class='btn btn-primary my-2 my-sm-0' type='button'>Save</button>");
   page += F("</form>");
-  page += F("</li>");
-  page += F("</ul>");
   page += F("</div>");
   page += F("</nav>");
 
@@ -2346,16 +2343,49 @@ String get_pedals_page() {
 
   page += get_top_page(3);
 
-  page += F("<table class='table-responsive-sm table-borderless'>");
-  page += F("<tbody><tr><td>Pedal</td><td>Mode</td><td>Function</td><td>Autosensing</td><td>Single<br>Press</td><td>Double<br>Press</td><td>Long<br>Press</td></tr>");
-  for (unsigned int i = 1; i <= 16; i++) {
-    page += F("<tr align='center' valign='center'>");
+  page += F("<p></p>");
+  page += F("<div class='row'>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>Pedal</span>");
+  page += F("</div>");
+  page += F("<div class='col-1'>");
+  page += F("<span class='badge badge-primary'>Autosensing</span>");
+  page += F("</div>");
+  page += F("<div class='col-2'>");
+  page += F("<span class='badge badge-primary'>Mode</span>");
+  page += F("</div>");
+  page += F("<div class='col-2'>");
+  page += F("<span class='badge badge-primary'>Function</span>");
+  page += F("</div>");
+  page += F("<div class='col-2'>");
+  page += F("<span class='badge badge-primary'>Single Press</span>");
+  page += F("</div>");
+  page += F("<div class='col-2'>");
+  page += F("<span class='badge badge-primary'>Double Press</span>");
+  page += F("</div>");
+  page += F("<div class='col-2'>");
+  page += F("<span class='badge badge-primary'>Long Press</span>");
+  page += F("</div>");
+  page += F("</div>");
 
-    page += F("<td>");
+  for (unsigned int i = 1; i <= 16; i++) {
+    page += F("<div class='row'>");
+
+    page += F("<div class='col-1'>");
     page += String(i);
-    page += F("</td>");
-    
-    page += F("<td><div class='form-group'>");
+    page += F("</div>");
+
+    page += F("<div class='col-1'>");
+		page += F("<div class='custom-control custom-checkbox'>");
+		page += F("<input type='checkbox' class='custom-control-input' id='autoCheck");
+    page += String(i) + F("' name='autosensing") + String(i) + F("'>");
+		page += F("<label class='custom-control-label' for='autoCheck");
+    page += String(i) + F("'></label>");
+		page += F("</div>");
+    page += F("</div>");
+
+    page += F("<div class='col-2'>");
+    page += F("<div class='form-group'>");
 	  page += F("<select class='custom-select-sm' id='mode");
     page += String(i);
     page += F("'>");
@@ -2364,59 +2394,64 @@ String get_pedals_page() {
 	  page += F("<option>Latch</option>");
 	  page += F("<option>Analog</option>");
     page += F("<option>Jog Wheel</option>");
-    page += F("<option>Ladder</option>");
     page += F("<option>Momentary 3</option>");
     page += F("<option>Momentary 2</option>");
     page += F("<option>Latch 2</option>");
+    page += F("<option>Ladder</option>");
 	  page += F("</select>");
-	  page += F("</div></td>");
+	  page += F("</div>");
+    page += F("</div>");
 
-    page += F("<td><div class='form-group'>");
+    page += F("<div class='col-2'>");
+    page += F("<div class='form-group'>");
 	  page += F("<select class='custom-select-sm' id='function");
     page += String(i);
     page += F("'>");
 	  page += F("<option>MIDI</option>");
 	  page += F("<option>Bank+</option>");
 	  page += F("<option>Bank-</option>");
-	  page += F("<option></option>");
-    page += F("<option></option>");
-    page += F("<option></option>");
-    page += F("<option></option>");
-    page += F("<option></option>");
-    page += F("<option></option>");
+	  page += F("<option>Start</option>");
+    page += F("<option>Stop</option>");
+    page += F("<option>Continue</option>");
+    page += F("<option>Tap</option>");
+    page += F("<option>Menu</option>");
+    page += F("<option>Confirm</option>");
+    page += F("<option>Excape</option>");
+    page += F("<option>Next</option>");
+    page += F("<option>Previous</option>");
 	  page += F("</select>");
-	  page += F("</div></td>");
+	  page += F("</div>");
+    page += F("</div>");
 
-		page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='autoCheck");
-    page += String(i) + F("' name='autosensing") + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='autoCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-
-    page += F("<td><div class='custom-control custom-checkbox'>");
+    page += F("<div class='col-2'>");
+    page += F("<div class='custom-control custom-checkbox'>");
 		page += F("<input type='checkbox' class='custom-control-input' id='singleCheck");
     page += String(i) + F("' name='singlepress") + String(i) + F("'>");
 		page += F("<label class='custom-control-label' for='singleCheck");
     page += String(i) + F("'></label>");
-		page += F("</div></td>");
+		page += F("</div>");
+    page += F("</div>");
 
-    page += F("<td><div class='custom-control custom-checkbox'>");
+    page += F("<div class='col-2'>");
+    page += F("<div class='custom-control custom-checkbox'>");
 		page += F("<input type='checkbox' class='custom-control-input' id='doubleCheck");
     page += String(i) + F("' name='doublepress") + String(i) + F("'>");
 		page += F("<label class='custom-control-label' for='doubleCheck");
     page += String(i) + F("'></label>");
-		page += F("</div></td>");
+		page += F("</div>");
+    page += F("</div>");
 
-    page += F("<td><div class='custom-control custom-checkbox'>");
+    page += F("<div class='col-2'>");
+    page += F("<div class='custom-control custom-checkbox'>");
 		page += F("<input type='checkbox' class='custom-control-input' id='longCheck");
     page += String(i) + F("' name='longpress") + String(i) + F("'>");
 		page += F("<label class='custom-control-label' for='longCheck");
     page += String(i) + F("'></label>");
-		page += F("</div></td>");
+		page += F("</div>");
+    page += F("</div>");
+
+    page += F("</div>");
   }
-  page += F("</tbody>");
-  page += F("</table>");
 
   page += get_footer_page();
 
@@ -2428,96 +2463,32 @@ String get_interfaces_page() {
   String page = "";
 
   page += get_top_page(4);
-/*
-  page += F("<table class='table-responsive-sm table-borderless'>");
-  page += F("<tbody><tr><td> </td><td>IN</td><td>OUT</td><td>THRU</td><td>Routing</td><td>Clock</td></tr>");
-  for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<tr align='center' valign='center'>");
 
-    switch (i) {
-      case 1:
-        page += F("<td>USB</td>");
-        break;
-      case 2:
-        page += F("<td>DIN</td>");
-        break;
-      case 3:
-        page += F("<td>RTP-MIDI</td>");
-        break;
-      case 4:
-        page += F("<td>IPMIDI</td>");
-        break;
-      case 5:
-        page += F("<td>Bluetooth LE</td>");
-        break;
-      case 6:
-        page += F("<td>OSC</td>");
-        break;
-    }
-
-		page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='autoCheck");
-    page += String(i) + F("' name='autosensing") + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='autoCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-
-    page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='singleCheck");
-    page += String(i) + F("' name='singlepress") + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='singleCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-
-    page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='doubleCheck");
-    page += String(i) + F("' name='doublepress") + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='doubleCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-
-    page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='longCheck");
-    page += String(i) + "' name='longpress" + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='longCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-
-    page += F("<td><div class='custom-control custom-checkbox'>");
-		page += F("<input type='checkbox' class='custom-control-input' id='clockCheck");
-    page += String(i) + F("' name='clock") + String(i) + F("'>");
-		page += F("<label class='custom-control-label' for='clockCheck");
-    page += String(i) + F("'></label>");
-		page += F("</div></td>");
-  }
-  page += F("</tbody>");
-  page += F("</table>");
-*/
   page += F("<p></p>");
   page += F("<div class='row'>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>USB MIDI</span>");
   page += F("</div>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>Legacy MIDI</span>");
   page += F("</div>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>RTP-MIDI</span>");
   page += F("</div>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>IPMIDI</span>");
   page += F("</div>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>BLE MIDI</span>");
   page += F("</div>");
-  page += F("<div class='col-1'>");
+  page += F("<div class='col-2'>");
   page += F("<span class='badge badge-primary'>OSC</span>");
   page += F("</div>");
   page += F("</div>");
 
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<div class='col-1'>");
+    page += F("<div class='col-2'>");
     page += F("<div class='custom-control custom-checkbox'>");
 	  page += F("<input type='checkbox' class='custom-control-input' id='inCheck");
     page += String(i) + F("' name='in") + String(i) + F("'>");
@@ -2529,7 +2500,7 @@ String get_interfaces_page() {
   page += F("</div>");
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<div class='col-1'>");
+    page += F("<div class='col-2'>");
     page += F("<div class='custom-control custom-checkbox'>");
 	  page += F("<input type='checkbox' class='custom-control-input' id='outCheck");
     page += String(i) + F("' name='out") + String(i) + F("'>");
@@ -2541,7 +2512,7 @@ String get_interfaces_page() {
   page += F("</div>");
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<div class='col-1'>");
+    page += F("<div class='col-2'>");
     page += F("<div class='custom-control custom-checkbox'>");
 	  page += F("<input type='checkbox' class='custom-control-input' id='thruCheck");
     page += String(i) + F("' name='thru") + String(i) + F("'>");
@@ -2553,7 +2524,7 @@ String get_interfaces_page() {
   page += F("</div>");
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<div class='col-1'>");
+    page += F("<div class='col-2'>");
     page += F("<div class='custom-control custom-checkbox'>");
 	  page += F("<input type='checkbox' class='custom-control-input' id='routingCheck");
     page += String(i) + F("' name='routing") + String(i) + F("'>");
@@ -2565,7 +2536,7 @@ String get_interfaces_page() {
   page += F("</div>");
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
-    page += F("<div class='col-1'>");
+    page += F("<div class='col-2'>");
     page += F("<div class='custom-control custom-checkbox'>");
 	  page += F("<input type='checkbox' class='custom-control-input' id='clockCheck");
     page += String(i) + F("' name='clock") + String(i) + F("'>");
