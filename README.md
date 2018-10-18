@@ -1,13 +1,13 @@
 # Pedalino™
 
->_I know. You are thinking: "yet another MIDI controller with Arduino"._
->_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
+_I know. You are thinking: "yet another MIDI controller with Arduino"._
+_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
 
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
 
->Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things you can re-use for your projects. For example:
+>Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things here you can re-use for your projects. For example:
 >
 >- How to implement an smart procedure for ESP8266/ESP32 [WiFi configuration](#wifi)
 >- How to use an Arduino board as a [programmer](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module) for the ESP-01 board
