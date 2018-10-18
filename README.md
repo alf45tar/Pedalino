@@ -1,20 +1,21 @@
 # Pedalino™
-<img src="logo/Pedalino_Transparent.png" width="180"/>
 
-_I know. You are thinking: "yet another MIDI controller with Arduino"._
-_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
+>_I know. You are thinking: "yet another MIDI controller with Arduino"._
+>_Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
 Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
 
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
 
-Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things you can learn and re-use for your projects.
+>Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things you can re-use for your projects. For example:
+>
+>- How to implement an smart procedure for ESP8266/ESP32 [WiFi configuration](#wifi)
+>- How to use an Arduino board as a [programmer](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module) for the ESP-01 board
+>- How to build a responsive mobile-first web interface with Bootstrap 4 and ESP8266
+>- How to serialize data an transfer back and forth from Arduino to ESP8266 with JSON
+>- How to connect Arduino and Blynk via Bluetooth LE
 
-- how to implement an easy procedure for ESP8266/ESP32 [WiFi configuration](#wifi)
-- how to use an Arduino board as a [programmer](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module) for the ESP01 board
-- how to build a responsive mobile-first web interface with Bootstrap 4 and ESP8266
-- how to serialize data an transfer back and forth from Arduino to ESP8266 with JSON
-- how to connect Arduino and Blynk via Bluetooth LE
+<img src="logo/Pedalino_Transparent.png" width="180"/>
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
@@ -272,7 +273,7 @@ Boot procedure
 - Led will start fast blinking when Pedalino is partecipating to an AppleMIDI session.
 - Reboot Pedalino to restart the procedure.
 
-You can reset the last know access point via menu.
+You can reset the last know access point via _Options->WiFi Reset_ menu.
 
 ## MIDI Network - AppleMIDI - RTP-MIDI
 
@@ -357,8 +358,10 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 
 ## ToDo
 
-- [X] Lite version for Arduino Uno R3
+- [ ] Lite version for Arduino Uno R3
 - [ ] Modern HTTP configuration interface
+- [ ] Build a plug&play network of interconnected Pedalino for MIDI routing
+- [ ] Pedalino Mini (only USB and WiFi)
 - [ ] Add rotary encoders
 - [ ] User guide
 
