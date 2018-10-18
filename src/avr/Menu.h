@@ -243,58 +243,91 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
 
     case II_MIDICHANNEL:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiChannel;
-      else banks[currentBank][currentPedal].midiChannel = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiChannel = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_MIDIMESSAGE:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiMessage;
-      else banks[currentBank][currentPedal].midiMessage = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiMessage = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_MIDICODE:
     case II_MIDINOTE:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiCode;
-      else banks[currentBank][currentPedal].midiCode = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiCode = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_MIDIVALUE1:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue1;
-      else banks[currentBank][currentPedal].midiValue1 = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiValue1 = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_MIDIVALUE2:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue2;
-      else banks[currentBank][currentPedal].midiValue2 = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiValue2 = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_MIDIVALUE3:
       if (bGet) vBuf.value = banks[currentBank][currentPedal].midiValue3;
-      else banks[currentBank][currentPedal].midiValue3 = vBuf.value;
+      else {
+        banks[currentBank][currentPedal].midiValue3 = vBuf.value;
+        serialize_bank();
+      }
       break;
 
     case II_FUNCTION:
       if (bGet) vBuf.value = pedals[currentPedal].function;
-      else pedals[currentPedal].function = vBuf.value;
+      else {
+        pedals[currentPedal].function = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_AUTOSENSING:
       if (bGet) vBuf.value = pedals[currentPedal].autoSensing;
-      else pedals[currentPedal].autoSensing = vBuf.value;
+      else {
+        pedals[currentPedal].autoSensing = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_MODE:
       if (bGet) vBuf.value = pedals[currentPedal].mode;
-      else pedals[currentPedal].mode = vBuf.value;
+      else {
+        pedals[currentPedal].mode = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_PRESS_MODE:
       if (bGet) vBuf.value = pedals[currentPedal].pressMode;
-      else pedals[currentPedal].pressMode = vBuf.value;
+      else {
+        pedals[currentPedal].pressMode = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_POLARITY:
       if (bGet) vBuf.value = pedals[currentPedal].invertPolarity;
-      else pedals[currentPedal].invertPolarity = vBuf.value;
+      else {
+        pedals[currentPedal].invertPolarity = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_CALIBRATE:
@@ -307,7 +340,10 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         if (pedals[currentPedal].mode == PED_ANALOG)
           vBuf.value = pedals[currentPedal].expZero;
         else r = nullptr;
-      else pedals[currentPedal].expZero = vBuf.value;
+      else {
+        pedals[currentPedal].expZero = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_MAX:
@@ -315,7 +351,10 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         if (pedals[currentPedal].mode == PED_ANALOG)
           vBuf.value = pedals[currentPedal].expMax;
         else r = nullptr;
-      else pedals[currentPedal].expMax = vBuf.value;
+      else {
+        pedals[currentPedal].expMax = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_RESPONSECURVE:
@@ -323,7 +362,10 @@ MD_Menu::value_t *mnuValueRqst(MD_Menu::mnuId_t id, bool bGet)
         if (pedals[currentPedal].mode == PED_ANALOG)
           vBuf.value = pedals[currentPedal].mapFunction;
         else r = nullptr;
-      else pedals[currentPedal].mapFunction = vBuf.value;
+      else {
+        pedals[currentPedal].mapFunction = vBuf.value;
+        serialize_pedal();
+      }
       break;
 
     case II_INTERFACE:

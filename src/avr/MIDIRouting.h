@@ -425,6 +425,11 @@ void OnEspMidiReceiveSysEx(byte *data, unsigned int size)
     if (root.containsKey("on")) {
 
     }
+    else if (root.containsKey("ready")) {
+      serialize_banks();
+      serialize_pedals();
+      serialize_interfaces();
+    }
     else if (root.containsKey("wifi.on")) {
       
     }

@@ -8,6 +8,14 @@ Right now the hardware is just a working well prototype. It will be boxed when t
 
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
 
+Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things you can learn and re-use for your projects.
+
+- how to implement an easy procedure for ESP8266/ESP32 [WiFi configuration](#wifi)
+- how to use an Arduino board as a [programmer](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module) for the ESP01 board
+- how to build a responsive mobile-first web interface with Bootstrap 4 and ESP8266
+- how to serialize data an transfer back and forth from Arduino to ESP8266 with JSON
+- how to connect Arduino and Blynk via Bluetooth LE
+
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
 
@@ -211,7 +219,7 @@ Pedalino like some of the more sophisticated effects and controllers incorporate
 
 ## Auto Sensing
 
-Most of them are plug-and-play because Pedalino will recognize via auto-sensing feature.
+Most of the foot switches and expression pedals are plug-and-play because Pedalino will recognize via auto-sensing feature.
 
 Auto-sensing will also enable automatic calibration. After each power on cycle move the expression pedal to its full range and Pedalino will calibrate it. During the first full movement of the pedal MIDI events could be not precise because Pedalino is still learning the full range of the pedal.
 
@@ -231,7 +239,7 @@ mocoLUFA firmware boots in USB MIDI mode by default.
 
 Arduino-Serial mode is required to upload a new sketch into main Arduino ATmega2560 microcontroller.
 
-To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Reset is required to switch the firmware mode.
+To enable Arduino-Serial, add a jumper to PIN 4 (MOSI PB2) and PIN6 (GND) on ICSP connector for ATmega16U2. Power on cycle is required to switch the firmware mode.
 
 ![ArduinoSerialJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-ArduinoSerial-Jumper.svg)
 
@@ -241,7 +249,7 @@ mocoLUFA default speed is 31.250 bps but an undocumented high speed mode is in t
 
 ![HighSpeedJumper](https://github.com/alf45tar/Pedalino/blob/master/images/mocoLUFA-HighSpeed-Jumper.svg)
 
-## How to connect Pedalino to a WiFi network
+## <a name="wifi"></a>How to connect Pedalino to a WiFi network
 
 AppleMIDI, ipMIDI and Open Sound Control (OSC) protocol requires a network connection. Pedalino support IEEE 802.11 b/g/n WiFi with WPA/WPA2 authentication (only 2.4 GHz).
 
