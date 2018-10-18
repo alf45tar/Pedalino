@@ -2084,7 +2084,7 @@ String get_top_page(byte p = 0) {
   page += F("<p></p>");
   page += F("<div class='container-fluid'>");
 
-  page += F("<nav class='navbar navbar-expand-lg navbar-light bg-light'>");
+  page += F("<nav class='navbar navbar-expand navbar-light bg-light'>");
   page += F("<a class='navbar-brand' href='/'>Pedalino&trade;</a>");
   page += F("<button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>");
   page += F("<span class='navbar-toggler-icon'></span>");
@@ -2107,6 +2107,10 @@ String get_top_page(byte p = 0) {
   page += (p == 4 ? F(" active'>") : F("'>"));
   page += F("<a class='nav-link' href='/interfaces'>Interfaces</a>");
   page += F("</li>");
+  page += F("<li class='nav-item");
+  page += (p == 5 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/options'>Options</a>");
+  page += F("</li>");
   page += F("</ul>");
   page += F("<form class='form-inline my-2 my-lg-0'>");
   page += F("<button class='btn btn-primary my-2 my-sm-0' type='button'>Save</button>");
@@ -2120,7 +2124,10 @@ String get_top_page(byte p = 0) {
 String get_footer_page() {
   
   String page = "";
-  
+  page += F("<nav class='navbar fixed-bottom navbar-light bg-light'>");
+  page += F("<a class='navbar-text' href='https://github.com/alf45tar/Pedalino'>https://github.com/alf45tar/Pedalino</a>");
+  page += F("</nav>");
+
   page += F("</div>");
   page += F("<script src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo' crossorigin='anonymous'></script>");
   page += F("<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js' integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49' crossorigin='anonymous'></script>");
@@ -2136,6 +2143,23 @@ String get_root_page() {
   String page = "";
   
   page += get_top_page();
+  
+  page += F("<p></p>");
+  page += F("<h6>Smart wireless MIDI foot controller for guitarists and more</h6>");
+  page += F("<p></p>");
+
+  page += get_footer_page();
+
+  return page;
+}
+
+String get_live_page() {
+
+  String page = "";
+
+  page += get_top_page(1);
+
+  page += F("<p></p>");
   
   page += get_footer_page();
 
@@ -2367,6 +2391,7 @@ String get_pedals_page() {
   page += F("<span class='badge badge-primary'>Long Press</span>");
   page += F("</div>");
   page += F("</div>");
+  page += F("<p></p>");
 
   for (unsigned int i = 1; i <= 16; i++) {
     page += F("<div class='row'>");
@@ -2485,7 +2510,8 @@ String get_interfaces_page() {
   page += F("<span class='badge badge-primary'>OSC</span>");
   page += F("</div>");
   page += F("</div>");
-
+  page += F("<p></p>");
+  
   page += F("<div class='row'>");
   for (unsigned int i = 1; i <= 6; i++) {
     page += F("<div class='col-2'>");
@@ -2552,6 +2578,19 @@ String get_interfaces_page() {
   return page;
 }
 
+String get_options_page() {
+
+  String page = "";
+
+  page += get_top_page(5);
+
+  page += F("<p></p>");
+  
+  page += get_footer_page();
+
+  return page;
+}
+
 void http_handle_root() { 
   
   if (httpServer.hasArg("theme")) {
@@ -2564,6 +2603,11 @@ void http_handle_root() {
     httpServer.send(200, "text/html", get_root_page());
   }
   return; 
+}
+
+void http_handle_live() {
+  if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
+  httpServer.send(200, "text/html", get_live_page());
 }
 
 void http_handle_banks() {
@@ -2580,6 +2624,11 @@ void http_handle_pedals() {
 void http_handle_interfaces() {
   if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
   httpServer.send(200, "text/html", get_interfaces_page());
+}
+
+void http_handle_options() {
+  if (httpServer.hasArg("theme")) theme = httpServer.arg("theme");
+  httpServer.send(200, "text/html", get_options_page());
 }
 
 void http_handle_not_found() {
@@ -2667,9 +2716,11 @@ typedef enum WiFiEvent
 
 #ifndef NOWEBCONFIG
           httpServer.on("/", http_handle_root);
+          httpServer.on("/live", http_handle_live);
           httpServer.on("/banks", http_handle_banks);
           httpServer.on("/pedals", http_handle_pedals);
           httpServer.on("/interfaces", http_handle_interfaces);
+          httpServer.on("/options", http_handle_options);
           httpServer.onNotFound(http_handle_not_found);
 #endif
           httpServer.begin();
