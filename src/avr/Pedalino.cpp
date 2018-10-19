@@ -24,9 +24,9 @@ void serial_pass_run()
   if (startSerialPassthrough) {
 #ifndef NOLCD
     lcd.clear();
-    lcd.print("Firmware upload");
+    lcd.print(" USB to Serial ");
     lcd.setCursor(0, 1);
-    lcd.print("Reset to stop");
+    lcd.print(" Reset to stop ");
 #endif
     startSerialPassthrough = false;
   }
@@ -85,7 +85,8 @@ void setup(void)
     DPRINTLN("Reset EEPROM to factory default");
 #ifndef NOLCD
     lcd.setCursor(0, 1);
-    lcd.print("Factory default");
+    lcd.print("Factory default ");
+    delay(1000);
 #endif
     load_factory_default();
     update_eeprom();
