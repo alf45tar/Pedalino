@@ -7,14 +7,6 @@ Right now the hardware is just a working well prototype. It will be boxed when t
 
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
 
->Not a guitarist or MIDI addicted? Don't worry there are a lot of interesting things here you can re-use for your projects. For example:
->
->- How to implement an smart procedure for ESP8266/ESP32 [WiFi configuration](#wifi)
->- How to use an Arduino board as a [programmer](https://github.com/alf45tar/Pedalino/wiki/How-to-flash-ESP8266-ESP%E2%80%9001S-WiFi-module) for the ESP-01 board
->- How to build a responsive mobile-first web interface with Bootstrap 4 and ESP8266
->- How to serialize data an transfer back and forth from Arduino to ESP8266 with JSON
->- How to connect Arduino and Blynk via Bluetooth LE
-
 <img src="logo/Pedalino_Transparent.png" width="180"/>
 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
