@@ -67,7 +67,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 - Invert polarity via software
 - Individual automatic calibration of expression pedals. Manual fine tuning is not usually requested.
 - Transform a linear expression pedal into log expression pedal and vice versa
-- Configuration using a Bootstrap based responsive and mobile-first web interface (http://pedalino.local)
+- Responsive and mobile-first configuration web interface (http://pedalino.local)
 - Configuration via IR remote control
 - Change bank via IR remote control
 - Simulate footswitch push via IR remote control
