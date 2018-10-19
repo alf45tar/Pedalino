@@ -3,7 +3,7 @@
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
 
-Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
+>Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
 
 [![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
 
@@ -36,15 +36,15 @@ Smart wireless MIDI foot controller for guitarists and more.
 ## Applications
 
 - Change preset to your favourite guitar rig
-- Transform legacy MIDI equipment to USB MIDI class-compliant device
-- Transform wired MIDI equipment into wireless MIDI equipment
-- Transform legacy MIDI equipment to OSC control surface
-- Connect Windows PC to macOS and iOS devices via AppleMIDI or Bluetooth LE
 - Hands-free way to control your audio parameters during live performance
 - Dramatically expanded audio system parameter control via WiFi, Bluetooth, USB, MIDI or OSC.
 - Set your music free with wireless MIDI connectivity
 - Bluetooth wireless MIDI adaptor for connecting instruments with MIDI IN/OUT terminals to your iOS devices (iPhone/iPad/iPod Touch) or Mac
-- Send MIDI messages using an IR remote control
+- Transform legacy MIDI equipment to USB MIDI class-compliant device
+- Transform wired MIDI equipment into wireless MIDI equipment
+- Transform legacy MIDI equipment to OSC control surface
+- Connect Windows to macOS and iOS devices via AppleMIDI or Bluetooth LE
+- Send MIDI messages using an IR remote control from your sofa
 
 ## Features
 
@@ -351,7 +351,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 ## ToDo
 
 - [ ] Lite version for Arduino Uno R3
-- [ ] Modern HTTP configuration interface
+- [ ] Configuration web interface
 - [ ] Build a plug&play network of interconnected Pedalino for MIDI routing
 - [ ] Pedalino Mini (only USB and WiFi)
 - [ ] Add rotary encoders
