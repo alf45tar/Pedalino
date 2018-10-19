@@ -69,7 +69,7 @@ Smart wireless MIDI foot controller for guitarists and more.
 
 ## iOS and Android App
 
-The app made with [Blynk](https://www.blynk.cc) is on the way. Here some images.
+The app made with [Blynk](https://www.blynk.cc) is on the way. Final version will be released later this year. Here some sneak preview images.
 
 <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-live.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-bank.png" width="280"/> <img src="https://github.com/alf45tar/Pedalino/blob/master/images/ios-pedal.png" width="280"/>
 
