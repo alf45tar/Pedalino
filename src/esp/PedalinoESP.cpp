@@ -80,7 +80,7 @@ RemoteDebug Debug;
 #if defined(ARDUINO_ARCH_ESP8266) && defined(DEBUG_ESP_PORT)
 #define SERIALDEBUG       DEBUG_ESP_PORT
 #define DPRINT(...)       DEBUG_ESP_PORT.printf( __VA_ARGS__ )
-#define DPRINTLN(...)     DEBUG_ESP_PORT.printf( __VA_ARGS__ )
+#define DPRINTLN(...)     DEBUG_ESP_PORT.printf( __VA_ARGS__ ); DEBUG_ESP_PORT.println();
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -2703,11 +2703,11 @@ typedef enum WiFiEvent
           if (MDNS.begin(host)) {
             DPRINTLN("mDNS responder started");
             // service name is lower case
-            // service name and protocol starts with an '_' e.g. '_udp'
-            MDNS.addService("_apple-midi", "_udp", 5004);
-            MDNS.addService("_osc",        "_udp", oscLocalPort);
+            // ESP8266 only: do not add '_' to service name and protocol
+            MDNS.addService("apple-midi", "udp", 5004);
+            MDNS.addService("osc",        "udp", oscLocalPort);
 #ifdef PEDALINO_TELNET_DEBUG
-            MDNS.addService("_telnet", "_tcp", 23);
+            MDNS.addService("telnet", "tcp", 23);
 #endif
           }
 
@@ -2724,7 +2724,7 @@ typedef enum WiFiEvent
           httpServer.onNotFound(http_handle_not_found);
 #endif
           httpServer.begin();
-          MDNS.addService("_http", "_tcp", 80);
+          MDNS.addService("http", "tcp", 80);
           DPRINTLN("HTTP server started");
           DPRINTLN("Connect to http://pedalino.local/update for firmware update");
 
@@ -3200,7 +3200,7 @@ void setup()
 {
 #ifdef SERIALDEBUG
   SERIALDEBUG.begin(115200);
-  SERIALDEBUG.setDebugOutput(true);
+  SERIALDEBUG.setDebugOutput(true);   // enable diagnostic output and printf() output
 #endif
 
   DPRINTLN("  __________           .___      .__  .__                   ___ ________________    ___");
