@@ -79,7 +79,7 @@ void screen_update(bool force = false) {
     }
     else if ( MidiTimeCode::getMode() == MidiTimeCode::SynchroClockMaster || MidiTimeCode::getMode() == MidiTimeCode::SynchroClockSlave) {
       sprintf(&buf[strlen(buf)], "%3dBPM", bpm);
-      for (byte i = 0; i < 10; i++)
+      for (byte i = 0; i < (LCD_COLS - 9); i++)
         if (MTC.isPlaying())
           buf[6 + i] = (MTC.getBeat() == i) ? '>' : ' ';
         else
@@ -89,7 +89,7 @@ void screen_update(bool force = false) {
       sprintf(&buf[strlen(buf)], "%02d:%02d:%02d:%02d    ", MTC.getHours(), MTC.getMinutes(), MTC.getSeconds(), MTC.getFrames());
     }
     else {
-      for (byte i = 0; i < LCD_COLS; i++) {
+      for (byte i = 0; i < (LCD_COLS - 3); i++) {
         //buf[i] = foot_char(i);
         buf[i] = ' ';
       }
@@ -108,7 +108,7 @@ void screen_update(bool force = false) {
       lcd.setCursor(13, 0);
       lcd.write(BLUETOOTHICON);
     }  
-    if (wifiConnected) {
+    if (wifiConnected || true) {
       lcd.setCursor(14, 0);
       lcd.write(WIFIICON);
     }
@@ -116,8 +116,10 @@ void screen_update(bool force = false) {
       lcd.setCursor(15, 0);
       lcd.write(POWERPLUG);
     }
+  
     byte newLevel = (millis() % 3500) / 500;
-    if (batteryLevel != newLevel) {
+    newLevel = 3;
+    if (force || batteryLevel != newLevel) {
       batteryLevel = newLevel;
       lcd.createChar(BATTERYLEVEL, battery[batteryLevel]);      
       lcd.setCursor(15, 0);
