@@ -5,7 +5,7 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 
 >Right now the hardware is just a working well prototype. It will be boxed when the hardware will be frozen.
 
-[![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://www.youtube.com/watch?v=q31N2oN0qTA)
+[![](https://github.com/alf45tar/Pedalino/blob/master/images/youtube-video.png)](https://youtu.be/pCNSvJ9QiDs)
 
 <img src="logo/Pedalino_Transparent.png" width="180"/>
 
