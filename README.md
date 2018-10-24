@@ -342,6 +342,11 @@ Pedalino is able to converts incoming OSC messages to MIDI events and outgoing M
 
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
 
+## Pedalino articles
+
+- [Finally, an open source MIDI foot controller](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/)
+- [These twenty projects won the Musical Instrument Challenge in the Hackaday Prize](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/)
+
 ## Commercial alternatives
 
 - [ControllerHub 8](https://ameliascompass.com/product/controllerhub-8/)
