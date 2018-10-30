@@ -12,7 +12,6 @@ _Pedalino™ is something new from any previous DIY projects and even better of 
 [![Build Status](https://travis-ci.org/alf45tar/Pedalino.svg?branch=master)](https://travis-ci.org/alf45tar/Pedalino)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/44375d0162e149469a30ee6549b9edb8)](https://app.codacy.com/app/alf45tar/Pedalino?utm_source=github.com&utm_medium=referral&utm_content=alf45tar/Pedalino&utm_campaign=Badge_Grade_Dashboard)
 [![Source Line of Code](https://img.shields.io/badge/Lines%20Of%20Code-7.3k-brightgreen.svg)](https://github.com/alf45tar/Pedalino)
-[![GitHub last commit](https://img.shields.io/github/last-commit/google/skia.svg)](https://github.com/alf45tar/Pedalino)
 
 Smart wireless MIDI foot controller for guitarists and more.
 
