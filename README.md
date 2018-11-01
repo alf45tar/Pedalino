@@ -343,6 +343,7 @@ The bottom line is you can connect MIDI devices (or software) that does not supo
 
 ## Pedalino articles
 
+- [Pedalino: A smart, open source wireless MIDI foot controller for guitarists and more](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/) by Mike Barela on [adafruit.com](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/)
 - [Finally, an open source MIDI foot controller](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/)
 - [These twenty projects won the Musical Instrument Challenge in the Hackaday Prize](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/)
 
