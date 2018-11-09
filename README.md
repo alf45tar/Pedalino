@@ -342,10 +342,12 @@ Pedalino is able to converts incoming OSC messages to MIDI events and outgoing M
 The bottom line is you can connect MIDI devices (or software) that does not suport OSC natively with OSC enabled software (or device) without any hard to configure software bridge.
 
 ## Pedalino articles
-- [Pedalino open source wireless MIDI foot controller with iOS and Android app](https://www.geeky-gadgets.com/pedalino-open-source-wireless-midi-foot-controller-31-10-2018/) by Julian Horsey on [geeky-gadgets.com](https://www.geeky-gadgets.com/pedalino-open-source-wireless-midi-foot-controller-31-10-2018/)
-- [Pedalino: A smart, open source wireless MIDI foot controller for guitarists and more](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/) by Mike Barela on [adafruit.com](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/)
-- [Finally, an open source MIDI foot controller](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/)
+
 - [These twenty projects won the Musical Instrument Challenge in the Hackaday Prize](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/16/these-twenty-projects-won-the-musical-instrument-challenge-in-the-hackaday-prize/)
+- [Finally, an open source MIDI foot controller](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/) by Brian Benchoff on [hackaday.com](https://hackaday.com/2018/10/21/finally-an-open-source-midi-foot-controller/)
+- [Pedalino: A smart, open source wireless MIDI foot controller for guitarists and more](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/) by Mike Barela on [adafruit.com](https://blog.adafruit.com/2018/10/30/pedalino-a-smart-open-source-wireless-midi-foot-controller-for-guitarists-and-more/)
+- [Pedalino open source wireless MIDI foot controller with iOS and Android app](https://www.geeky-gadgets.com/pedalino-open-source-wireless-midi-foot-controller-31-10-2018/) by Julian Horsey on [geeky-gadgets.com](https://www.geeky-gadgets.com/pedalino-open-source-wireless-midi-foot-controller-31-10-2018/)
+- [Pedalino: Open Source Wireless MIDI Foot Controller](https://www.open-electronics.org/pedalino-open-source-wireless-midi-foot-controller/) by Luca Ruggeri on [open-electronics.org](https://www.open-electronics.org/pedalino-open-source-wireless-midi-foot-controller/)
 
 ## Commercial alternatives
 
