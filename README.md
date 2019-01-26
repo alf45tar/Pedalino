@@ -1,3 +1,4 @@
+You may also be interested by [PedalinoMini™](https://github.com/alf45tar/PedalinoMini)
 # Pedalino™
 
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
