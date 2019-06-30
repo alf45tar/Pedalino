@@ -1,4 +1,4 @@
-# [Pedalino™] has been superseed by [PedalinoMini™](https://github.com/alf45tar/PedalinoMini).
+# Pedalino™ has been superseed by [PedalinoMini™](https://github.com/alf45tar/PedalinoMini).
 
 
 # Pedalino™
