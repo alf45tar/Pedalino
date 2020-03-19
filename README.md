@@ -1,7 +1,7 @@
 # Pedalino™ has been superseed by [PedalinoMini™](https://github.com/alf45tar/PedalinoMini).
 
 
-# Pedalino™
+# Pedalino™ (discontinued)
 
 _I know. You are thinking: "yet another MIDI controller with Arduino"._
 _Pedalino™ is something new from any previous DIY projects and even better of commercial alternatives at a fraction of the cost._
